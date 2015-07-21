@@ -16,36 +16,33 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int r
 
 	Matrix* calculated = new Matrix(A->getRow(), B->getCol());
 
+	Timer t;
+	double t_min = 10000000.0f, t_max = 0.0f, t_total = 0.0f, consumed = 0.0f;
+
 	if (power != NULL) {
 		power->read_before();
 	}
 
-	Timer t1, t2;
-	double t_min = 10000000.0f, t_max = 0.0f, t_avg = 0.0f;
-
-	t1.snapshot();
-
 	for (int i = 0; i < repeat; i++) {
 
-		t2.snapshot();
+		t.snapshot();
+
 		if (!(A->*(A->multipliers[modeID].f))(B, calculated, gpu)) {
 			printf("\nMultiplication Method: %s failed\n", A->multipliers[modeID].id);
 			delete calculated;
 			return NULL;
 		}
-		double t2_diff = t2.getdiff();
-		if (t_min > t2_diff) {
-			t_min = t2_diff;
+		double t_diff = t.getdiff();
+
+		if (t_min > t_diff) {
+			t_min = t_diff;
 		}
-		if (t2_diff > t_max) {
-			t_max = t2_diff;
+		if (t_diff > t_max) {
+			t_max = t_diff;
 		}
 
-		t_avg += t2_diff;
+		t_total += t_diff;
 	}
-
-	double t1_diff = t1.getdiff();
-	double consumed = 0;
 
 	if (power != NULL) {
 		consumed = power->read_after();
@@ -55,11 +52,9 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int r
 		calculated->printOut();
 	}
 
-	t_avg /= repeat;
-
 	printf("\nMultiplication Method: %s \n", A->multipliers[modeID].id);
-	printf("Multiplication Time: %.3lf seconds!!!\n", t1_diff);
-	printf("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_avg);
+	printf("Multiplication Time: %.3lf seconds!!!\n", t_total);
+	printf("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
 		printf("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
@@ -67,6 +62,92 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int r
 	}
 
 	return calculated;
+}
+
+bool MatrixApp::process(char fileInputs[][255]) {
+
+	Timer t;
+
+	Matrix *A, *B;
+
+	t.snapshot();
+
+	printf("Loading Matrix Input Files from Storage... \n");
+
+	try {
+
+		A = new Matrix(fileInputs[0]);
+
+	} catch(const std::runtime_error e) {
+
+		printf("Matrix A could not created!!!, Exception : %s\n", e.what());
+		return false;
+	}
+
+	try {
+
+		B = new Matrix(fileInputs[1]);
+
+	} catch(const std::runtime_error e) {
+
+		printf("Matrix B could not created!!!, Exception : %s\n", e.what());
+		delete A;
+		return false;
+	}
+
+	printf("Calculate Started... \n");
+
+	if (seqID == SEQTYPE_NONE) {
+
+		Matrix *C = calculate(A, B, modeID, print_enabled, repeat);
+		if (C != NULL && sanityID < MULTYPE_MAX) {
+			Matrix *D = calculate(A, B, sanityID, false, 1);
+
+			if (D != NULL) {
+				if (C->compare(D)) {
+					printf("Sanity check passed\n");
+				} else {
+					printf("Sanity check failed\n");
+				}
+				delete D;
+			}
+
+			delete C;
+		}
+
+
+	} else {
+
+		int startIndex = 0;
+		int count = 0;
+		switch(seqID) {
+			case SEQTYPE_ALL:
+			default:
+				startIndex = MULTYPE_CPU_STD;
+				count = MULTYPE_MAX - MULTYPE_CPU_STD;
+				break;
+			case SEQTYPE_CPU:
+				startIndex = MULTYPE_CPU_STD;
+				count = MULTYPE_GPU_STD - MULTYPE_CPU_STD;
+				break;
+			case SEQTYPE_GPU:
+				startIndex = MULTYPE_GPU_STD;
+				count = MULTYPE_MAX - MULTYPE_GPU_STD;
+				break;
+		}
+
+		for (int i = startIndex; i < startIndex + count; i++) {
+			calculate(A, B, i, false, 1);
+		}
+	}
+
+	double t_diff = t.getdiff();
+	printf("\nTotal Time: %.3lf seconds!!!\n", t_diff);
+
+	delete A;
+	delete B;
+
+	return true;
 }
 
 bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
@@ -155,86 +236,4 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	printf("Test is running with %d repeats\n", repeat);
 
 	return process(fileInputs);
-}
-
-bool MatrixApp::process(char fileInputs[][255]) {
-
-	Timer t;
-
-	Matrix *A, *B;
-
-	t.snapshot();
-
-	try {
-
-		A = new Matrix(fileInputs[0]);
-
-	} catch(const std::runtime_error e) {
-
-		printf("Matrix A could not created!!!, Exception : %s\n", e.what());
-		return false;
-	}
-
-	try {
-
-		B = new Matrix(fileInputs[1]);
-
-	} catch(const std::runtime_error e) {
-
-		printf("Matrix B could not created!!!, Exception : %s\n", e.what());
-		delete A;
-		return false;
-	}
-
-	if (seqID == SEQTYPE_NONE) {
-
-		Matrix *C = calculate(A, B, modeID, print_enabled, repeat);
-		if (C != NULL && sanityID < MULTYPE_MAX) {
-			Matrix *D = calculate(A, B, sanityID, false, 1);
-
-			if (D != NULL) {
-				if (C->compare(D)) {
-					printf("Sanity check passed\n");
-				} else {
-					printf("Sanity check failed\n");
-				}
-				delete D;
-			}
-
-			delete C;
-		}
-
-
-	} else {
-
-		int startIndex = 0;
-		int count = 0;
-		switch(seqID) {
-			case SEQTYPE_ALL:
-			default:
-				startIndex = MULTYPE_CPU_STD;
-				count = MULTYPE_MAX - MULTYPE_CPU_STD;
-				break;
-			case SEQTYPE_CPU:
-				startIndex = MULTYPE_CPU_STD;
-				count = MULTYPE_GPU_STD - MULTYPE_CPU_STD;
-				break;
-			case SEQTYPE_GPU:
-				startIndex = MULTYPE_GPU_STD;
-				count = MULTYPE_MAX - MULTYPE_GPU_STD;
-				break;
-		}
-
-		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, B, i, false, 1);
-		}
-	}
-
-	double t_diff = t.getdiff();
-	printf("\nTotal Time: %.3lf seconds!!!\n", t_diff);
-
-	delete A;
-	delete B;
-
-	return true;
 }

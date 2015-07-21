@@ -23,12 +23,6 @@ App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power) {
 	return app;
 }
 
-void App::setTimerState(bool state) {
-
-	timer_enabled = state;
-	Timer::enabled = state;
-}
-
 void App::setPrintState(bool state) {
 
 	print_enabled = state;

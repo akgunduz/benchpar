@@ -29,7 +29,6 @@ protected:
 	GPU *gpu;
 	CPU *cpu;
 
-	bool timer_enabled;
 	bool print_enabled;
 
 	int repeat;
@@ -39,7 +38,6 @@ protected:
 	App(CPU *c, GPU *g, Power *pw):
 			cpu(c), gpu(g), power(pw) {
 
-		timer_enabled = true;
 		print_enabled = false;
 
 		repeat = 1;
@@ -49,7 +47,6 @@ public :
 
 	static App* newInstance(APP_MODES, CPU*, GPU*, Power*);
 
-	void setTimerState(bool);
 	void setPrintState(bool);
 
 	void setRepeat(int);

@@ -51,8 +51,6 @@ class Timer {
 
 public:
 
-	static bool enabled;
-
 	Timer() : startTime(0){}
 	double snapshot();
 	double getdiff();

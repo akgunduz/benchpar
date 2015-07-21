@@ -10,10 +10,6 @@
 
 double Timer::getTime() {
 
-	if (!enabled) {
-		return 0;
-	}
-
 	struct timeval refTime;
 	int res = gettimeofday(&refTime, nullptr);
 	if (res != 0) {
@@ -27,19 +23,11 @@ double Timer::getTime() {
 
 double Timer::snapshot() {
 
-	if (!enabled) {
-		return 0;
-	}
-
 	startTime = getTime();
 	return startTime;
 }
 
 double Timer::getdiff() {
-
-	if (!enabled) {
-		return 0;
-	}
 
 	if (startTime == 0) {
 		printf("Take snaphot first!\n");

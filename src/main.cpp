@@ -11,8 +11,6 @@
 #include "power.h"
 #include "app.h"
 
-bool Timer::enabled = true;
-
 void printHelp() {
 
 	printf("-------------- Bench Tool -----------------              \n");
@@ -28,7 +26,6 @@ void printHelp() {
 	printf("\n3. Matrix Calculation Mode:(default)                   \n");
 	printf("Usage: fileInput1 fileInput2                             \n");
 	printf("Parameters:                                              \n");
-	printf("Timer:  -t off/on         default:on                     \n");
 	printf("Print:  -p off/on         default:off                    \n");
 	printf("Repeat: -r (1-1000)       default:1                      \n");
 	printf("Power:  -o off/msr/perf   default:off                    \n");
@@ -53,7 +50,6 @@ int main(int argc, const char *argv[]) {
 	enum APP_MODES appMode = MATRIX_MODE;
 	enum POWER_MODES powerMode = POWER_OFF;
 
-	bool timer_enabled = true;
 	bool print_enabled = false;
 
 	int repeat = 1;
@@ -110,12 +106,6 @@ int main(int argc, const char *argv[]) {
 				print_enabled = true;
 			}
 
-		} else if (!strcmp (argv[i], "-t")) {
-
-			if (!strcmp(argv[++i], "off")) {
-				timer_enabled = false;
-			}
-
 		} else if (!strcmp (argv[i], "-q")) {
 			gpu->platformQuery();
 			delete cpu;
@@ -134,7 +124,6 @@ int main(int argc, const char *argv[]) {
 	App *app = App::newInstance(appMode, cpu, gpu, power);
 
 	app->setRepeat(repeat);
-	app->setTimerState(timer_enabled);
 	app->setPrintState(print_enabled);
 
 	app->run(filtered_argc, filtered_argv);
