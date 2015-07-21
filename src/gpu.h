@@ -13,23 +13,13 @@ class GPU {
 
 	bool enabled;
 
-	cl_device_id *clDevices;
-
 	cl_uint numPlatforms;
 	cl_platform_id* platforms;
 	cl_uint numDevices;
 
-	cl_program createBuildProgramFromFile(cl_context context,
-			cl_device_id device,
-			const char* buildOptions,
-			const char* fileName);
-
-	cl_program createBuildProgram(cl_context context,
-			cl_device_id device,
-			const char* buildOptions,
-			const char* source);
-
 public:
+
+	cl_device_id *clDevices;
 
 	cl_program clProgram;
 
@@ -48,6 +38,17 @@ public:
 	bool getEnabled();
 
 	void getInfo();
+
+	bool createBuildProgramFromFile(
+			int deviceIndex,
+			const char* buildOptions,
+			const char* fileName);
+
+	bool createCommandQueue(int deviceIndex, cl_command_queue_properties);
+
+	bool createBuildProgram(int deviceIndex,
+			const char* buildOptions,
+			const char* source);
 
 	GPU();
 	~GPU();

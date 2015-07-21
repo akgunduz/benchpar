@@ -78,26 +78,6 @@ bool GPU::platformInit() {
 		return false;
 	}
 
-	std::string file(getcwd(NULL, 0));
-	file.append("/matMul.cl");
-
-	clProgram = createBuildProgramFromFile(clGPUContext,
-			clDevices[0], NULL, file.c_str());
-
-	clCommandQue = clCreateCommandQueue(clGPUContext,
-			clDevices[0], 0, &errCode);
-	checkErr("clCreateCommandQueue", errCode);
-	if (errCode != CL_SUCCESS) {
-		delete[] platforms;
-		delete[] clDevices;
-		clReleaseContext(clGPUContext);
-		clReleaseProgram(clProgram);
-		return false;
-	}
-
-	localWorkSize[0] = 16;
-	localWorkSize[1] = 16;
-
 	return true;
 }
 
@@ -107,19 +87,15 @@ bool GPU::platformDeInit() {
 	delete[] clDevices;
 
 	clReleaseContext(clGPUContext);
-	clReleaseProgram(clProgram);
-	clReleaseCommandQueue(clCommandQue);
 
 	return false;
 }
 
 //OCL program build - from file
-cl_program GPU::createBuildProgramFromFile(cl_context context,
-		cl_device_id device,
-		const char* buildOptions,
+bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,
 		const char* fileName) {
+
 	cl_int errNum;
-	cl_program program;
 
 	//create programs
 	FILE  *fProgramHandle;
@@ -131,7 +107,7 @@ cl_program GPU::createBuildProgramFromFile(cl_context context,
 	if(fProgramHandle <= 0)
 	{
 		printf("cannot read file \n");
-		return NULL;
+		return false;
 	}
 	fseek(fProgramHandle, 0, SEEK_END);
 	sProgramSize = ftell(fProgramHandle);
@@ -139,100 +115,87 @@ cl_program GPU::createBuildProgramFromFile(cl_context context,
 	cProgramBuffer = (char*)malloc(sProgramSize + 1);
 
 	int res = fread(cProgramBuffer, sizeof(char), sProgramSize, fProgramHandle);
-        if (res == 0) {
-            printf("cannot read data \n");
-        }
-	cProgramBuffer[sProgramSize] = '\0';
 
 	fclose(fProgramHandle);
 
+	if (res == 0) {
+		printf("cannot read kernel data \n");
+		return false;
+	}
+
+	cProgramBuffer[sProgramSize] = '\0';
+
 	//create program using source
-	program = clCreateProgramWithSource(context,
-			1,
-			(const char **)&cProgramBuffer,
-			&sProgramSize,
-			&errNum);
-	if(errNum != CL_SUCCESS)
-	{
+	clProgram = clCreateProgramWithSource(clGPUContext,
+			1, (const char **)&cProgramBuffer,
+			&sProgramSize, &errNum);
+
+	free(cProgramBuffer);
+
+	if(errNum != CL_SUCCESS) {
 		printf("Failed to create CL program from source.\n");
 		checkErr("", errNum);
-		//free(cProgramBuffer);
-		return NULL;
-
+		return false;
 	}
 
 	//build program
-	errNum = clBuildProgram(program,
-			1,
-			&device,
-			buildOptions,
-			NULL,
-			NULL);
+	errNum = clBuildProgram(clProgram, 1, &clDevices[deviceIndex], buildOptions, NULL,	NULL);
 
 	char *cBuildLog;
 	size_t sLogSize;
-	if(errNum != CL_SUCCESS)
-	{
+
+	if(errNum != CL_SUCCESS) {
+
 		printf("cannot build program %d !\n", errNum);
 
-		clGetProgramBuildInfo(program,
-				device,
+		clGetProgramBuildInfo(clProgram,
+				clDevices[deviceIndex],
 				CL_PROGRAM_BUILD_LOG,
 				0,
 				NULL,
 				&sLogSize);
 
-		cBuildLog = (char*)malloc(sLogSize+1);
+		cBuildLog = (char*) malloc(sLogSize + 1);
 
-		clGetProgramBuildInfo(program,
-				device,
+		clGetProgramBuildInfo(clProgram,
+				clDevices[deviceIndex],
 				CL_PROGRAM_BUILD_LOG,
 				sLogSize+1,
 				cBuildLog,
 				NULL);
 
 		printf("%s \n",cBuildLog);
-		return NULL;
+
+		free(cBuildLog);
+
+		clReleaseProgram(clProgram);
+
+		return false;
 	}
 
-	return program;
+	return true;
 }
 
 //OCL program build - from const char array
-cl_program GPU::createBuildProgram(cl_context context,
-		cl_device_id device,
-		const char* buildOptions,
-		const char* source)
+bool GPU::createBuildProgram(int deviceIndex,
+		const char* buildOptions, const char* source)
 {
 	cl_int errNum;
-	cl_program program;
-
-	//create programs
-	FILE  *fProgramHandle;
 
 	//create program using source
-	program = clCreateProgramWithSource(context,
-			1,
-			(const char **)&source,
-			NULL,
-			&errNum);
+	clProgram = clCreateProgramWithSource(clGPUContext,
+			1, &source,	NULL, &errNum);
 
-	if(errNum != CL_SUCCESS)
-	{
+	if(errNum != CL_SUCCESS) {
 		printf("Failed to create CL program from source.\n");
 		checkErr("", errNum);
-		//free(cProgramBuffer);
-		return NULL;
-
+		return false;
 	}
 
 	//build program
-	errNum = clBuildProgram(program,
-			1,
-			&device,
-			buildOptions,
-			NULL,
-			NULL);
+	errNum = clBuildProgram(clProgram,
+			1, &clDevices[deviceIndex],
+			buildOptions, NULL,	NULL);
 
 	char *cBuildLog;
 	size_t sLogSize;
@@ -240,27 +203,44 @@ cl_program GPU::createBuildProgram(cl_context context,
 	{
 		printf("cannot build program %d !\n", errNum);
 
-		clGetProgramBuildInfo(program,
-				device,
+		clGetProgramBuildInfo(clProgram,
+				clDevices[deviceIndex],
 				CL_PROGRAM_BUILD_LOG,
 				0,
 				NULL,
 				&sLogSize);
 
-		cBuildLog = (char*)malloc(sLogSize+1);
+		cBuildLog = (char*) malloc(sLogSize + 1);
 
-		clGetProgramBuildInfo(program,
-				device,
+		clGetProgramBuildInfo(clProgram,
+				clDevices[deviceIndex],
 				CL_PROGRAM_BUILD_LOG,
 				sLogSize+1,
 				cBuildLog,
 				NULL);
 
 		printf("%s \n",cBuildLog);
-		return NULL;
+
+		free(cBuildLog);
+
+		clReleaseProgram(clProgram);
+
+		return false;
 	}
 
-	return program;
+	return true;
+}
+
+bool GPU::createCommandQueue(int deviceIndex, cl_command_queue_properties properties) {
+
+	cl_int errCode;
+
+	clCommandQue = clCreateCommandQueue(clGPUContext,
+			clDevices[deviceIndex], properties, &errCode);
+
+	checkErr("clCreateCommandQueue", errCode);
+
+	return errCode == CL_SUCCESS;
 }
 
 void GPU::getInfo() {
@@ -450,5 +430,6 @@ void GPU::checkErr(const char *id, cl_int err)
 		default:                                            printf("%s -> Unknown\n", id);
 	}
 }
+
 
 

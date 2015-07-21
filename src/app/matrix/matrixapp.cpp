@@ -8,6 +8,17 @@
 
 #include "matrixapp.h"
 
+MatrixApp::MatrixApp(CPU *c, GPU *g, Power *pw) :
+		App(c, g, pw) {
+
+	loadGPUKernel();
+}
+
+MatrixApp::~MatrixApp() {
+
+	unLoadGPUKernel();
+}
+
 Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int repeat) {
 
 	if (!A->check(B)) {
@@ -236,4 +247,44 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	printf("Test is running with %d repeats\n", repeat);
 
 	return process(fileInputs);
+}
+
+bool MatrixApp::loadGPUKernel() {
+
+	if (!gpu->getEnabled()) {
+		return false;
+	}
+
+	char file[PATH_LENGTH];
+
+	sprintf(file, "%s/matMul.cl", getcwd(NULL, 0));
+
+	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
+
+	if (!res) {
+		printf("Could not load GPU kernel\n");
+		return false;
+	}
+
+	res = gpu->createCommandQueue(0, 0);
+	if (!res) {
+		printf("Could not create GPU Command Queue\n");
+		clReleaseProgram(gpu->clProgram);
+		return false;
+	}
+
+	gpu->localWorkSize[0] = 16;
+	gpu->localWorkSize[1] = 16;
+
+	gpu_kernel_loaded = true;
+
+	return true;
+}
+
+void MatrixApp::unLoadGPUKernel() {
+
+	if (gpu_kernel_loaded) {
+		clReleaseProgram(gpu->clProgram);
+		clReleaseCommandQueue(gpu->clCommandQue);
+	}
 }
