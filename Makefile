@@ -25,6 +25,7 @@ FILES = \
 		timer.cpp \
 		power/power.cpp \
 		power/power_smart_calc.cpp \
+		power/power_smart_real.cpp \
 		cpu.cpp \
 		app/app.cpp \
 		app/matrix/matrix.cpp \

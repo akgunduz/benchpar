@@ -370,7 +370,7 @@ void GPU::platformQuery() {
 		free(item_info);
 
 		errCode = clGetDeviceInfo(clDevices[i], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &mem_size, NULL);
-		printf("CL_DEVICE_GLOBAL_MEM_SIZE is %lu MBs\n", mem_size/1024/1024);
+		printf("CL_DEVICE_GLOBAL_MEM_SIZE is %lu MBs\n", (unsigned long)mem_size/1024/1024);
 
 		errCode = clGetDeviceInfo(clDevices[i], CL_DEVICE_ADDRESS_BITS, sizeof(cl_uint), &attribute_ui, NULL);
 		printf("CL_DEVICE_ADDRESS_BITS is %u\n",attribute_ui);
@@ -385,7 +385,7 @@ void GPU::platformQuery() {
 		printf("CL_DEVICE_ENDIAN_LITTLE is %d\n",available?1:0);
 
 		errCode = clGetDeviceInfo(clDevices[i], CL_DEVICE_LOCAL_MEM_SIZE, sizeof(cl_ulong), &mem_size, NULL);
-		printf("CL_DEVICE_LOCAL_MEM_SIZE is %lu KBs\n", mem_size/1024);
+		printf("CL_DEVICE_LOCAL_MEM_SIZE is %lu KBs\n", (unsigned long)mem_size/1024);
 
 	}
 

@@ -14,7 +14,8 @@ enum POWER_MODES {
 	POWER_MSR,
 	POWER_PERF,
 	POWER_INA,
-	POWER_SMART,
+	POWER_SMARTCALC,
+	POWER_SMARTREAL,
 	POWER_MAX,
 };
 
@@ -22,7 +23,7 @@ class Power {
 
 	POWER_MODES mode;
 	const char names[POWER_MAX][PATH_LENGTH] = {
-			"OFF", "MSR", "PERF", "INA", "SMART"
+			"OFF", "MSR", "PERF", "INA", "SMARTCALC", "SMARTREAL"
 	};
 
 

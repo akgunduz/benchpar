@@ -89,8 +89,10 @@ int main(int argc, const char *argv[]) {
 				powerMode = POWER_PERF;
 			} else if (!strcmp(argv[i], "ina")) {
 				powerMode = POWER_INA;
-			} else if (!strcmp(argv[i], "smart")) {
-				powerMode = POWER_SMART;
+			} else if (!strcmp(argv[i], "smart1")) {
+				powerMode = POWER_SMARTCALC;
+			} else if (!strcmp(argv[i], "smart2")) {
+				powerMode = POWER_SMARTREAL;
 			}
 
 		} else if (!strcmp (argv[i], "-q")) {

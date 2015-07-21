@@ -14,6 +14,7 @@
 #include "power.h"
 #endif
 #include "power_smart_calc.h"
+#include "power_smart_real.h"
 
 Power::Power() {
 
@@ -47,8 +48,11 @@ Power *Power::newInstance(POWER_MODES mode, int count) {
 		default:
 			power = new Power();
 			break;
-		case POWER_SMART:
+		case POWER_SMARTCALC:
 			power = new Power_SMARTCALC();
+			break;
+		case POWER_SMARTREAL:
+			power = new Power_SMARTREAL();
 			break;
 	}
 
