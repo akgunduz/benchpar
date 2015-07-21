@@ -9,26 +9,19 @@ CPU::CPU() {
 
 	type = PROC_UNKNOWN;
 	coreCount = 0;
-	detectCPU();
+	powerCoreCount = 0;
+	if (detectCPU()) {
+		powerCoreCount = cores[0].type == CORE_HASWELL ||
+				cores[0].type == CORE_HASWELL_EP ||
+				cores[0].type == CORE_BROADWELL ? coreCount : 1;
+	}
 
-}
-
-bool CPU::isIntelSeperateCorePower() {
-    
-    if (cores[0].type == CORE_HASWELL ||
-            cores[0].type == CORE_HASWELL_EP ||
-            cores[0].type == CORE_BROADWELL) {
-        return true;
-    }
-    
-    return false;
 }
 
 bool CPU::detectCPU() {
 
 #ifndef __linux__
-	printf("CPU can not detected in non-linux platforms, core count fixed to %d\n", 8);
-	coreCount = 8;
+	printf("CPU can not detected in non-linux platforms\n");
 	return true;
 #endif
 
@@ -67,29 +60,29 @@ bool CPU::detectCPU() {
 
 		} else if (type == PROC_INTEL && !strncmp(result, "model", 5)) {
 			sscanf(result,"%*s%*s%d", &part);
-                        switch(part) {
-                            case CPU_SANDYBRIDGE:
-                                cores[coreCount - 1].type = CORE_SANDYBRIDGE;
-                                break;
-                            case CPU_SANDYBRIDGE_EP:
-                                cores[coreCount - 1].type = CORE_SANDYBRIDGE_EP;
-                                break;
-                            case CPU_IVYBRIDGE:
-                                cores[coreCount - 1].type = CORE_IVYBRIDGE;
-                                break;
-                            case CPU_IVYBRIDGE_EP:
-                                cores[coreCount - 1].type = CORE_IVYBRIDGE_EP;
-                                break;
-                            case CPU_HASWELL:
-                                cores[coreCount - 1].type = CORE_HASWELL;
-                                break;
-                            case CPU_HASWELL_EP:
-                                cores[coreCount - 1].type = CORE_HASWELL_EP;
-                                break;
-                            case CPU_BROADWELL:
-                                cores[coreCount - 1].type = CORE_BROADWELL;
-                                break;
-                        }
+			switch(part) {
+				case CPU_SANDYBRIDGE:
+					cores[coreCount - 1].type = CORE_SANDYBRIDGE;
+					break;
+				case CPU_SANDYBRIDGE_EP:
+					cores[coreCount - 1].type = CORE_SANDYBRIDGE_EP;
+					break;
+				case CPU_IVYBRIDGE:
+					cores[coreCount - 1].type = CORE_IVYBRIDGE;
+					break;
+				case CPU_IVYBRIDGE_EP:
+					cores[coreCount - 1].type = CORE_IVYBRIDGE_EP;
+					break;
+				case CPU_HASWELL:
+					cores[coreCount - 1].type = CORE_HASWELL;
+					break;
+				case CPU_HASWELL_EP:
+					cores[coreCount - 1].type = CORE_HASWELL_EP;
+					break;
+				case CPU_BROADWELL:
+					cores[coreCount - 1].type = CORE_BROADWELL;
+					break;
+			}
 
 		} else if (type == PROC_ARM && !strncmp(result, "CPU part", 8)) {
 			sscanf(result,"%*s%*s%*s%x", &part);
@@ -104,7 +97,7 @@ bool CPU::detectCPU() {
 
 	if (coreCount == 0) {
 		printf("\n");
-		return true;
+		return false;
 	}
 
 	int count = 1;

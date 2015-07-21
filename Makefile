@@ -33,27 +33,30 @@ FILES = \
 		app/matrix/matrixapp.cpp \
 		main.cpp
 
-LINUX_FILES = $(FILES) \
+CMD_FILES = $(FILES) \
 		power/hid_linux.cpp \
 		power/power_msr.cpp \
-		power/power_perf.cpp \
-		power/power_ina.cpp
+		power/power_perf.cpp 
 
 OSX_FILES = $(FILES) \
 		power/hid_apple.cpp 
+
+C15_FILES = $(FILES) \
+		power/hid_libusb.cpp \
+		power/power_ina.cpp
+
+
 
 C15_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
 
 C15_OBJECTS_PATH = Objects/c15
 
-C15_CFLAGS = $(CFLAGS) -O3 -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
+C15_CFLAGS = $(CFLAGS) -O3 -DC15 -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/include
 
 C15_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/lib \
-	-L$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/lib $(LDFLAGS) -lOpenCL -ludev
-
-C15_FILES = $(LINUX_FILES)
+	-L$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/lib $(LDFLAGS) -lOpenCL -lusb-1.0
 
 C15_FILES_DIR = $(addprefix $(C15_OBJECTS_PATH)/, $(sort $(dir $(C15_FILES))))
 
@@ -66,6 +69,7 @@ C15_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(C15_OBJECTS_PATH)/%.o, $(C15_SO
 C15_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(C15_OBJECTS_PATH)/%.d, $(C15_SOURCES))
 
 
+
 CMD_CC = g++
 
 CMD_OBJECTS_PATH = Objects/cmd
@@ -73,8 +77,6 @@ CMD_OBJECTS_PATH = Objects/cmd
 CMD_CFLAGS = $(CFLAGS) -O3
 
 CMD_LDFLAGS = -L/usr/local/lib $(LDFLAGS) -lOpenCL -ludev
-
-CMD_FILES = $(LINUX_FILES)
 
 CMD_FILES_DIR = $(addprefix $(CMD_OBJECTS_PATH)/, $(sort $(dir $(CMD_FILES))))
 
@@ -108,7 +110,7 @@ OSX_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(OSX_OBJECTS_PATH)/%.d, $(O
 
 
 
-all: cmd
+all: c15
 
 
 $(EXEC_PATH):

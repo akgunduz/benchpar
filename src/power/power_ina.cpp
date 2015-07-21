@@ -138,10 +138,10 @@ void* Power_INA::runMonitor(void *arg) {
 
 		gettimeofday(&now,NULL);
 
-		long long target_ms = now.tv_sec * 1000 + now.tv_usec / 1000 + INA231_WAIT;
+		uint64_t target_ms = (uint64_t) now.tv_sec * 1000 + now.tv_usec / 1000 + INA231_WAIT;
 
-		to.tv_sec = target_ms / 1000;
-		to.tv_nsec = (target_ms % 1000) * 1000000;
+		to.tv_sec = (long) (target_ms / 1000);
+		to.tv_nsec = (long) (target_ms % 1000) * 1000000;
 
 		int res = pthread_cond_timedwait(&power->mCond, &power->mMutex, &to);
 

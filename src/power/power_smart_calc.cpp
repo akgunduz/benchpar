@@ -224,7 +224,7 @@ bool Power_SMARTCALC::getSensorDatas(bool &initial) {
 		}
 
 		if (buffer[0] == REQUEST_DATA) {
-                	sscanf((char *)&buffer[18], "%lfW", &curWatt);
+                	sscanf((char *)&buffer[17], "%lfW", &curWatt);
 		}
 	} else {
 		initial = false;
@@ -257,12 +257,12 @@ void* Power_SMARTCALC::runMonitor(void *arg) {
 
 		pthread_mutex_lock(&power->mMutex);
 
-		gettimeofday(&now,NULL);
+		gettimeofday(&now, NULL);
 
-		long long target_ms = now.tv_sec * 1000 + now.tv_usec / 1000 + SMART_WAIT;
+		uint64_t target_ms = (uint64_t) now.tv_sec * 1000 + now.tv_usec / 1000 + SMART_WAIT;
 
-		to.tv_sec = target_ms / 1000;
-		to.tv_nsec = (target_ms % 1000) * 1000000;
+		to.tv_sec = (long) (target_ms / 1000);
+		to.tv_nsec = (long) (target_ms % 1000) * 1000000;
 
 		int res = pthread_cond_timedwait(&power->mCond, &power->mMutex, &to);
 

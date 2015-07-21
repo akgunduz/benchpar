@@ -28,13 +28,13 @@ enum PROCTYPE {
 };
 
 enum CORETYPE {
-        CORE_SANDYBRIDGE,
-        CORE_SANDYBRIDGE_EP,
-        CORE_IVYBRIDGE,
-        CORE_IVYBRIDGE_EP,
-        CORE_HASWELL,
-        CORE_HASWELL_EP,
-        CORE_BROADWELL,
+	CORE_SANDYBRIDGE,
+	CORE_SANDYBRIDGE_EP,
+	CORE_IVYBRIDGE,
+	CORE_IVYBRIDGE_EP,
+	CORE_HASWELL,
+	CORE_HASWELL_EP,
+	CORE_BROADWELL,
 	CORE_A15,
 	CORE_A7,
 	CORE_MAX
@@ -48,6 +48,7 @@ public:
 class CPU {
 public:
 	int coreCount;
+	int powerCoreCount;
 	PROCTYPE type;
 	Core cores[MAX_CORE_COUNT];
 
@@ -61,7 +62,6 @@ public:
 
 	CPU();
 	bool detectCPU();
-        bool isIntelSeperateCorePower();
 };
 
 

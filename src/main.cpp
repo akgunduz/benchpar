@@ -52,23 +52,15 @@ int main(int argc, const char *argv[]) {
 
 	enum APP_MODES appMode = MATRIX_MODE;
 	enum POWER_MODES powerMode = POWER_OFF;
-	int powerCoreCount = 0;
 
 	if (argc <= 1) {
 		printHelp();
 		return 0;
 	}
 
-        setenv("LC_NUMERIC", "C", 1);
+	setenv("LC_NUMERIC", "C", 1);
         
 	CPU *cpu = new CPU();
-	if (cpu->type == PROC_INTEL) {
-		powerMode = POWER_MSR;
-		powerCoreCount = cpu->isIntelSeperateCorePower() ? cpu->coreCount : 1;
-	} else if (cpu->type == PROC_ARM) {
-		powerMode = POWER_INA;
-		powerCoreCount = cpu->coreCount;
-	}
 
 	GPU *gpu = new GPU();
 
@@ -104,7 +96,7 @@ int main(int argc, const char *argv[]) {
 		}
 	}
 
-	Power *power = Power::newInstance(powerMode, powerCoreCount);
+	Power *power = Power::newInstance(powerMode, cpu->powerCoreCount);
 
 	App *app = App::newInstance(appMode, cpu, gpu, power);
 	app->init(argc, argv);

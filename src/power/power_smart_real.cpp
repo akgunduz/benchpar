@@ -160,7 +160,7 @@ double Power_SMARTREAL::read_after() {
 	hid_close(device);
 
 	if (buffer[0] == REQUEST_DATA) {
-		sscanf((char *)&buffer[26], "%lfW", &consumed);
+		sscanf((char *)&buffer[24], "%lfW", &consumed);
 		consumed *= H_TO_S;
 
 		return consumed;

@@ -29,30 +29,35 @@ Power *Power::newInstance(POWER_MODES mode, int count) {
 	Power *power;
 
 	switch(mode) {
+		case POWER_SMARTCALC:
+			power = new Power_SMARTCALC();
+			break;
+		case POWER_SMARTREAL:
+			power = new Power_SMARTREAL();
+			break;
+#ifdef C15
+		case POWER_INA:
+			power = new Power_INA();
+			break;
+#else
 #ifdef __linux__
+
 		case POWER_MSR:
 			power = new Power_MSR();
 			break;
 		case POWER_PERF:
 			power = new Power_PERF();
 			break;
-		case POWER_INA:
-			power = new Power_INA();
-			break;
+
 #else
 		case POWER_MSR:
 		case POWER_PERF:
+#endif
 		case POWER_INA:
 #endif
 		case POWER_OFF:
 		default:
 			power = new Power();
-			break;
-		case POWER_SMARTCALC:
-			power = new Power_SMARTCALC();
-			break;
-		case POWER_SMARTREAL:
-			power = new Power_SMARTREAL();
 			break;
 	}
 
