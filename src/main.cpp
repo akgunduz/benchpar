@@ -137,7 +137,7 @@ int main(int argc, const char *argv[]) {
 	app->setTimerState(timer_enabled);
 	app->setPrintState(print_enabled);
 
-	app->init(filtered_argc, filtered_argv);
+	app->run(filtered_argc, filtered_argv);
 
 	delete cpu;
 	delete gpu;

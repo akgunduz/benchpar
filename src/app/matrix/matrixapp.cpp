@@ -8,7 +8,7 @@
 
 #include "matrixapp.h"
 
-Matrix* MatrixApp::process(Matrix *A, Matrix *B, int modeID, bool print, int repeat) {
+Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int repeat) {
 
 	if (!A->check(B)) {
 		return NULL;
@@ -70,11 +70,7 @@ Matrix* MatrixApp::process(Matrix *A, Matrix *B, int modeID, bool print, int rep
 }
 
 
-bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
-
-	enum SEQTYPE seqID = SEQTYPE_NONE;
-	enum MULTYPE modeID = MULTYPE_CPU_STD;
-	enum MULTYPE sanityID = MULTYPE_MAX;
+bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	char fileInputs[2][255];
 	int fileIndex = 0;
@@ -150,7 +146,7 @@ bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
 
 	if (fileIndex < 2) {
 		printf("Matrix File Inputs did not entered\n");
-		return 0;
+		return false;
 	}
 
 	if (!(sanityID < MULTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
@@ -158,6 +154,11 @@ bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
 	}
 
 	printf("Test is running with %d repeats\n", repeat);
+	
+	return process(fileInputs);
+}
+
+bool MatrixApp::process(char fileInputs[][255]) {
 
 	Timer t;
 
@@ -172,7 +173,7 @@ bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
 	} catch(const std::runtime_error e) {
 
 		printf("Matrix A could not created!!!, Exception : %s\n", e.what());
-		return 0;
+		return false;
 	}
 
 	try {
@@ -183,14 +184,14 @@ bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
 
 		printf("Matrix B could not created!!!, Exception : %s\n", e.what());
 		delete A;
-		return 0;
+		return false;
 	}
 
 	if (seqID == SEQTYPE_NONE) {
 
-		Matrix *C = process(A, B, modeID, print_enabled, repeat);
+		Matrix *C = calculate(A, B, modeID, print_enabled, repeat);
 		if (C != NULL && sanityID < MULTYPE_MAX) {
-			Matrix *D = process(A, B, sanityID, false, 1);
+			Matrix *D = calculate(A, B, sanityID, false, 1);
 
 			if (D != NULL) {
 				if (C->compare(D)) {
@@ -226,7 +227,7 @@ bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			process(A, B, i, false, 1);
+			calculate(A, B, i, false, 1);
 		}
 	}
 

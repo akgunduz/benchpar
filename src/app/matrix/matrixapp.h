@@ -14,13 +14,19 @@
 
 class MatrixApp : public App {
 
+	enum SEQTYPE seqID = SEQTYPE_NONE;
+	enum MULTYPE modeID = MULTYPE_CPU_STD;
+	enum MULTYPE sanityID = MULTYPE_MAX;
+
 public:
 	MatrixApp(CPU *c, GPU *g, Power *pw):
 			App(c, g, pw){};
 
-	Matrix* process(Matrix *A, Matrix *B, int modeID, bool print, int repeat);
+	Matrix* calculate(Matrix *A, Matrix *B, int modeID, bool print, int repeat);
 
-	virtual bool init(int argc, const char argv[][ARGV_LENGTH]);
+	bool process(char fileInputs[][255]);
+
+	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 };
 
 #endif

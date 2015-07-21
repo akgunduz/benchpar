@@ -53,7 +53,7 @@ public :
 
 	void setRepeat(int);
 
-	virtual bool init(int argc, const char argv[][ARGV_LENGTH]) = 0;
+	virtual bool run(int argc, const char argv[][ARGV_LENGTH]) = 0;
 
 };
 
