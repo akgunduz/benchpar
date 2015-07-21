@@ -20,7 +20,7 @@ public:
 
 	Matrix* process(Matrix *A, Matrix *B, int modeID, bool print, int repeat);
 
-	virtual bool init(int argc, const char *argv[]);
+	virtual bool init(int argc, const char argv[][ARGV_LENGTH]);
 };
 
 #endif

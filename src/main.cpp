@@ -53,10 +53,18 @@ int main(int argc, const char *argv[]) {
 	enum APP_MODES appMode = MATRIX_MODE;
 	enum POWER_MODES powerMode = POWER_OFF;
 
+	bool timer_enabled = true;
+	bool print_enabled = false;
+
+	int repeat = 1;
+
 	if (argc <= 1) {
 		printHelp();
 		return 0;
 	}
+
+	int filtered_argc = 0;
+	char filtered_argv[ARGV_MAX][ARGV_LENGTH];
 
 	setenv("LC_NUMERIC", "C", 1);
         
@@ -87,19 +95,49 @@ int main(int argc, const char *argv[]) {
 				powerMode = POWER_SMARTREAL;
 			}
 
+		} else if (!strcmp (argv[i], "-r")) {
+
+			if (isdigit(argv[++i][0])) {
+				repeat = atoi(argv[i]);
+				if (repeat < 1 || repeat > 1000) {
+					repeat = 1;
+				}
+			}
+
+		} else if (!strcmp (argv[i], "-p")) {
+
+			if (!strcmp(argv[++i], "on")) {
+				print_enabled = true;
+			}
+
+		} else if (!strcmp (argv[i], "-t")) {
+
+			if (!strcmp(argv[++i], "off")) {
+				timer_enabled = false;
+			}
+
 		} else if (!strcmp (argv[i], "-q")) {
 			gpu->platformQuery();
 			delete cpu;
 			delete gpu;
 			return 0;
 
+		} else {
+
+			strcpy(filtered_argv[filtered_argc], argv[i]);
+			filtered_argc++;
 		}
 	}
 
 	Power *power = Power::newInstance(powerMode, cpu->powerCoreCount);
 
 	App *app = App::newInstance(appMode, cpu, gpu, power);
-	app->init(argc, argv);
+
+	app->setRepeat(repeat);
+	app->setTimerState(timer_enabled);
+	app->setPrintState(print_enabled);
+
+	app->init(filtered_argc, filtered_argv);
 
 	delete cpu;
 	delete gpu;

@@ -70,18 +70,16 @@ Matrix* MatrixApp::process(Matrix *A, Matrix *B, int modeID, bool print, int rep
 }
 
 
-bool MatrixApp::init(int argc, char const *argv[]) {
+bool MatrixApp::init(int argc, const char argv[][ARGV_LENGTH]) {
 
 	enum SEQTYPE seqID = SEQTYPE_NONE;
 	enum MULTYPE modeID = MULTYPE_CPU_STD;
 	enum MULTYPE sanityID = MULTYPE_MAX;
-	bool printState = false;
-	int repeat = 1;
 
 	char fileInputs[2][255];
 	int fileIndex = 0;
 
-	for (int i = 1; i < argc; i++) {
+	for (int i = 0; i < argc; i++) {
 
 		if (!strcmp (argv[i], "-c")) {
 
@@ -94,27 +92,6 @@ bool MatrixApp::init(int argc, char const *argv[]) {
 			A->printToFile((unsigned)atoi(argv[i+1]));
 			delete A;
 			return true;
-
-		} else if (!strcmp (argv[i], "-t")) {
-
-			if (!strcmp(argv[++i], "off")) {
-				Timer::enabled = false;
-			}
-
-		} else if (!strcmp (argv[i], "-p")) {
-
-			if (!strcmp(argv[++i], "on")) {
-				printState = true;
-			}
-
-		} else if (!strcmp (argv[i], "-r")) {
-
-			if (isdigit(argv[++i][0])) {
-				repeat = atoi(argv[i]);
-				if (repeat < 1 || repeat > 1000) {
-					repeat = 1;
-				}
-			}
 
 		} else if (!strcmp (argv[i], "-m")) {
 
@@ -153,11 +130,6 @@ bool MatrixApp::init(int argc, char const *argv[]) {
 			if (isdigit(argv[++i][0])) {
 				sanityID = (MULTYPE) atoi(argv[i]);
 			}
-
-		} else if (!strcmp (argv[i], "-a") || !strcmp (argv[i], "-o")) {
-
-			++i;
-			continue;
 
 		} else {
 
@@ -216,7 +188,7 @@ bool MatrixApp::init(int argc, char const *argv[]) {
 
 	if (seqID == SEQTYPE_NONE) {
 
-		Matrix *C = process(A, B, modeID, printState, repeat);
+		Matrix *C = process(A, B, modeID, print_enabled, repeat);
 		if (C != NULL && sanityID < MULTYPE_MAX) {
 			Matrix *D = process(A, B, sanityID, false, 1);
 
