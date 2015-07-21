@@ -15,7 +15,7 @@ bool Timer::enabled = true;
 
 void printHelp() {
 
-	printf("---------- Bench Tool        ----------                  \n");
+	printf("-------------- Bench Tool -----------------              \n");
 	printf("-----------------Howto ----------------                  \n");
 	printf("There are 3 main running modes:                        \n\n");
 	printf("1. Matrix Create Mode:                                   \n");

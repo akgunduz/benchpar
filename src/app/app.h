@@ -10,6 +10,7 @@
 #include "common.h"
 #include "power.h"
 #include "gpu.h"
+
 #include "matrix.h"
 
 #define ARGV_LENGTH 30

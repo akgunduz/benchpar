@@ -69,7 +69,6 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int r
 	return calculated;
 }
 
-
 bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	char fileInputs[2][255];
@@ -154,7 +153,7 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	}
 
 	printf("Test is running with %d repeats\n", repeat);
-	
+
 	return process(fileInputs);
 }
 

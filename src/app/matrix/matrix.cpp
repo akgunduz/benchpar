@@ -30,10 +30,10 @@ Matrix::Matrix(std::string path) {
 	}
 
 	int res = fscanf(fd, "%d,%d", &row, &col);
-        if (res == EOF) {
-            	fclose(fd);
+	if (res == EOF) {
+		fclose(fd);
 		throw std::runtime_error("File Read Error happened!");
-        }
+	}
 
 	if (!allocMem(row, col)) {
 		fclose(fd);
@@ -45,10 +45,10 @@ Matrix::Matrix(std::string path) {
 		for (int j = 0; j < col; j++) {
 
 			res = fscanf(fd, "%f,", mem + i * col + j);
-                        if (res == EOF) {
-                            fclose(fd);
-                            throw std::runtime_error("File Read Error happened!");
-                        }
+			if (res == EOF) {
+				fclose(fd);
+				throw std::runtime_error("File Read Error happened!");
+			}
 		}
 	}
 
