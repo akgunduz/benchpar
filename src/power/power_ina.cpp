@@ -112,15 +112,23 @@ double Power_INA::read_after() {
 	return consumed;
 }
 
-void Power_INA::getSensorDatas() {
+bool Power_INA::getSensorDatas() {
 
 	for (int i = 0; i < SENSOR_MAX; i++) {
 		if (sensor[i].fd > 0) {
 			if (ioctl(sensor[i].fd, INA231_IOCGREG, &sensor[i].data) < 0) {
 				printf("initINA231 IOCTL Error\n");
+				return false;
 			}
+		} else {
+			return false;
 		}
 	}
+
+	curWatt = (double)(sensor[SENSOR_G3D].data.cur_uW + sensor[SENSOR_ARM].data.cur_uW +
+			sensor[SENSOR_KFC].data.cur_uW + sensor[SENSOR_MEM].data.cur_uW) / 1000000;
+
+	return true;
 }
 
 void* Power_INA::runMonitor(void *arg) {
@@ -145,7 +153,6 @@ void* Power_INA::runMonitor(void *arg) {
 
 		int res = pthread_cond_timedwait(&power->mCond, &power->mMutex, &to);
 
-		double watt;
 		switch(res) {
 
 			case 0:
@@ -153,10 +160,10 @@ void* Power_INA::runMonitor(void *arg) {
 				break;
 
 			case ETIMEDOUT:
-				power->getSensorDatas();
-				watt = power->sensor[SENSOR_G3D].data.cur_uW + power->sensor[SENSOR_ARM].data.cur_uW +
-					   power->sensor[SENSOR_KFC].data.cur_uW + power->sensor[SENSOR_MEM].data.cur_uW;
-				power->consumed += (INA231_WAIT/1000.0) * (watt/1000000.0);
+				thread_started = power->getSensorDatas();
+				if (thread_started) {
+					power->consumed += ((double) INA231_WAIT / 1000.0) * power->curWatt;
+				}
 				break;
 
 			default:

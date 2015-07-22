@@ -224,7 +224,7 @@ bool Power_SMARTCALC::getSensorDatas(bool &initial) {
 		}
 
 		if (buffer[0] == REQUEST_DATA) {
-                	sscanf((char *)&buffer[17], "%lfW", &curWatt);
+			sscanf((char *)&buffer[17], "%lfW", &curWatt);
 		}
 	} else {
 		initial = false;
@@ -274,7 +274,9 @@ void* Power_SMARTCALC::runMonitor(void *arg) {
 
 			case ETIMEDOUT:
 				thread_started = power->getSensorDatas(initial);
-				power->consumed += ((double)SMART_WAIT / 1000.0) * power->curWatt;
+				if (thread_started) {
+					power->consumed += ((double) SMART_WAIT / 1000.0) * power->curWatt;
+				}
 				break;
 
 			default:

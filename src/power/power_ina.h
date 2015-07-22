@@ -51,7 +51,9 @@ class Power_INA : public Power {
 	double consumed;
 	bool initialized;
 
-	void getSensorDatas();
+	double curWatt;
+
+	bool getSensorDatas();
 	static void* runMonitor(void *arg);
 
 public:
