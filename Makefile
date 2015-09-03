@@ -97,7 +97,7 @@ OSX_CC = clang-omp++
 
 OSX_OBJECTS_PATH = Objects/osx
 
-OSX_CFLAGS = $(CFLAGS) -O3
+OSX_CFLAGS = $(CFLAGS) -O3 -mavx
 
 OSX_LDFLAGS = -L/usr/local/lib $(LDFLAGS) -framework OpenCL -framework IOKit -framework CoreFoundation
 

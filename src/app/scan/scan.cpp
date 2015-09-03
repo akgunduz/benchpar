@@ -56,22 +56,22 @@ Scan::Scan(std::string path) {
 
 Scan::~Scan() {
 
-	delete mem;
+	free(mem);
 }
 
 bool Scan::allocMem(uint32_t size) {
 
 	this->size = size;
 	mem_size = sizeof(float) * size;
-	mem = new float[size]; //new is already aligned allocation
-	if (mem == NULL) {
+	int res = posix_memalign((void**)&mem, SIZE * sizeof(float), ALIGNMENT);
+	if (res != 0) {
 		printf("Memory insufficient!\n");
 		return false;
 	}
 
 	int check = (int)((unsigned long long)mem % ALIGNMENT);
 	if (check != 0) {
-		delete mem;
+		free(mem);
 		printf("Alignment failed!\n");
 		return false;
 	}

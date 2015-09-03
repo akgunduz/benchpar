@@ -18,10 +18,10 @@
 #include <stdexcept>
 #include <math.h>
 #include <sys/ioctl.h>
-
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/syscall.h>
+#include <stdlib.h>
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
