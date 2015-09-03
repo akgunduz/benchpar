@@ -198,7 +198,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		if (!strcmp (argv[i], "-c")) {
 
-			if (i + 3 >= argc) {
+			if (i + 2 >= argc) {
 				printf("Scan Creator needs printID, size values \n");
 				return 0;
 			}

@@ -63,7 +63,7 @@ bool Scan::allocMem(uint32_t size) {
 
 	this->size = size;
 	mem_size = sizeof(float) * size;
-	int res = posix_memalign((void**)&mem, SIZE * sizeof(float), ALIGNMENT);
+	int res = posix_memalign((void**)&mem, size * sizeof(float), ALIGNMENT);
 	if (res != 0) {
 		printf("Memory insufficient!\n");
 		return false;
@@ -132,14 +132,15 @@ bool Scan::printToFile(uint32_t printID) {
 		return false;
 	}
 
-	fprintf(fd, "%d\n\n", size);
+	fprintf(fd, "%d\n", size);
 
 	for (int i = 0; i < size; i++) {
 
-		fprintf(fd, "%f,", *(mem + i));
 		if (i % 30 == 0) {
 			fprintf(fd, "\n");
 		}
+
+		fprintf(fd, "%f,", *(mem + i));
 	}
 
 	fclose(fd);
