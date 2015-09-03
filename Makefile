@@ -6,7 +6,7 @@ EXECUTABLE = benchtool
 GCC_VERSION = 4.9
 TOOLCHAIN_TYPE = toolchain_arm
 
-CFLAGS = -g -std=c++11 -fopenmp -Isrc -Isrc/power -Isrc/app -Isrc/app/matrix
+CFLAGS = -g -std=c++11 -fopenmp -Isrc -Isrc/power -Isrc/app -Isrc/app/matrix -Isrc/app/scan
 LDFLAGS = -fopenmp
 
 OBJECTS_PATH = Objects
@@ -31,6 +31,9 @@ FILES = \
 		app/matrix/matrix.cpp \
 		app/matrix/multiplications.cpp \
 		app/matrix/matrixapp.cpp \
+		app/scan/scanapp.cpp \
+		app/scan/scan.cpp \
+		app/scan/scanners.cpp \
 		main.cpp
 
 CMD_FILES = $(FILES) \

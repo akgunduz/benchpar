@@ -11,13 +11,12 @@
 #include "power.h"
 #include "gpu.h"
 
-#include "matrix.h"
-
 #define ARGV_LENGTH 30
 #define ARGV_MAX 20
 
 enum APP_MODES {
 	MATRIX_MODE,
+	SCAN_MODE,
 };
 
 
@@ -33,15 +32,11 @@ protected:
 
 	int repeat;
 
+	bool gpu_kernel_loaded = false;
+
 protected:
 
-	App(CPU *c, GPU *g, Power *pw):
-			cpu(c), gpu(g), power(pw) {
-
-		print_enabled = false;
-
-		repeat = 1;
-	};
+	App(CPU *c, GPU *g, Power *pw);
 
 public :
 
@@ -51,9 +46,12 @@ public :
 
 	void setRepeat(int);
 
+	virtual bool loadGPUKernel() = 0;
+	virtual void unLoadGPUKernel() = 0;
+
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]) = 0;
 
-	virtual ~App(){};
+	virtual ~App();
 };
 
 #endif

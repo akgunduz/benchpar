@@ -10,6 +10,9 @@
 #define __MATRIX_H_
 
 //#include "app.h"
+
+#define EPSILON 1.0f
+
 #include "gpu.h"
 
 class Matrix;

@@ -8,6 +8,7 @@
 
 #include "app.h"
 #include "matrixapp.h"
+#include "scanapp.h"
 
 App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power) {
 
@@ -18,9 +19,25 @@ App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power) {
 		default:
 			app = new MatrixApp(cpu, gpu, power);
 			break;
+		case SCAN_MODE:
+			app = new ScanApp(cpu, gpu, power);
+			break;
 	}
 
 	return app;
+}
+
+App::App(CPU *c, GPU *g, Power *pw):
+		cpu(c), gpu(g), power(pw) {
+
+	print_enabled = false;
+
+	repeat = 1;
+
+};
+
+App::~App() {
+
 }
 
 void App::setPrintState(bool state) {

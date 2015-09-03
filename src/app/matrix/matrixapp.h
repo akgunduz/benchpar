@@ -18,12 +18,13 @@ class MatrixApp : public App {
 	enum MULTYPE modeID = MULTYPE_CPU_STD;
 	enum MULTYPE sanityID = MULTYPE_MAX;
 
-	bool gpu_kernel_loaded = false;
-
 public:
 
 	MatrixApp(CPU *c, GPU *g, Power *pw);
 	~MatrixApp();
+
+	virtual bool loadGPUKernel();
+	virtual void unLoadGPUKernel();
 
 	Matrix* calculate(Matrix *A, Matrix *B, int modeID, bool print, int repeat);
 
@@ -31,8 +32,6 @@ public:
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 
-	bool loadGPUKernel();
-	void unLoadGPUKernel();
 };
 
 #endif

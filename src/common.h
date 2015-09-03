@@ -32,7 +32,6 @@
 
 #define PATH_LENGTH 255
 #define TILESIZE 32
-#define EPSILON 1.0f
 
 enum SEQTYPE {
 	SEQTYPE_NONE,

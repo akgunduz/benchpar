@@ -80,6 +80,8 @@ int main(int argc, const char *argv[]) {
 
 			if (!strcmp(argv[++i], "m")) {
 				appMode = MATRIX_MODE;
+			} else if (!strcmp(argv[i], "s")) {
+				appMode = SCAN_MODE;
 			}
 
 		} else if (!strcmp(argv[i], "-o")) {
