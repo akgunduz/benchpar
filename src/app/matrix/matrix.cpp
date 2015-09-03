@@ -8,6 +8,8 @@
 
 #include "matrix.h"
 
+#define EPSILON 1.0f
+
 Matrix::Matrix(uint32_t row, uint32_t col, bool prepare) {
 
 	this->row = row;

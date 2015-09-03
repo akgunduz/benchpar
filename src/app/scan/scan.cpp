@@ -5,6 +5,12 @@
 
 #include "scan.h"
 
+#define SIZE 1024*512
+#define ALIGNMENT 16
+#define RANGE 10
+#define EPSILON 100.0 //FLT_MIN
+#define ITERATIONS 1000
+
 Scan::Scan(uint32_t size, bool prepare) {
 
 	this->size = size;
