@@ -44,7 +44,7 @@ Scan::Scan(std::string path) {
 
 	for (int i = 0; i < size; i++) {
 
-		res = fscanf(fd, "%f,", mem + i);
+		res = fscanf(fd, "%f,", &mem[i]);
 		if (res == EOF) {
 			fclose(fd);
 			throw std::runtime_error("File Read Error happened!");
@@ -65,7 +65,7 @@ bool Scan::allocMem(uint32_t size) {
 	mem_size = sizeof(float) * size;
 	int res = posix_memalign((void**)&mem, size * sizeof(float), ALIGNMENT);
 	if (res != 0) {
-		printf("Memory insufficient!\n");
+		printf("Alloc failed! : %d\n", errno);
 		return false;
 	}
 
@@ -87,7 +87,7 @@ void Scan::create(uint32_t size) {
 
 	for (int i = 0; i < size; i++) {
 
-		*(mem + i) = (float)(rand()  / (RAND_MAX + 1.));
+		mem[i] = (float)(rand()  / (RAND_MAX + 1.));
 
 	}
 }
@@ -98,8 +98,8 @@ bool Scan::compare(Scan *ref) {
 
 	for (int i = 0; i < size; i++) {
 
-		float val1 = *(mem + i);
-		float val2 = *(ref->mem + i);
+		float val1 = mem[i];
+		float val2 = ref->mem[i];
 		if (EPSILON < fabsf(val1 - val2)) {
 			printf("Compare failed on index : %d\n", i);
 			printf("First val : %f, Second val : %f\n", val1, val2);
@@ -116,7 +116,7 @@ void Scan::printOut() {
 
 	for (int i = 0; i < size; i++) {
 
-		printf("%f,", *(mem + i));
+		printf("%f,", mem[i]);
 		if (i % 30 == 0){
 			printf("\n");
 		}
@@ -136,11 +136,7 @@ bool Scan::printToFile(uint32_t printID) {
 
 	for (int i = 0; i < size; i++) {
 
-		if (i % 30 == 0) {
-			fprintf(fd, "\n");
-		}
-
-		fprintf(fd, "%f,", *(mem + i));
+		fprintf(fd, "%f,", mem[i]);
 	}
 
 	fclose(fd);

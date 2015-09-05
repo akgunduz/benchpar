@@ -103,7 +103,7 @@ int main(int argc, const char *argv[]) {
 
 			if (isdigit(argv[++i][0])) {
 				repeat = atoi(argv[i]);
-				if (repeat < 1 || repeat > 1000) {
+				if (repeat < 1 || repeat > 2000000000) {
 					repeat = 1;
 				}
 			}

@@ -263,7 +263,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	}
 
-	if (fileIndex < 2) {
+	if (fileIndex < 1) {
 		printf("Scan File Inputs did not entered\n");
 		return false;
 	}
