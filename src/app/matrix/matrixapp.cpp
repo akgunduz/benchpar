@@ -27,7 +27,7 @@ bool MatrixApp::loadGPUKernel() {
 
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/scan.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/matMul.cl", getcwd(NULL, 0));
 
 	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
 

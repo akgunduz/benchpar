@@ -17,6 +17,7 @@
 enum APP_MODES {
 	MATRIX_MODE,
 	SCAN_MODE,
+	CONV_MODE,
 };
 
 

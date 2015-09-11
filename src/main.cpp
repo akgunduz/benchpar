@@ -82,6 +82,8 @@ int main(int argc, const char *argv[]) {
 				appMode = MATRIX_MODE;
 			} else if (!strcmp(argv[i], "s")) {
 				appMode = SCAN_MODE;
+			} else if (!strcmp(argv[i], "c")) {
+				appMode = CONV_MODE;
 			}
 
 		} else if (!strcmp(argv[i], "-o")) {

@@ -92,8 +92,7 @@ bool GPU::platformDeInit() {
 }
 
 //OCL program build - from file
-bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,
-		const char* fileName) {
+bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	const char* fileName) {
 
 	cl_int errNum;
 
@@ -141,14 +140,14 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,
 	//build program
 	errNum = clBuildProgram(clProgram, 1, &clDevices[deviceIndex], buildOptions, NULL,	NULL);
 
-	char *cBuildLog;
+	char cBuildLog[16384];
 	size_t sLogSize;
 
 	if(errNum != CL_SUCCESS) {
 
 		printf("cannot build program %d !\n", errNum);
 
-		clGetProgramBuildInfo(clProgram,
+/*		clGetProgramBuildInfo(clProgram,
 				clDevices[deviceIndex],
 				CL_PROGRAM_BUILD_LOG,
 				0,
@@ -156,11 +155,11 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,
 				&sLogSize);
 
 		cBuildLog = (char*) malloc(sLogSize + 1);
-
-		clGetProgramBuildInfo(clProgram,
+*/
+		errNum = clGetProgramBuildInfo(clProgram,
 				clDevices[deviceIndex],
 				CL_PROGRAM_BUILD_LOG,
-				sLogSize+1,
+				sizeof(cBuildLog),
 				cBuildLog,
 				NULL);
 

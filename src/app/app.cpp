@@ -8,6 +8,7 @@
 
 #include "app.h"
 #include "matrixapp.h"
+#include "convapp.h"
 #include "scanapp.h"
 
 App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power) {
@@ -21,6 +22,9 @@ App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power) {
 			break;
 		case SCAN_MODE:
 			app = new ScanApp(cpu, gpu, power);
+			break;
+		case CONV_MODE:
+			app = new ConvApp(cpu, gpu, power);
 			break;
 	}
 
