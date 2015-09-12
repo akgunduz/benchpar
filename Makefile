@@ -13,7 +13,7 @@ OBJECTS_PATH = Objects
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-    TOOLCHAIN_PATH = /usr/local
+    TOOLCHAIN_PATH = /home/akgunduz/Toolchains
     TOOLCHAIN_ARM_PREFIX = arm-linux-gnueabihf
 else
 	TOOLCHAIN_PATH = /Volumes/Toolchains
@@ -80,9 +80,9 @@ CMD_CC = g++
 
 CMD_OBJECTS_PATH = Objects/cmd
 
-CMD_CFLAGS = $(CFLAGS) -O3
+CMD_CFLAGS = $(CFLAGS) -O0 -mavx
 
-CMD_LDFLAGS = -L/usr/local/lib $(LDFLAGS) -lOpenCL -ludev
+CMD_LDFLAGS = -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu $(LDFLAGS) -lOpenCL -ludev
 
 CMD_FILES_DIR = $(addprefix $(CMD_OBJECTS_PATH)/, $(sort $(dir $(CMD_FILES))))
 
@@ -116,7 +116,7 @@ OSX_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(OSX_OBJECTS_PATH)/%.d, $(O
 
 
 
-all: c15
+all: cmd
 
 
 $(EXEC_PATH):

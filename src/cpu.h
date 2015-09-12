@@ -15,7 +15,7 @@
 #define CPU_SANDYBRIDGE_EP	45
 #define CPU_IVYBRIDGE		58
 #define CPU_IVYBRIDGE_EP	62
-#define CPU_HASWELL			60
+#define CPU_HASWELL		60
 #define CPU_HASWELL_EP		63
 #define CPU_BROADWELL		61
 
@@ -28,6 +28,7 @@ enum PROCTYPE {
 };
 
 enum CORETYPE {
+        CORE_UNKNOWN,
 	CORE_SANDYBRIDGE,
 	CORE_SANDYBRIDGE_EP,
 	CORE_IVYBRIDGE,
@@ -53,6 +54,7 @@ public:
 	Core cores[MAX_CORE_COUNT];
 
 	const char names[CORE_MAX][30] = {
+                "CORE_UNKNOWN",
 		"CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP", 
                 "CORE_IVYBRIDGE", "CORE_IVYBRIDGE_EP", 
                 "CORE_HASWELL", "CORE_HASWELL_EP", 
