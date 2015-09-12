@@ -82,9 +82,9 @@ bool CPU::detectCPU() {
 				case CPU_BROADWELL:
 					cores[coreCount - 1].type = CORE_BROADWELL;
 					break;
-                                default:
-                                        cores[coreCount - 1].type = CORE_UNKNOWN;
-                                        break;
+				default:
+					cores[coreCount - 1].type = CORE_UNKNOWN;
+					break;
 			}
 
 		} else if (type == PROC_ARM && !strncmp(result, "CPU part", 8)) {

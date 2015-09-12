@@ -28,7 +28,7 @@ enum PROCTYPE {
 };
 
 enum CORETYPE {
-        CORE_UNKNOWN,
+	CORE_UNKNOWN,
 	CORE_SANDYBRIDGE,
 	CORE_SANDYBRIDGE_EP,
 	CORE_IVYBRIDGE,
@@ -55,7 +55,7 @@ public:
 
 	const char names[CORE_MAX][30] = {
                 "CORE_UNKNOWN",
-		"CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP", 
+				"CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP",
                 "CORE_IVYBRIDGE", "CORE_IVYBRIDGE_EP", 
                 "CORE_HASWELL", "CORE_HASWELL_EP", 
                 "CORE_BROADWELL", 
