@@ -122,7 +122,7 @@ void Scan::printOut() {
 bool Scan::printToFile(uint32_t printID) {
 
 	std::string file(getcwd(NULL, 0));
-	file.append("/ScanInput_" + std::to_string(printID));
+	file.append("/scan/ScanInput_" + std::to_string(printID));
 	FILE *fd = fopen(file.c_str(), "w");
 	if (!fd) {
 		return false;

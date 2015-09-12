@@ -27,6 +27,9 @@ public:
 
 	Scan* calculate(Scan *A, int modeID, bool print, int repeat);
 
+	virtual int getFuncModeCount(FUNCTYPE);
+	virtual bool creator(uint32_t, uint32_t, uint32_t);
+
 	bool process(char fileInputs[][255]);
 	bool processDir(const char path[255]);
 

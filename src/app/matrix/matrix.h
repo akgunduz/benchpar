@@ -59,10 +59,12 @@ public:
 
 	Matrix(uint32_t row, uint32_t col, bool prepare = false);
 	Matrix(std::string path);
+	Matrix(std::string path, Matrix **B);
 	~Matrix();
 
 	void printOut();
 	bool printToFile(uint32_t);
+	bool printToFile(uint32_t, Matrix *B);
 
 	bool multiplyCPU_STD(Matrix *, Matrix *, GPU *);
 	bool multiplyCPU_TILED(Matrix *, Matrix *, GPU *);

@@ -19,6 +19,20 @@ ConvApp::~ConvApp() {
 	unLoadGPUKernel();
 }
 
+int ConvApp::getFuncModeCount(FUNCTYPE functype) {
+
+	switch(functype) {
+		case FUNCTYPE_CPU:
+			return CONVTYPE_GPU_STD;
+		case FUNCTYPE_GPU:
+			return CONVTYPE_MAX - CONVTYPE_GPU_STD;
+		case FUNCTYPE_ALL:
+			return CONVTYPE_MAX;
+	}
+
+	return 0;
+}
+
 bool ConvApp::loadGPUKernel() {
 
 	if (!gpu->getEnabled()) {
@@ -170,7 +184,7 @@ uint32_t ConvApp::processFilter(char fileInput[255], float **filter) {
 	return filter_length;
 }
 
-bool ConvApp::process(char fileInputs[][255]) {
+bool ConvApp::process(char fileInputs[][255], char filterInputs[][255]) {
 
 	Timer t;
 
@@ -186,14 +200,8 @@ bool ConvApp::process(char fileInputs[][255]) {
 		float *filter;
 		uint32_t filter_length;
 
-		if (strncmp(fileInputs[0], "Filter", 6) == 0) {
-			filter_length = processFilter(fileInputs[0], &filter);
-			A = new Conv(fileInputs[1], filter, filter_length);
-
-		} else {
-			filter_length = processFilter(fileInputs[1], &filter);
-			A = new Conv(fileInputs[0], filter, filter_length);
-		}
+		filter_length = processFilter(filterInputs[0], &filter);
+		A = new Conv(fileInputs[0], filter, filter_length);
 
 	} catch(const std::runtime_error e) {
 
@@ -255,7 +263,7 @@ bool ConvApp::process(char fileInputs[][255]) {
 	return true;
 }
 
-bool ConvApp::processDir(const char path[255]) {
+bool ConvApp::processDir(const char path[255], char filterInputs[][255]) {
 
 	char fileInputs[1][255];
 
@@ -278,7 +286,7 @@ bool ConvApp::processDir(const char path[255]) {
 		}
 
 		sprintf(fileInputs[0], "%s/%s", path, ent->d_name);
-		bool status = process(fileInputs);
+		bool status = process(fileInputs, filterInputs);
 		if (!status) {
 			return false;
 		}
@@ -301,60 +309,19 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		if (!strcmp (argv[i], "-c")) {
 
-			if (i + 2 >= argc) {
+			if (i + 3 >= argc) {
 				printf("Conv Creator needs printID, size values \n");
 				return 0;
 			}
 
-			Conv *A = new Conv((unsigned)atoi(argv[i+2]), (unsigned)atoi(argv[i+3]), NULL, 0, true);
-			A->printToFile((unsigned)atoi(argv[i+1]));
-			delete A;
-			return true;
-
-		} else if (!strcmp (argv[i], "-m")) {
-
-			if (i + 1 >= argc) {
-				printf("Mode Setting needs modeID \n");
-				return 0;
-			}
-
-			if (isdigit(argv[++i][0])) {
-				modeID = (CONVTYPE) atoi(argv[i]);
-				if (modeID >= CONVTYPE_MAX) {
-					modeID = CONVTYPE_CPU_STD;
-				}
-			} else {
-				switch(argv[i][0]) {
-					case 'a':
-					default:
-						seqID = SEQTYPE_ALL;
-						break;
-					case 'c':
-						seqID = SEQTYPE_CPU;
-						break;
-					case 'g':
-						seqID = SEQTYPE_GPU;
-						break;
-				}
-			}
-
-		} else if (!strcmp (argv[i], "-s")) {
-
-			if (i + 1 >= argc) {
-				printf("Sanity Setting needs modeID \n");
-				return 0;
-			}
-
-			if (isdigit(argv[++i][0])) {
-				sanityID = (CONVTYPE) atoi(argv[i]);
-			}
+			return creator((unsigned)atoi(argv[i+1]), (unsigned)atoi(argv[i+2]), (unsigned)atoi(argv[i+3]));
 
 		} else if (!strcmp (argv[i], "-f")) {
 
 			if (isdigit(argv[++i][0])) {
-				sprintf(filterInputs[0], "FilterInput_%s", argv[i]);
+				sprintf(filterInputs[0], "conv/FilterInput_%s", argv[i]);
 			} else {
-				strcpy(filterInputs[0], argv[i]);
+				sprintf(filterInputs[0], "conv/%s", argv[i]);
 			}
 
 		} else {
@@ -374,15 +341,11 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 		}
 	}
 
-	if (!(sanityID < CONVTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
-		sanityID = CONVTYPE_MAX;
-	}
-
 	if (dirMode) {
 
 		printf("Test is running in Directory Mode with %d repeats\n", repeat);
 
-		return processDir("conv");
+		return processDir("conv", filterInputs);
 
 	} else {
 
@@ -393,9 +356,15 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		printf("Test is running with %d repeats\n", repeat);
 
-		return process(fileInputs);
+		return process(fileInputs, filterInputs);
 	}
 }
 
 
+bool ConvApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
 
+	Conv *A = new Conv(row, col, NULL, 0, true);
+	A->printToFile(printID);
+	delete A;
+	return true;
+}

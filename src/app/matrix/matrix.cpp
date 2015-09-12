@@ -57,6 +57,53 @@ Matrix::Matrix(std::string path) {
 	fclose(fd);
 }
 
+Matrix::Matrix(std::string path, Matrix **B) {
+
+	FILE *fd = fopen(path.c_str(), "r");
+	if (!fd) {
+		throw std::runtime_error("File could not opened!");
+	}
+
+	int res = fscanf(fd, "%d,%d", &row, &col);
+	if (res == EOF) {
+		fclose(fd);
+		throw std::runtime_error("File Read Error happened!");
+	}
+
+	if (!allocMem(row, col)) {
+		fclose(fd);
+		throw std::runtime_error("Memory insufficient!");
+	}
+
+	*B = new Matrix(col, row, false);
+
+	for (int i = 0; i < row; i++) {
+
+		for (int j = 0; j < col; j++) {
+
+			res = fscanf(fd, "%f,", mem + i * col + j);
+			if (res == EOF) {
+				fclose(fd);
+				throw std::runtime_error("File Read Error happened!");
+			}
+		}
+	}
+
+	for (int i = 0; i < col; i++) {
+
+		for (int j = 0; j < row; j++) {
+
+			res = fscanf(fd, "%f,", (*B)->mem + i * row + j);
+			if (res == EOF) {
+				fclose(fd);
+				throw std::runtime_error("File Read Error happened!");
+			}
+		}
+	}
+
+	fclose(fd);
+}
+
 Matrix::~Matrix() {
 
 	free(mem);
@@ -162,6 +209,43 @@ bool Matrix::printToFile(uint32_t printID) {
 
 		}
 		fprintf(fd, "\n");
+	}
+
+	fclose(fd);
+
+	return true;
+
+}
+
+bool Matrix::printToFile(uint32_t printID, Matrix *B) {
+
+	std::string file(getcwd(NULL, 0));
+	file.append("/matrix/MatrixInput_" + std::to_string(printID));
+	FILE *fd = fopen(file.c_str(), "w");
+	if (!fd) {
+		return false;
+	}
+
+	fprintf(fd, "%d,%d\n\n", row, col);
+
+	for (int i = 0; i < row; i++) {
+
+		for (int j = 0; j < col; j++) {
+
+			fprintf(fd, "%f,", *(mem + i * col + j));
+
+		}
+
+	}
+
+	for (int i = 0; i < B->row; i++) {
+
+		for (int j = 0; j < B->col; j++) {
+
+			fprintf(fd, "%f,", *(B->mem + i * B->col + j));
+
+		}
+
 	}
 
 	fclose(fd);

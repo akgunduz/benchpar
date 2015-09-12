@@ -19,6 +19,20 @@ MatrixApp::~MatrixApp() {
 	unLoadGPUKernel();
 }
 
+int MatrixApp::getFuncModeCount(FUNCTYPE functype) {
+
+	switch(functype) {
+		case FUNCTYPE_CPU:
+			return MULTYPE_GPU_STD;
+		case FUNCTYPE_GPU:
+			return MULTYPE_MAX - MULTYPE_GPU_STD;
+		case FUNCTYPE_ALL:
+			return MULTYPE_MAX;
+	}
+
+	return 0;
+}
+
 bool MatrixApp::loadGPUKernel() {
 
 	if (!gpu->getEnabled()) {
@@ -128,22 +142,11 @@ bool MatrixApp::process(char fileInputs[][255]) {
 
 	try {
 
-		A = new Matrix(fileInputs[0]);
+		A = new Matrix(fileInputs[0], &B);
 
 	} catch(const std::runtime_error e) {
 
-		printf("Matrix A could not created!!!, Exception : %s\n", e.what());
-		return false;
-	}
-
-	try {
-
-		B = new Matrix(fileInputs[1]);
-
-	} catch(const std::runtime_error e) {
-
-		printf("Matrix B could not created!!!, Exception : %s\n", e.what());
-		delete A;
+		printf("Matrix A & B could not created!!!, Exception : %s\n", e.what());
 		return false;
 	}
 
@@ -258,54 +261,13 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 				return 0;
 			}
 
-			Matrix *A = new Matrix((unsigned)atoi(argv[i+2]), (unsigned)atoi(argv[i+3]), true);
-			A->printToFile((unsigned)atoi(argv[i+1]));
-			delete A;
-			return true;
-
-		} else if (!strcmp (argv[i], "-m")) {
-
-			if (i + 1 >= argc) {
-				printf("Mode Setting needs modeID \n");
-				return 0;
-			}
-
-			if (isdigit(argv[++i][0])) {
-				modeID = (MULTYPE) atoi(argv[i]);
-				if (modeID >= MULTYPE_MAX) {
-					modeID = MULTYPE_CPU_STD;
-				}
-			} else {
-				switch(argv[i][0]) {
-					case 'a':
-					default:
-						seqID = SEQTYPE_ALL;
-						break;
-					case 'c':
-						seqID = SEQTYPE_CPU;
-						break;
-					case 'g':
-						seqID = SEQTYPE_GPU;
-						break;
-				}
-			}
-
-		} else if (!strcmp (argv[i], "-s")) {
-
-			if (i + 1 >= argc) {
-				printf("Sanity Setting needs modeID \n");
-				return 0;
-			}
-
-			if (isdigit(argv[++i][0])) {
-				sanityID = (MULTYPE) atoi(argv[i]);
-			}
+			return creator((unsigned)atoi(argv[i+1]), (unsigned)atoi(argv[i+2]), (unsigned)atoi(argv[i+3]));
 
 		} else {
 
 			dirMode = false;
 
-			if (fileIndex == 2) {
+			if (fileIndex == 1) {
 				continue;
 			}
 
@@ -318,10 +280,6 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	}
 
-	if (!(sanityID < MULTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
-		sanityID = MULTYPE_MAX;
-	}
-
 	if (dirMode) {
 
 		printf("Test is running in Directory Mode with %d repeats\n", repeat);
@@ -330,7 +288,7 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	} else {
 
-		if (fileIndex < 2) {
+		if (fileIndex < 1) {
 			printf("Matrix File Inputs did not entered\n");
 			return false;
 		}
@@ -339,4 +297,17 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		return process(fileInputs);
 	}
+}
+
+bool MatrixApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
+
+	Matrix *A = new Matrix(row, col, true);
+
+	Matrix *B = new Matrix(col, row, true);
+
+	A->printToFile(printID, B);
+
+	delete A;
+	delete B;
+	return true;
 }

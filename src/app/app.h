@@ -30,8 +30,11 @@ protected:
 	CPU *cpu;
 
 	bool print_enabled;
-
 	int repeat;
+
+	int seqID = SEQTYPE_NONE;
+	int modeID = 0;
+	int sanityID = INVALID_SANITY;
 
 	bool gpu_kernel_loaded = false;
 
@@ -46,6 +49,11 @@ public :
 	void setPrintState(bool);
 
 	void setRepeat(int);
+
+	void setModes(int, int, int);
+
+	virtual int getFuncModeCount(FUNCTYPE) = 0;
+	virtual bool creator(uint32_t, uint32_t, uint32_t) = 0;
 
 	virtual bool loadGPUKernel() = 0;
 	virtual void unLoadGPUKernel() = 0;

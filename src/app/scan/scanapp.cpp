@@ -19,6 +19,20 @@ ScanApp::~ScanApp() {
 	unLoadGPUKernel();
 }
 
+int ScanApp::getFuncModeCount(FUNCTYPE functype) {
+
+	switch(functype) {
+		case FUNCTYPE_CPU:
+			return SCANTYPE_GPU_STD;
+		case FUNCTYPE_GPU:
+			return SCANTYPE_MAX - SCANTYPE_GPU_STD;
+		case FUNCTYPE_ALL:
+			return SCANTYPE_MAX;
+	}
+
+	return 0;
+}
+
 bool ScanApp::loadGPUKernel() {
 
 	if (!gpu->getEnabled()) {
@@ -238,48 +252,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 				return 0;
 			}
 
-			Scan *A = new Scan((unsigned)atoi(argv[i+2]), true);
-			A->printToFile((unsigned)atoi(argv[i+1]));
-			delete A;
-			return true;
-
-		} else if (!strcmp (argv[i], "-m")) {
-
-			if (i + 1 >= argc) {
-				printf("Mode Setting needs modeID \n");
-				return 0;
-			}
-
-			if (isdigit(argv[++i][0])) {
-				modeID = (SCANTYPE) atoi(argv[i]);
-				if (modeID >= SCANTYPE_MAX) {
-					modeID = SCANTYPE_CPU_STD;
-				}
-			} else {
-				switch(argv[i][0]) {
-					case 'a':
-					default:
-						seqID = SEQTYPE_ALL;
-						break;
-					case 'c':
-						seqID = SEQTYPE_CPU;
-						break;
-					case 'g':
-						seqID = SEQTYPE_GPU;
-						break;
-				}
-			}
-
-		} else if (!strcmp (argv[i], "-s")) {
-
-			if (i + 1 >= argc) {
-				printf("Sanity Setting needs modeID \n");
-				return 0;
-			}
-
-			if (isdigit(argv[++i][0])) {
-				sanityID = (SCANTYPE) atoi(argv[i]);
-			}
+			return creator((unsigned)atoi(argv[i+1]), (unsigned)atoi(argv[i+2]), 0);
 
 		} else {
 
@@ -297,10 +270,6 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		}
 
-	}
-
-	if (!(sanityID < SCANTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
-		sanityID = SCANTYPE_MAX;
 	}
 
 	if (dirMode) {
@@ -323,4 +292,10 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 }
 
 
+bool ScanApp::creator(uint32_t printID, uint32_t size, uint32_t unused) {
 
+	Scan *A = new Scan(size, true);
+	A->printToFile(printID);
+	delete A;
+	return true;
+}

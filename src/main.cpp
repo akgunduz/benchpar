@@ -57,8 +57,10 @@ int main(int argc, const char *argv[]) {
 	enum POWER_MODES powerMode = POWER_OFF;
 
 	bool print_enabled = false;
-
 	int repeat = 1;
+	enum SEQTYPE seqID = SEQTYPE_NONE;
+	int modeID = 0;
+	int sanityID = INVALID_SANITY;
 
 	int filtered_argc = 0;
 	char filtered_argv[ARGV_MAX][ARGV_LENGTH];
@@ -96,6 +98,42 @@ int main(int argc, const char *argv[]) {
 				powerMode = POWER_SMARTREAL;
 			}
 
+		} else if (!strcmp (argv[i], "-m")) {
+
+			if (i + 1 >= argc) {
+				printf("Mode Setting needs modeID \n");
+				return 0;
+			}
+
+			if (isdigit(argv[++i][0])) {
+				modeID = atoi(argv[i]);
+
+			} else {
+				switch(argv[i][0]) {
+					case 'a':
+					default:
+						seqID = SEQTYPE_ALL;
+						break;
+					case 'c':
+						seqID = SEQTYPE_CPU;
+						break;
+					case 'g':
+						seqID = SEQTYPE_GPU;
+						break;
+				}
+			}
+
+		} else if (!strcmp (argv[i], "-s")) {
+
+			if (i + 1 >= argc) {
+				printf("Sanity Setting needs modeID \n");
+				return 0;
+			}
+
+			if (isdigit(argv[++i][0])) {
+				sanityID = atoi(argv[i]);
+			}
+
 		} else if (!strcmp (argv[i], "-r")) {
 
 			if (isdigit(argv[++i][0])) {
@@ -124,9 +162,7 @@ int main(int argc, const char *argv[]) {
 			return 0;
 
 		} else {
-
-			strcpy(filtered_argv[filtered_argc], argv[i]);
-			filtered_argc++;
+			strcpy(filtered_argv[filtered_argc++], argv[i]);
 		}
 	}
 
@@ -136,6 +172,7 @@ int main(int argc, const char *argv[]) {
 
 	app->setRepeat(repeat);
 	app->setPrintState(print_enabled);
+	app->setModes(modeID, seqID, sanityID);
 
 	app->run(filtered_argc, filtered_argv);
 

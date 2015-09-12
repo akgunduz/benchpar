@@ -27,8 +27,11 @@ public:
 
 	Conv* calculate(Conv *A, int modeID, bool print, int repeat);
 
-	bool process(char fileInputs[][255]);
-	bool processDir(const char path[255]);
+	virtual int getFuncModeCount(FUNCTYPE);
+	virtual bool creator(uint32_t, uint32_t, uint32_t);
+
+	bool process(char fileInputs[][255], char filterInputs[][255]);
+	bool processDir(const char path[255], char filterInputs[][255]);
 	uint32_t processFilter(char fileInputs[255], float **filter);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
