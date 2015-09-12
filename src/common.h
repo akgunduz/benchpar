@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <sys/syscall.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
