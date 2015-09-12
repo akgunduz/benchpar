@@ -66,9 +66,17 @@ bool Matrix::allocMem(uint32_t row, uint32_t col) {
 
 	size = (size_t) (row * col);
 	mem_size = sizeof(float) * size;
-	mem = (float*) calloc(size, sizeof(float));
-	if (mem == NULL) {
-		printf("Memory insufficient!\n");
+
+	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
+	if (res != 0) {
+		printf("Alloc failed! : %d\n", errno);
+		return false;
+	}
+
+	int check = (int)((unsigned long long)mem % ALIGNMENT);
+	if (check != 0) {
+		free(mem);
+		printf("Alignment failed!\n");
 		return false;
 	}
 

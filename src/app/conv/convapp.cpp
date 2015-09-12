@@ -27,7 +27,7 @@ bool ConvApp::loadGPUKernel() {
 
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/convolutionSeparable.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/conv.cl", getcwd(NULL, 0));
 
 	char buildOptions[2048];
 	sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable");
@@ -121,7 +121,7 @@ uint32_t ConvApp::processFilter(char fileInput[255], float **filter) {
 
 	if (strcmp(fileInput, "") == 0) {
 
-		filter_length = 5;
+		filter_length = FILTER_LENGTH;
 
 		int res = posix_memalign((void**)filter, ALIGNMENT, filter_length * sizeof(float));
 		if (res != 0) {
@@ -331,9 +331,9 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 			}
 
 			if (isdigit(argv[i][0])) {
-				sprintf(fileInputs[fileIndex++], "ConvInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "conv/ConvInput_%s", argv[i]);
 			} else {
-				strcpy(fileInputs[fileIndex++], argv[i]);
+				sprintf(fileInputs[fileIndex++], "conv/%s", argv[i]);
 			}
 
 		}

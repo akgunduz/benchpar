@@ -5,11 +5,7 @@
 
 #include "scan.h"
 
-#define SIZE 1024*512
-#define ALIGNMENT 16
-#define RANGE 10
-#define EPSILON 100.0 //FLT_MIN
-#define ITERATIONS 1000
+#define EPSILON 100.0
 
 Scan::Scan(uint32_t size, bool prepare) {
 
@@ -63,7 +59,7 @@ bool Scan::allocMem(uint32_t size) {
 
 	this->size = size;
 	mem_size = sizeof(float) * size;
-	int res = posix_memalign((void**)&mem, size * sizeof(float), ALIGNMENT);
+	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
 		return false;

@@ -16,9 +16,9 @@ void printHelp() {
 	printf("------------------- Bench Tool -------------------       \n");
 
 	printf("Parameters:                                              \n");
-	printf("App  :  -a m/?/?                         default:m       \n");
+	printf("App  :  -a m/s/c                         default:m       \n");
 	printf("Print:  -p off/on                        default:off     \n");
-	printf("Repeat: -r (1-1000)                      default:1       \n");
+	printf("Repeat: -r (1-2000000)                   default:1       \n");
 	printf("Power:  -o off/msr/perf/ina/spc/spr      default:off     \n");
 
 	printf("\n------------------- Matrix (m) -------------------     \n");

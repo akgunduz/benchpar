@@ -27,7 +27,7 @@ bool MatrixApp::loadGPUKernel() {
 
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/matMul.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/matrix.cl", getcwd(NULL, 0));
 
 	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
 
@@ -146,7 +146,7 @@ bool MatrixApp::process(char fileInputs[][255]) {
 		return false;
 	}
 
-	printf("Calculate Started... \n");
+	printf("Calculate Started... %dx%d with %dx%d\n", A->getRow(), A->getCol(), B->getRow(), B->getCol());
 
 	if (seqID == SEQTYPE_NONE) {
 
@@ -193,10 +193,51 @@ bool MatrixApp::process(char fileInputs[][255]) {
 	}
 
 	double t_diff = t.getdiff();
-	printf("\nTotal Time: %.3lf seconds!!!\n", t_diff);
+	printf("Total Time: %.3lf seconds!!!\n\n", t_diff);
 
 	delete A;
 	delete B;
+
+	return true;
+}
+
+bool MatrixApp::processDir(const char path[255]) {
+
+	char fileInputs[2][255];
+
+	struct dirent *ent;
+
+	DIR *dir = opendir(path);
+	if (dir == nullptr) {
+		printf ("Directory : %s could not opened\n err: %d", path, errno);
+		return false;
+	}
+
+	int fileIndex = 0;
+
+	while((ent = readdir(dir)) != nullptr) {
+
+		if (ent->d_type != DT_REG) {
+			continue;
+		}
+
+		if (strncmp(ent->d_name, "MatrixInput", 11) != 0) {
+			continue;
+		}
+
+		if (fileIndex == 0) {
+			sprintf(fileInputs[0], "%s/%s", path, ent->d_name);
+			fileIndex = 1;
+
+		} else {
+			sprintf(fileInputs[1], "%s/%s", path, ent->d_name);
+			fileIndex = 0;
+			bool status = process(fileInputs);
+			if (!status) {
+				return false;
+			}
+		}
+	}
 
 	return true;
 }
@@ -205,6 +246,7 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	char fileInputs[2][255];
 	int fileIndex = 0;
+	bool dirMode = true;
 
 	for (int i = 0; i < argc; i++) {
 
@@ -260,31 +302,40 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else {
 
+			dirMode = false;
+
 			if (fileIndex == 2) {
-				printf("Wrong command \n");
-				return 0;
+				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
-				sprintf(fileInputs[fileIndex++], "MatrixInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "matrix/MatrixInput_%s", argv[i]);
 			} else {
-				strcpy(fileInputs[fileIndex++], argv[i]);
+				sprintf(fileInputs[fileIndex++], "matrix/%s", argv[i]);
 			}
-
 		}
 
-	}
-
-	if (fileIndex < 2) {
-		printf("Matrix File Inputs did not entered\n");
-		return false;
 	}
 
 	if (!(sanityID < MULTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
 		sanityID = MULTYPE_MAX;
 	}
 
-	printf("Test is running with %d repeats\n", repeat);
+	if (dirMode) {
 
-	return process(fileInputs);
+		printf("Test is running in Directory Mode with %d repeats\n", repeat);
+
+		return processDir("matrix");
+
+	} else {
+
+		if (fileIndex < 2) {
+			printf("Matrix File Inputs did not entered\n");
+			return false;
+		}
+
+		printf("Test is running with %d repeats\n", repeat);
+
+		return process(fileInputs);
+	}
 }

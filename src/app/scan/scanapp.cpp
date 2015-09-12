@@ -27,7 +27,7 @@ bool ScanApp::loadGPUKernel() {
 
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/matMul.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/scan.cl", getcwd(NULL, 0));
 
 	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
 
@@ -254,9 +254,9 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 			}
 
 			if (isdigit(argv[i][0])) {
-				sprintf(fileInputs[fileIndex++], "ScanInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "scan/ScanInput_%s", argv[i]);
 			} else {
-				strcpy(fileInputs[fileIndex++], argv[i]);
+				sprintf(fileInputs[fileIndex++], "scan/%s", argv[i]);
 			}
 
 		}

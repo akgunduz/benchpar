@@ -7,12 +7,12 @@
 #ifndef __conv_H_
 #define __conv_H_
 
+#include "gpu.h"
+
 #define HEIGHT 1024
 #define WIDTH 1024
 #define FILTER_LENGTH 5
-#define ALIGNMENT 16
 #define RANGE 10
-#define EPSILON 0.001f //FLT_MIN
 #define ITERATIONS 100
 
 #define KERNEL_RADIUS 2
@@ -26,8 +26,6 @@
 #define ROWS_HALO_STEPS 1
 #define COLUMNS_RESULT_STEPS 8//4
 #define COLUMNS_HALO_STEPS 1
-
-#include "gpu.h"
 
 class Conv;
 

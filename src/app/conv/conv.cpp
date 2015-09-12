@@ -5,6 +5,8 @@
 
 #include "conv.h"
 
+#define EPSILON 0.001f //FLT_MIN
+
 Conv::Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bool prepare) {
 
 	this->row = row;

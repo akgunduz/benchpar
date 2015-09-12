@@ -29,6 +29,7 @@ public:
 	Matrix* calculate(Matrix *A, Matrix *B, int modeID, bool print, int repeat);
 
 	bool process(char fileInputs[][255]);
+	bool processDir(const char path[255]);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 
