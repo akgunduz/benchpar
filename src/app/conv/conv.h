@@ -68,7 +68,7 @@ public:
 	ConvFuncs convFuncs[CONVTYPE_MAX] = {
 			{"CONVTYPE_CPU_STD", "", 1, &Conv::convCPU_STD},
 			{"CONVTYPE_CPU_OMP", "", 1, &Conv::convCPU_OMP},
-			{"SCANTYPE_GPU_STD", "matrixMul", 1, &Conv::convGPU_STD},
+			{"CONVTYPE_GPU_STD", "", 1, &Conv::convGPU_STD},
 	};
 
 	Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bool prepare = false);

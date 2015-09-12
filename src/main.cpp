@@ -60,11 +60,6 @@ int main(int argc, const char *argv[]) {
 
 	int repeat = 1;
 
-	if (argc <= 1) {
-		printHelp();
-		return 0;
-	}
-
 	int filtered_argc = 0;
 	char filtered_argv[ARGV_MAX][ARGV_LENGTH];
 
@@ -118,6 +113,12 @@ int main(int argc, const char *argv[]) {
 
 		} else if (!strcmp (argv[i], "-q")) {
 			gpu->platformQuery();
+			delete cpu;
+			delete gpu;
+			return 0;
+
+		} else if (!strcmp (argv[i], "-h")) {
+			printHelp();
 			delete cpu;
 			delete gpu;
 			return 0;

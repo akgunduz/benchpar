@@ -140,16 +140,6 @@ bool Scan::scanGPU_STD(Scan *calculated, GPU *gpu) {
 	return scanGPU(calculated, SCANTYPE_GPU_STD, gpu);
 }
 
-bool Scan::scanGPU_VEC4(Scan *calculated, GPU *gpu) {
-
-	return scanGPU(calculated, SCANTYPE_GPU_VEC4, gpu);
-}
-
-bool Scan::scanGPU_VEC8(Scan *calculated, GPU *gpu) {
-
-	return scanGPU(calculated, SCANTYPE_GPU_VEC8, gpu);
-}
-
 bool Scan::scanGPU(Scan *calculated, enum SCANTYPE scanType, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {

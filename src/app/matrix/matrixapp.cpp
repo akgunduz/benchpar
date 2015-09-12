@@ -123,6 +123,7 @@ bool MatrixApp::process(char fileInputs[][255]) {
 
 	t.snapshot();
 
+	printf("\n=========================================\n");
 	printf("Loading Matrix Input Files from Storage... \n");
 
 	try {

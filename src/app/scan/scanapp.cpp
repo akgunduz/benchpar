@@ -123,6 +123,7 @@ bool ScanApp::process(char fileInputs[][255]) {
 
 	t.snapshot();
 
+	printf("\n=========================================\n");
 	printf("Loading Scan Input Files from Storage... \n");
 
 	try {
@@ -135,7 +136,7 @@ bool ScanApp::process(char fileInputs[][255]) {
 		return false;
 	}
 
-	printf("Calculate Started... \n");
+	printf("Calculate Started... Size : %dK\n", A->getSize() / 1024);
 
 	if (seqID == SEQTYPE_NONE) {
 
@@ -182,9 +183,42 @@ bool ScanApp::process(char fileInputs[][255]) {
 	}
 
 	double t_diff = t.getdiff();
-	printf("\nTotal Time: %.3lf seconds!!!\n", t_diff);
+	printf("\nTotal Time: %.3lf seconds!!!\n\n", t_diff);
 
 	delete A;
+
+	return true;
+}
+
+bool ScanApp::processDir(const char path[255]) {
+
+	char fileInputs[1][255];
+
+	struct dirent *ent;
+
+	DIR *dir = opendir(path);
+	if (dir == nullptr) {
+		printf ("Directory : %s could not opened\n err: %d", path, errno);
+		return false;
+	}
+
+	while((ent = readdir(dir)) != nullptr) {
+
+		if (ent->d_type != DT_REG) {
+			continue;
+		}
+
+		if (strncmp(ent->d_name, "ScanInput", 9) != 0) {
+			continue;
+		}
+
+		sprintf(fileInputs[0], "%s/%s", path, ent->d_name);
+		bool status = process(fileInputs);
+		if (!status) {
+			return false;
+		}
+
+	}
 
 	return true;
 }
@@ -193,6 +227,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	char fileInputs[2][255];
 	int fileIndex = 0;
+	bool dirMode = true;
 
 	for (int i = 0; i < argc; i++) {
 
@@ -248,9 +283,10 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else {
 
-			if (fileIndex == 2) {
-				printf("Wrong command \n");
-				return 0;
+			dirMode = false;
+
+			if (fileIndex == 1) {
+				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
@@ -263,18 +299,27 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	}
 
-	if (fileIndex < 1) {
-		printf("Scan File Inputs did not entered\n");
-		return false;
-	}
-
 	if (!(sanityID < SCANTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
 		sanityID = SCANTYPE_MAX;
 	}
 
-	printf("Test is running with %d repeats\n", repeat);
+	if (dirMode) {
 
-	return process(fileInputs);
+		printf("Test is running in Directory Mode with %d repeats\n", repeat);
+
+		return processDir("scan");
+
+	} else {
+
+		if (fileIndex < 1) {
+			printf("Scan File Inputs did not entered\n");
+			return false;
+		}
+
+		printf("Test is running with %d repeats\n", repeat);
+
+		return process(fileInputs);
+	}
 }
 
 

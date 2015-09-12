@@ -104,7 +104,7 @@ Conv* ConvApp::calculate(Conv *A, int modeID, bool print, int repeat) {
 	}
 
 	printf("\nConv Method: %s \n", A->convFuncs[modeID].id);
-	printf("nConv Time: %.3lf seconds!!!\n", t_total);
+	printf("Conv Time: %.3lf seconds!!!\n", t_total);
 	printf("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
@@ -178,6 +178,7 @@ bool ConvApp::process(char fileInputs[][255]) {
 
 	t.snapshot();
 
+	printf("\n=========================================\n");
 	printf("Loading Scan Input Files from Storage... \n");
 
 	try {
@@ -200,7 +201,7 @@ bool ConvApp::process(char fileInputs[][255]) {
 		return false;
 	}
 
-	printf("Calculate Started... \n");
+	printf("Calculate Started... %dx%d\n", A->getRow(), A->getCol());
 
 	if (seqID == SEQTYPE_NONE) {
 
@@ -247,20 +248,54 @@ bool ConvApp::process(char fileInputs[][255]) {
 	}
 
 	double t_diff = t.getdiff();
-	printf("\nTotal Time: %.3lf seconds!!!\n", t_diff);
+	printf("\nTotal Time: %.3lf seconds!!!\n\n", t_diff);
 
 	delete A;
 
 	return true;
 }
 
+bool ConvApp::processDir(const char path[255]) {
+
+	char fileInputs[1][255];
+
+	struct dirent *ent;
+
+	DIR *dir = opendir(path);
+	if (dir == nullptr) {
+		printf ("Directory : %s could not opened\n err: %d", path, errno);
+		return false;
+	}
+
+	while((ent = readdir(dir)) != nullptr) {
+
+		if (ent->d_type != DT_REG) {
+			continue;
+		}
+
+		if (strncmp(ent->d_name, "ConvInput", 9) != 0) {
+			continue;
+		}
+
+		sprintf(fileInputs[0], "%s/%s", path, ent->d_name);
+		bool status = process(fileInputs);
+		if (!status) {
+			return false;
+		}
+
+	}
+
+	return true;
+}
+
 bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-	char fileInputs[2][255];
+	char fileInputs[1][255];
+	char filterInputs[1][255];
 	int fileIndex = 0;
-	strcpy(fileInputs[0], "");
-	strcpy(fileInputs[1], "");
-	bool filterEnabled = false;
+	bool dirMode = true;
+
+	strcpy(filterInputs[0], "");
 
 	for (int i = 0; i < argc; i++) {
 
@@ -316,18 +351,18 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else if (!strcmp (argv[i], "-f")) {
 
-			filterEnabled = true;
 			if (isdigit(argv[++i][0])) {
-				sprintf(fileInputs[fileIndex++], "FilterInput_%s", argv[i]);
+				sprintf(filterInputs[0], "FilterInput_%s", argv[i]);
 			} else {
-				strcpy(fileInputs[fileIndex++], argv[i]);
+				strcpy(filterInputs[0], argv[i]);
 			}
 
 		} else {
 
-			if (fileIndex == 2) {
-				printf("Wrong command \n");
-				return 0;
+			dirMode = false;
+
+			if (fileIndex == 1) {
+				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
@@ -337,21 +372,29 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 			}
 
 		}
-
-	}
-
-	if ((filterEnabled && fileIndex < 2) || (!filterEnabled && fileIndex < 1)) {
-		printf("Conv File Inputs did not entered\n");
-		return false;
 	}
 
 	if (!(sanityID < CONVTYPE_MAX && seqID == SEQTYPE_NONE && sanityID != modeID)) {
 		sanityID = CONVTYPE_MAX;
 	}
 
-	printf("Test is running with %d repeats\n", repeat);
+	if (dirMode) {
 
-	return process(fileInputs);
+		printf("Test is running in Directory Mode with %d repeats\n", repeat);
+
+		return processDir("conv");
+
+	} else {
+
+		if (fileIndex < 1) {
+			printf("Conv File Inputs did not entered\n");
+			return false;
+		}
+
+		printf("Test is running with %d repeats\n", repeat);
+
+		return process(fileInputs);
+	}
 }
 
 

@@ -22,8 +22,6 @@ enum SCANTYPE {
 	SCANTYPE_CPU_OMP_SSEp2_SSEp1,
 #endif
 	SCANTYPE_GPU_STD,
-	SCANTYPE_GPU_VEC4,
-	SCANTYPE_GPU_VEC8,
 	SCANTYPE_MAX,
 };
 
@@ -53,9 +51,7 @@ public:
 			{"SCANTYPE_CPU_OMP_SSE", "", 1, &Scan::scanCPU_OMP_SSE},
 			{"SCANTYPE_CPU_OMP_SSEp2_SSEp1", "", 1, &Scan::scanCPU_OMP_SSEp2_SSEp1},
 #endif
-			{"SCANTYPE_GPU_STD", "matrixMul", 1, &Scan::scanGPU_STD},
-			{"SCANTYPE_GPU_VEC4", "matrixMulVec4", 1, &Scan::scanGPU_VEC4},
-			{"SCANTYPE_GPU_VEC8", "matrixMulVec8", 1, &Scan::scanGPU_VEC8},
+			{"SCANTYPE_GPU_STD", "", 1, &Scan::scanGPU_STD},
 	};
 
 	Scan(uint32_t size, bool prepare = false);
@@ -75,8 +71,6 @@ public:
 #endif
 
 	bool scanGPU_STD(Scan *, GPU *);
-	bool scanGPU_VEC4(Scan *, GPU *);
-	bool scanGPU_VEC8(Scan *, GPU *);
 
 	bool scanGPU(Scan *calculated, enum SCANTYPE scanType, GPU *);
 
