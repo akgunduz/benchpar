@@ -141,7 +141,6 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	
 	errNum = clBuildProgram(clProgram, 1, &clDevices[deviceIndex], buildOptions, NULL,	NULL);
 
 	char cBuildLog[16384];
-	size_t sLogSize;
 
 	if(errNum != CL_SUCCESS) {
 
@@ -164,8 +163,6 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	
 				NULL);
 
 		printf("%s \n",cBuildLog);
-
-		free(cBuildLog);
 
 		clReleaseProgram(clProgram);
 
