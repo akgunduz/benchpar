@@ -73,7 +73,7 @@ void MatrixApp::unLoadGPUKernel() {
 	}
 }
 
-Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int repeat) {
+Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 
 	if (!A->check(B)) {
 		return NULL;
@@ -93,7 +93,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int r
 		t.snapshot();
 
 		if (!(A->*(A->multipliers[modeID].f))(B, calculated, gpu)) {
-			printf("\nMultiplication Method: %s failed\n", A->multipliers[modeID].id);
+			printOut("\nMultiplication Method: %s failed\n", A->multipliers[modeID].id);
 			delete calculated;
 			return NULL;
 		}
@@ -113,23 +113,19 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, bool print, int r
 		consumed = power->read_after();
 	}
 
-	if (print) {
-		calculated->printOut();
-	}
-
-	printf("\nMultiplication Method: %s \n", A->multipliers[modeID].id);
-	printf("Multiplication Time: %.3lf seconds!!!\n", t_total);
-	printf("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
+	printOut("\nMultiplication Method: %s \n", A->multipliers[modeID].id);
+	printOut("Multiplication Time: %.3lf seconds!!!\n", t_total);
+	printOut("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
-		printf("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
+		printOut("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
 				power->getName(), consumed);
 	}
 
 	return calculated;
 }
 
-bool MatrixApp::process(char fileInputs[][255]) {
+bool MatrixApp::process(char fileInput[255]) {
 
 	Timer t;
 
@@ -137,32 +133,32 @@ bool MatrixApp::process(char fileInputs[][255]) {
 
 	t.snapshot();
 
-	printf("\n=========================================\n");
-	printf("Loading Matrix Input Files from Storage... \n");
+	printOut("\n=========================================\n");
+	printOut("Loading Matrix Input File : %s ... \n", fileInput);
 
 	try {
 
-		A = new Matrix(fileInputs[0], &B);
+		A = new Matrix(fileInput, &B);
 
 	} catch(const std::runtime_error e) {
 
-		printf("Matrix A & B could not created!!!, Exception : %s\n", e.what());
+		printOut("Matrix A & B could not created!!!, Exception : %s\n", e.what());
 		return false;
 	}
 
-	printf("Calculate Started... %dx%d with %dx%d\n", A->getRow(), A->getCol(), B->getRow(), B->getCol());
+	printOut("Calculate Started... %dx%d with %dx%d\n", A->getRow(), A->getCol(), B->getRow(), B->getCol());
 
 	if (seqID == SEQTYPE_NONE) {
 
-		Matrix *C = calculate(A, B, modeID, print_enabled, repeat);
+		Matrix *C = calculate(A, B, modeID, repeat);
 		if (C != NULL && sanityID != INVALID_SANITY) {
-			Matrix *D = calculate(A, B, sanityID, false, 1);
+			Matrix *D = calculate(A, B, sanityID, 1);
 
 			if (D != NULL) {
 				if (C->compare(D)) {
-					printf("Sanity check passed\n");
+					printOut("Sanity check passed\n");
 				} else {
-					printf("Sanity check failed\n");
+					printOut("Sanity check failed\n");
 				}
 				delete D;
 			}
@@ -192,12 +188,12 @@ bool MatrixApp::process(char fileInputs[][255]) {
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, B, i, false, 1);
+			calculate(A, B, i, repeat);
 		}
 	}
 
 	double t_diff = t.getdiff();
-	printf("Total Time: %.3lf seconds!!!\n\n", t_diff);
+	printOut("Total Time: %.3lf seconds!!!\n\n", t_diff);
 
 	delete A;
 	delete B;
@@ -207,17 +203,15 @@ bool MatrixApp::process(char fileInputs[][255]) {
 
 bool MatrixApp::processDir(const char path[255]) {
 
-	char fileInputs[2][255];
+	char fileInput[255];
 
 	struct dirent *ent;
 
 	DIR *dir = opendir(path);
 	if (dir == nullptr) {
-		printf ("Directory : %s could not opened\n err: %d", path, errno);
+		printOut("Directory : %s could not opened\n err: %d", path, errno);
 		return false;
 	}
-
-	int fileIndex = 0;
 
 	while((ent = readdir(dir)) != nullptr) {
 
@@ -229,17 +223,10 @@ bool MatrixApp::processDir(const char path[255]) {
 			continue;
 		}
 
-		if (fileIndex == 0) {
-			sprintf(fileInputs[0], "%s/%s", path, ent->d_name);
-			fileIndex = 1;
-
-		} else {
-			sprintf(fileInputs[1], "%s/%s", path, ent->d_name);
-			fileIndex = 0;
-			bool status = process(fileInputs);
-			if (!status) {
-				return false;
-			}
+		sprintf(fileInput, "%s/%s", path, ent->d_name);
+		bool status = process(fileInput);
+		if (!status) {
+			return false;
 		}
 	}
 
@@ -248,9 +235,9 @@ bool MatrixApp::processDir(const char path[255]) {
 
 bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-	char fileInputs[2][255];
-	int fileIndex = 0;
-	bool dirMode = true;
+	char fileInput[255];
+	int fileID = 0;
+	bool status;
 
 	for (int i = 0; i < argc; i++) {
 
@@ -265,38 +252,47 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else {
 
-			dirMode = false;
-
-			if (fileIndex == 1) {
+			if (fileID != 0) {
 				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
-				sprintf(fileInputs[fileIndex++], "matrix/MatrixInput_%s", argv[i]);
+				fileID = atoi(argv[i]);
+				if (fileID == 0) {
+					fileID = 0xFF;
+				}
+				sprintf(fileInput, "matrix/MatrixInput_%s", argv[i]);
+
 			} else {
-				sprintf(fileInputs[fileIndex++], "matrix/%s", argv[i]);
+				fileID = 0xFF;
+				sprintf(fileInput, "matrix/%s", argv[i]);
 			}
 		}
 
 	}
 
-	if (dirMode) {
+	if (!printStart("matrix/Matrix", fileID)) {
+		return false;
+	}
 
-		printf("Test is running in Directory Mode with %d repeats\n", repeat);
+	if (fileID == 0) {
 
-		return processDir("matrix");
+		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
+
+		status = processDir("matrix");
 
 	} else {
 
-		if (fileIndex < 1) {
-			printf("Matrix File Inputs did not entered\n");
-			return false;
-		}
+		printOut("Test is running with %d repeats\n", repeat);
 
-		printf("Test is running with %d repeats\n", repeat);
-
-		return process(fileInputs);
+		status = process(fileInput);
 	}
+
+	if (debugFile) {
+		fclose(debugFile);
+	}
+
+	return status;
 }
 
 bool MatrixApp::creator(uint32_t printID, uint32_t row, uint32_t col) {

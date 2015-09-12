@@ -21,14 +21,14 @@ public:
 	virtual bool loadGPUKernel();
 	virtual void unLoadGPUKernel();
 
-	Conv* calculate(Conv *A, int modeID, bool print, int repeat);
+	Conv* calculate(Conv *A, int modeID, int repeat);
 
 	virtual int getFuncModeCount(FUNCTYPE);
 	virtual bool creator(uint32_t, uint32_t, uint32_t);
 
-	bool process(char fileInputs[][255], char filterInputs[][255]);
-	bool processDir(const char path[255], char filterInputs[][255]);
-	uint32_t processFilter(char fileInputs[255], float **filter);
+	bool process(char fileInput[255], char filterInput[255]);
+	bool processDir(const char path[255], char filterInput[255]);
+	uint32_t processFilter(char fileInput[255], float **filter);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 };

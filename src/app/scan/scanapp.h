@@ -21,12 +21,12 @@ public:
 	virtual bool loadGPUKernel();
 	virtual void unLoadGPUKernel();
 
-	Scan* calculate(Scan *A, int modeID, bool print, int repeat);
+	Scan* calculate(Scan *A, int modeID, int repeat);
 
 	virtual int getFuncModeCount(FUNCTYPE);
 	virtual bool creator(uint32_t, uint32_t, uint32_t);
 
-	bool process(char fileInputs[][255]);
+	bool process(char fileInput[255]);
 	bool processDir(const char path[255]);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);

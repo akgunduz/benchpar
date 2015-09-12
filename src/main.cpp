@@ -56,7 +56,7 @@ int main(int argc, const char *argv[]) {
 	enum APP_MODES appMode = MATRIX_MODE;
 	enum POWER_MODES powerMode = POWER_OFF;
 
-	bool print_enabled = false;
+	bool print_enabled = true;
 	int repeat = 1;
 	enum SEQTYPE seqID = SEQTYPE_NONE;
 	int modeID = 0;
@@ -145,8 +145,8 @@ int main(int argc, const char *argv[]) {
 
 		} else if (!strcmp (argv[i], "-p")) {
 
-			if (!strcmp(argv[++i], "on")) {
-				print_enabled = true;
+			if (!strcmp(argv[++i], "off")) {
+				print_enabled = false;
 			}
 
 		} else if (!strcmp (argv[i], "-q")) {
@@ -170,9 +170,7 @@ int main(int argc, const char *argv[]) {
 
 	App *app = App::newInstance(appMode, cpu, gpu, power);
 
-	app->setRepeat(repeat);
-	app->setPrintState(print_enabled);
-	app->setModes(modeID, seqID, sanityID);
+	app->setModes(modeID, seqID, sanityID, print_enabled, repeat);
 
 	app->run(filtered_argc, filtered_argv);
 

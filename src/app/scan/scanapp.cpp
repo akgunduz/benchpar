@@ -73,7 +73,7 @@ void ScanApp::unLoadGPUKernel() {
 	}
 }
 
-Scan* ScanApp::calculate(Scan *A, int modeID, bool print, int repeat) {
+Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 
 	if (!A->check()) {
 		return NULL;
@@ -93,7 +93,7 @@ Scan* ScanApp::calculate(Scan *A, int modeID, bool print, int repeat) {
 		t.snapshot();
 
 		if (!(A->*(A->scanners[modeID].f))(calculated, gpu)) {
-			printf("\nScan Method: %s failed\n", A->scanners[modeID].id);
+			printOut("\nScan Method: %s failed\n", A->scanners[modeID].id);
 			delete calculated;
 			return NULL;
 		}
@@ -113,23 +113,19 @@ Scan* ScanApp::calculate(Scan *A, int modeID, bool print, int repeat) {
 		consumed = power->read_after();
 	}
 
-	if (print) {
-		calculated->printOut();
-	}
-
-	printf("\nScan Method: %s \n", A->scanners[modeID].id);
-	printf("Scan Time: %.3lf seconds!!!\n", t_total);
-	printf("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
+	printOut("\nScan Method: %s \n", A->scanners[modeID].id);
+	printOut("Scan Time: %.3lf seconds!!!\n", t_total);
+	printOut("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
-		printf("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
+		printOut("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
 				power->getName(), consumed);
 	}
 
 	return calculated;
 }
 
-bool ScanApp::process(char fileInputs[][255]) {
+bool ScanApp::process(char fileInput[255]) {
 
 	Timer t;
 
@@ -137,32 +133,32 @@ bool ScanApp::process(char fileInputs[][255]) {
 
 	t.snapshot();
 
-	printf("\n=========================================\n");
-	printf("Loading Scan Input Files from Storage... \n");
+	printOut("\n=========================================\n");
+	printOut("Loading Scan Input File : %s ... \n", fileInput);
 
 	try {
 
-		A = new Scan(fileInputs[0]);
+		A = new Scan(fileInput);
 
 	} catch(const std::runtime_error e) {
 
-		printf("Scan A could not created!!!, Exception : %s\n", e.what());
+		printOut("Scan A could not created!!!, Exception : %s\n", e.what());
 		return false;
 	}
 
-	printf("Calculate Started... Size : %dK\n", A->getSize() / 1024);
+	printOut("Calculate Started... Size : %dK\n", A->getSize() / 1024);
 
 	if (seqID == SEQTYPE_NONE) {
 
-		Scan *C = calculate(A, modeID, print_enabled, repeat);
+		Scan *C = calculate(A, modeID, repeat);
 		if (C != NULL && sanityID != INVALID_SANITY) {
-			Scan *D = calculate(A, sanityID, false, 1);
+			Scan *D = calculate(A, sanityID, 1);
 
 			if (D != NULL) {
 				if (C->compare(D)) {
-					printf("Sanity check passed\n");
+					printOut("Sanity check passed\n");
 				} else {
-					printf("Sanity check failed\n");
+					printOut("Sanity check failed\n");
 				}
 				delete D;
 			}
@@ -192,12 +188,12 @@ bool ScanApp::process(char fileInputs[][255]) {
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, i, false, 1);
+			calculate(A, i, repeat);
 		}
 	}
 
 	double t_diff = t.getdiff();
-	printf("\nTotal Time: %.3lf seconds!!!\n\n", t_diff);
+	printOut("\nTotal Time: %.3lf seconds!!!\n\n", t_diff);
 
 	delete A;
 
@@ -206,13 +202,13 @@ bool ScanApp::process(char fileInputs[][255]) {
 
 bool ScanApp::processDir(const char path[255]) {
 
-	char fileInputs[1][255];
+	char fileInput[255];
 
 	struct dirent *ent;
 
 	DIR *dir = opendir(path);
 	if (dir == nullptr) {
-		printf ("Directory : %s could not opened\n err: %d", path, errno);
+		printOut ("Directory : %s could not opened\n err: %d", path, errno);
 		return false;
 	}
 
@@ -226,8 +222,8 @@ bool ScanApp::processDir(const char path[255]) {
 			continue;
 		}
 
-		sprintf(fileInputs[0], "%s/%s", path, ent->d_name);
-		bool status = process(fileInputs);
+		sprintf(fileInput, "%s/%s", path, ent->d_name);
+		bool status = process(fileInput);
 		if (!status) {
 			return false;
 		}
@@ -239,9 +235,9 @@ bool ScanApp::processDir(const char path[255]) {
 
 bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-	char fileInputs[2][255];
-	int fileIndex = 0;
-	bool dirMode = true;
+	char fileInput[255];
+	int fileID = 0;
+	bool status;
 
 	for (int i = 0; i < argc; i++) {
 
@@ -256,39 +252,47 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else {
 
-			dirMode = false;
-
-			if (fileIndex == 1) {
+			if (fileID != 0) {
 				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
-				sprintf(fileInputs[fileIndex++], "scan/ScanInput_%s", argv[i]);
-			} else {
-				sprintf(fileInputs[fileIndex++], "scan/%s", argv[i]);
-			}
+				fileID = atoi(argv[i]);
+				if (fileID == 0) {
+					fileID = 0xFF;
+				}
+				sprintf(fileInput, "scan/ScanInput_%s", argv[i]);
 
+			} else {
+				fileID = 0xFF;
+				sprintf(fileInput, "scan/%s", argv[i]);
+			}
 		}
 
 	}
 
-	if (dirMode) {
+	if (!printStart("scan/Scan", fileID)) {
+		return false;
+	}
 
-		printf("Test is running in Directory Mode with %d repeats\n", repeat);
+	if (fileID == 0) {
 
-		return processDir("scan");
+		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
+
+		status = processDir("scan");
 
 	} else {
 
-		if (fileIndex < 1) {
-			printf("Scan File Inputs did not entered\n");
-			return false;
-		}
+		printOut("Test is running with %d repeats\n", repeat);
 
-		printf("Test is running with %d repeats\n", repeat);
-
-		return process(fileInputs);
+		status = process(fileInput);
 	}
+
+	if (debugFile) {
+		fclose(debugFile);
+	}
+
+	return status;
 }
 
 

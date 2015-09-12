@@ -31,6 +31,9 @@ protected:
 
 	bool print_enabled;
 	int repeat;
+	//char debugFile[255];
+
+	FILE *debugFile = nullptr;
 
 	int seqID = SEQTYPE_NONE;
 	int modeID = 0;
@@ -46,17 +49,16 @@ public :
 
 	static App* newInstance(APP_MODES, CPU*, GPU*, Power*);
 
-	void setPrintState(bool);
-
-	void setRepeat(int);
-
-	void setModes(int, int, int);
+	void setModes(int, int, int, bool print, int repeat);
 
 	virtual int getFuncModeCount(FUNCTYPE) = 0;
 	virtual bool creator(uint32_t, uint32_t, uint32_t) = 0;
 
 	virtual bool loadGPUKernel() = 0;
 	virtual void unLoadGPUKernel() = 0;
+
+	virtual void printOut(const char* format, ...);
+	virtual bool printStart(const char* prefix, int);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]) = 0;
 
