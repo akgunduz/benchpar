@@ -155,7 +155,7 @@ bool ScanApp::process(char fileInputs[][255]) {
 	if (seqID == SEQTYPE_NONE) {
 
 		Scan *C = calculate(A, modeID, print_enabled, repeat);
-		if (C != NULL && sanityID < SCANTYPE_MAX) {
+		if (C != NULL && sanityID != INVALID_SANITY) {
 			Scan *D = calculate(A, sanityID, false, 1);
 
 			if (D != NULL) {

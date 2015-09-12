@@ -214,7 +214,7 @@ bool ConvApp::process(char fileInputs[][255], char filterInputs[][255]) {
 	if (seqID == SEQTYPE_NONE) {
 
 		Conv *C = calculate(A, modeID, print_enabled, repeat);
-		if (C != NULL && sanityID < CONVTYPE_MAX) {
+		if (C != NULL && sanityID != INVALID_SANITY) {
 			Conv *D = calculate(A, sanityID, false, 1);
 
 			if (D != NULL) {

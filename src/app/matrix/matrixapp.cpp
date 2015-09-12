@@ -155,7 +155,7 @@ bool MatrixApp::process(char fileInputs[][255]) {
 	if (seqID == SEQTYPE_NONE) {
 
 		Matrix *C = calculate(A, B, modeID, print_enabled, repeat);
-		if (C != NULL && sanityID < MULTYPE_MAX) {
+		if (C != NULL && sanityID != INVALID_SANITY) {
 			Matrix *D = calculate(A, B, sanityID, false, 1);
 
 			if (D != NULL) {

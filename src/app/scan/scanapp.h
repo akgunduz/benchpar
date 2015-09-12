@@ -13,10 +13,6 @@
 
 class ScanApp : public App  {
 
-	enum SEQTYPE seqID = SEQTYPE_NONE;
-	enum SCANTYPE modeID = SCANTYPE_CPU_STD;
-	enum SCANTYPE sanityID = SCANTYPE_MAX;
-
 public:
 
 	ScanApp(CPU *c, GPU *g, Power *pw);

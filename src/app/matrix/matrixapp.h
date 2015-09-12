@@ -14,10 +14,6 @@
 
 class MatrixApp : public App {
 
-	enum SEQTYPE seqID = SEQTYPE_NONE;
-	enum MULTYPE modeID = MULTYPE_CPU_STD;
-	enum MULTYPE sanityID = MULTYPE_MAX;
-
 public:
 
 	MatrixApp(CPU *c, GPU *g, Power *pw);

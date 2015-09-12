@@ -13,10 +13,6 @@
 
 class ConvApp : public App  {
 
-	enum SEQTYPE seqID = SEQTYPE_NONE;
-	enum CONVTYPE modeID = CONVTYPE_CPU_STD;
-	enum CONVTYPE sanityID = CONVTYPE_MAX;
-
 public:
 
 	ConvApp(CPU *c, GPU *g, Power *pw);
