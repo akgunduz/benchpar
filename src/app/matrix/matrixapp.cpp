@@ -114,8 +114,8 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 	}
 
 	printOut("\nMultiplication Method: %s \n", A->multipliers[modeID].id);
-	printOut("Multiplication Time: %.3lf seconds!!!\n", t_total);
-	printOut("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
+	printOut("Multiplication Time: %.3lfms!!!\n", t_total);
+	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
 		printOut("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
@@ -193,7 +193,7 @@ bool MatrixApp::process(char fileInput[255]) {
 	}
 
 	double t_diff = t.getdiff();
-	printOut("Total Time: %.3lf seconds!!!\n\n", t_diff);
+	printOut("Total Time: %.3lf ms!!!\n\n", t_diff);
 
 	delete A;
 	delete B;

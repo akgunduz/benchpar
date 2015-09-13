@@ -17,7 +17,7 @@ double Timer::getTime() {
 		return 0;
 	}
 
-	return refTime.tv_sec + (double)refTime.tv_usec / 1000000;
+	return refTime.tv_sec * 1000 + (double)refTime.tv_usec / 1000;
 
 }
 

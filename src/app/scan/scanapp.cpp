@@ -114,8 +114,8 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 	}
 
 	printOut("\nScan Method: %s \n", A->scanners[modeID].id);
-	printOut("Scan Time: %.3lf seconds!!!\n", t_total);
-	printOut("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
+	printOut("Scan Time: %.3lf ms!!!\n", t_total);
+	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
 		printOut("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
@@ -193,7 +193,7 @@ bool ScanApp::process(char fileInput[255]) {
 	}
 
 	double t_diff = t.getdiff();
-	printOut("\nTotal Time: %.3lf seconds!!!\n\n", t_diff);
+	printOut("\nTotal Time: %.3lfms!!!\n\n", t_diff);
 
 	delete A;
 

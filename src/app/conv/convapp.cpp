@@ -114,8 +114,8 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 	}
 
 	printOut("\nConv Method: %s \n", A->convFuncs[modeID].id);
-	printOut("Conv Time: %.3lf seconds!!!\n", t_total);
-	printOut("Min Time: %.3lfs, Max Time: %.3lfs, Avg Time: %.3lfs\n", t_min, t_max, t_total / repeat);
+	printOut("Conv Time: %.3lfms!!!\n", t_total);
+	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
 		printOut("Power -> Method: %s, Consumed: %.3lf Joules!!!\n",
@@ -252,7 +252,7 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 	}
 
 	double t_diff = t.getdiff();
-	printOut("\nTotal Time: %.3lf seconds!!!\n\n", t_diff);
+	printOut("\nTotal Time: %.3lf ms!!!\n\n", t_diff);
 
 	delete A;
 
