@@ -79,8 +79,8 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 		return NULL;
 	}
 
-#if 0
-	double sTime[1000];
+#ifdef ENABLE_TIMEARRAY
+	double sTime[MAX_TIMEARRAY_COUNT];
 #endif
 
 	Scan* calculated = new Scan(A->getSize());
@@ -120,8 +120,8 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 
 		t_total += t_diff;
 
-#if 0
-		if (i < 1000) {
+#ifdef ENABLE_TIMEARRAY
+		if (i < MAX_TIMEARRAY_COUNT) {
 			sTime[i] = t_diff;
 		}
 #endif
@@ -131,10 +131,10 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 		consumed = power->read_after();
 	}
 
-#if 0
+#ifdef ENABLE_TIMEARRAY
 	printOut("Time values : ");
 	for (int i = 1; i < repeat; i++) {
-		if (i < 1000) {
+		if (i < MAX_TIMEARRAY_COUNT) {
 			printOut("%.3lf, ", sTime[i]);
 		}
 	}
