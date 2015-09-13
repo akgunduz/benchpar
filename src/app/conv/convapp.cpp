@@ -83,7 +83,7 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 
 	Conv* calculated = new Conv(A->getRow(), A->getCol(), A->getFilter(), A->getFilterLength());
 
-	printOut("\nConv Method: %s \n", A->convFuncs[modeID].id);
+	printOut("\nConv Method: %s \n", A->funcList[modeID].id);
 
 	Timer t;
 	double t_min = 10000000.0f, t_max = 0.0f, t_total = 0.0f, consumed = 0.0f;
@@ -96,8 +96,8 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 
 		t.snapshot();
 
-		if (!(A->*(A->convFuncs[modeID].f))(calculated, gpu)) {
-			printOut("\nConv Method: %s failed\n", A->convFuncs[modeID].id);
+		if (!(A->*(A->funcList[modeID].f))(calculated, gpu)) {
+			printOut("\nConv Method: %s failed\n", A->funcList[modeID].id);
 			delete calculated;
 			return NULL;
 		}
@@ -133,9 +133,10 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 				printOut("%.3lf, ", sTime[i]);
 			}
 		}
+		printOut("\n");
 	}
 
-	printOut("\nConv Time: %.3lfms!!!\n", t_total);
+	printOut("Conv Time: %.3lfms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {

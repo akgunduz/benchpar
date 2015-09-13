@@ -35,7 +35,7 @@ Power *Power::newInstance(POWER_MODES mode, int count) {
 		case POWER_SMARTREAL:
 			power = new Power_SMARTREAL();
 			break;
-#ifdef C15
+#ifdef __C15__
 		case POWER_INA:
 			power = new Power_INA();
 			break;

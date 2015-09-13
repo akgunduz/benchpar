@@ -22,6 +22,8 @@ Conv::Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bo
 	if (prepare) {
 		create(row, col);
 	}
+
+	initFuncs();
 }
 
 Conv::Conv(std::string path, float *filter, uint32_t filter_length) {
@@ -58,11 +60,24 @@ Conv::Conv(std::string path, float *filter, uint32_t filter_length) {
 	}
 
 	fclose(fd);
+
+	initFuncs();
 }
 
 Conv::~Conv() {
 
 	free(mem);
+
+	delete[] funcList;
+}
+
+void Conv::initFuncs() {
+
+	funcList = new FuncList[CONVTYPE_MAX];
+	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", "", 1, (fFuncs)&Conv::convCPU_STD);
+	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", "", 1, (fFuncs)&Conv::convCPU_OMP);
+	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", "", 1, (fFuncs)&Conv::convGPU_STD);
+
 }
 
 bool Conv::allocMem(uint32_t row, uint32_t col) {

@@ -83,7 +83,7 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 
 	Scan* calculated = new Scan(A->getSize());
 
-	printOut("\nScan Method: %s \n", A->scanners[modeID].id);
+	printOut("\nScan Method: %s \n", A->funcList[modeID].id);
 
 	Timer t;
 	double t_min = 10000000.0f, t_max = 0.0f, t_total = 0.0f, consumed = 0.0f;
@@ -96,8 +96,8 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 
 		t.snapshot();
 
-		if (!(A->*(A->scanners[modeID].f))(calculated, gpu)) {
-			printOut("\nScan Method: %s failed\n", A->scanners[modeID].id);
+		if (!(A->*(A->funcList[modeID].f))(calculated, gpu)) {
+			printOut("\nScan Method: %s failed\n", A->funcList[modeID].id);
 			delete calculated;
 			return NULL;
 		}
@@ -135,9 +135,10 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 				printOut("%.3lf, ", sTime[i]);
 			}
 		}
+		printOut("\n");
 	}
 
-	printOut("\nScan Time: %.3lf ms!!!\n", t_total);
+	printOut("Scan Time: %.3lf ms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {

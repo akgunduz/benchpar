@@ -91,7 +91,7 @@ bool Conv::convGPU_STD(Conv *calculated, GPU *gpu) {
 	return convGPU(calculated, CONVTYPE_GPU_STD, gpu);
 }
 
-bool Conv::convGPU(Conv *calculated, enum CONVTYPE convType, GPU *gpu) {
+bool Conv::convGPU(Conv *calculated, int type, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {
 		return false;

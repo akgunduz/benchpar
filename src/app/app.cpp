@@ -93,6 +93,15 @@ bool App::printStart(const char* prefix, int fileID) {
 		sprintf(dDir, "F%02d", fileID);
 	}
 
+	char dOS[4];
+#if defined __APPLE__
+	strcpy(dOS, "OSX");
+#elif defined __ARM__
+	strcpy(dOS, "ARM");
+#else
+	strcpy(dOS, "LNX");
+#endif
+
 	char dTime[100];
 	time_t date = time(NULL);
 	struct tm *ptm = gmtime(&date);
@@ -100,7 +109,7 @@ bool App::printStart(const char* prefix, int fileID) {
 			ptm->tm_mday, ptm->tm_mon + 1, ptm->tm_year + 1900,
 			ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
 
-	sprintf(dFile, "%s/%s_%s_%s_R%d_%s", getcwd(NULL, 0), prefix, dMode, dDir, repeat, dTime);
+	sprintf(dFile, "%s/%s_%s_%s_%s_R%d_%s", getcwd(NULL, 0), prefix, dOS, dMode, dDir, repeat, dTime);
 
 	debugFile = fopen(dFile, "w");
 
@@ -121,3 +130,5 @@ void App::printOut(const char* format, ...) {
 
 	va_end(arglist);
 }
+
+

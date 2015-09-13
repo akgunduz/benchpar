@@ -7,15 +7,11 @@
 #ifndef __scan_H_
 #define __scan_H_
 
-#include "gpu.h"
-
-class Scan;
-
-typedef bool (Scan::*fScanner)(Scan *, GPU *);
+#include "function.h"
 
 enum SCANTYPE {
 	SCANTYPE_CPU_STD,
-#ifndef C15
+#ifndef __ARM__
 	SCANTYPE_CPU_AVX,
 	SCANTYPE_CPU_SSE,
 	SCANTYPE_CPU_OMP_SSE,
@@ -25,45 +21,24 @@ enum SCANTYPE {
 	SCANTYPE_MAX,
 };
 
-struct Scanners {
-
-	const char id[255];
-	const char kernelid[255];
-	int divider;
-	fScanner f;
-};
-
-class Scan {
-
-	uint32_t size;
-	size_t mem_size;
-	float *mem;
+class Scan : public Function {
 
 	bool allocMem(uint32_t size);
 
 public:
 
-	Scanners scanners[SCANTYPE_MAX] = {
-			{"SCANTYPE_CPU_STD", "", 1, &Scan::scanCPU_STD},
-#ifndef C15
-			{"SCANTYPE_CPU_AVX", "", 1, &Scan::scanCPU_AVX},
-			{"SCANTYPE_CPU_SSE", "", 1, &Scan::scanCPU_SSE},
-			{"SCANTYPE_CPU_OMP_SSE", "", 1, &Scan::scanCPU_OMP_SSE},
-			{"SCANTYPE_CPU_OMP_SSEp2_SSEp1", "", 1, &Scan::scanCPU_OMP_SSEp2_SSEp1},
-#endif
-			{"SCANTYPE_GPU_STD", "", 1, &Scan::scanGPU_STD},
-	};
-
 	Scan(uint32_t size, bool prepare = false);
 	Scan(std::string path);
 	~Scan();
+
+	virtual void initFuncs();
 
 	void printOut();
 	bool printToFile(uint32_t);
 
 	bool scanCPU_STD(Scan *, GPU *);
 
-#ifndef C15
+#ifndef __ARM__
 	bool scanCPU_AVX(Scan *, GPU *);
 	bool scanCPU_SSE(Scan *, GPU *);
 	bool scanCPU_OMP_SSE(Scan *, GPU *);
@@ -72,7 +47,7 @@ public:
 
 	bool scanGPU_STD(Scan *, GPU *);
 
-	bool scanGPU(Scan *calculated, enum SCANTYPE scanType, GPU *);
+	bool scanGPU(Scan *calculated, int type, GPU *);
 
 	void create(uint32_t size);
 	bool compare(Scan *);

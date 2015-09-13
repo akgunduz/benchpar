@@ -19,7 +19,7 @@ bool Scan::scanCPU_STD(Scan *calculated, GPU *gpu) {
 	return true;
 }
 
-#ifndef C15
+#ifndef __ARM__
 
 inline __m256 scan_AVX(__m256 x)
 {
@@ -140,7 +140,7 @@ bool Scan::scanGPU_STD(Scan *calculated, GPU *gpu) {
 	return scanGPU(calculated, SCANTYPE_GPU_STD, gpu);
 }
 
-bool Scan::scanGPU(Scan *calculated, enum SCANTYPE scanType, GPU *gpu) {
+bool Scan::scanGPU(Scan *calculated, int type, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {
 		return false;

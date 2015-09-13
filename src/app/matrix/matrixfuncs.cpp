@@ -8,16 +8,16 @@
 
 #include "matrix.h"
 
-bool Matrix::multiplyCPU_STD(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyCPU_STD(Matrix *calculated, GPU *gpu) {
 
 	for (int i = 0; i < row; i++) {
 
-		for (int j = 0; j < ref->col; j++) {
+		for (int j = 0; j < B->col; j++) {
 
 			for (int k = 0; k < col; k++) {
 
-				calculated->mem[i * ref->col + j] +=
-						mem[i * col + k] * ref->mem[k * ref->col + j];
+				calculated->mem[i * B->col + j] +=
+						mem[i * col + k] * B->mem[k * B->col + j];
 			}
 		}
 	}
@@ -25,9 +25,9 @@ bool Matrix::multiplyCPU_STD(Matrix *ref, Matrix *calculated, GPU *gpu) {
 	return true;
 }
 
-bool Matrix::multiplyCPU_TILED(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyCPU_TILED(Matrix *calculated, GPU *gpu) {
 
-	for (int i = 0; i < ref->col; i += TILESIZE) {
+	for (int i = 0; i < B->col; i += TILESIZE) {
 
 		for (int k = 0; k < col; k += TILESIZE) {
 
@@ -37,8 +37,8 @@ bool Matrix::multiplyCPU_TILED(Matrix *ref, Matrix *calculated, GPU *gpu) {
 
 					for (int ii = i; ii < i + TILESIZE; ii++) {
 
-						calculated->mem[j * ref->col + ii] +=
-								mem[j * col + kk] * ref->mem[kk * ref->col + ii];
+						calculated->mem[j * B->col + ii] +=
+								mem[j * col + kk] * B->mem[kk * B->col + ii];
 					}
 				}
 			}
@@ -48,11 +48,11 @@ bool Matrix::multiplyCPU_TILED(Matrix *ref, Matrix *calculated, GPU *gpu) {
 	return true;
 }
 
-bool Matrix::multiplyCPU_TILED_BASIC(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyCPU_TILED_BASIC(Matrix *calculated, GPU *gpu) {
 
 	for (int j0 = 0; j0 < row; j0 += TILESIZE) {
 
-		for (int i0 = 0; i0 < ref->col; i0 += TILESIZE) {
+		for (int i0 = 0; i0 < B->col; i0 += TILESIZE) {
 
 			for (int k0 = 0; k0 < col; k0 += TILESIZE) {
 
@@ -62,8 +62,8 @@ bool Matrix::multiplyCPU_TILED_BASIC(Matrix *ref, Matrix *calculated, GPU *gpu) 
 
 						for (int k = k0; k < k0 + TILESIZE; k++) {
 
-							calculated->mem[j * ref->col + i] +=
-									mem[j * col + k] * ref->mem[k * ref->col + i];
+							calculated->mem[j * B->col + i] +=
+									mem[j * col + k] * B->mem[k * B->col + i];
 						}
 					}
 				}
@@ -74,10 +74,10 @@ bool Matrix::multiplyCPU_TILED_BASIC(Matrix *ref, Matrix *calculated, GPU *gpu) 
 	return true;
 }
 
-bool Matrix::multiplyCPU_TILED_OMP(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyCPU_TILED_OMP(Matrix *calculated, GPU *gpu) {
 
 #pragma omp parallel for
-	for (int i = 0; i < ref->col; i += TILESIZE) {
+	for (int i = 0; i < B->col; i += TILESIZE) {
 #pragma omp parallel for
 		for (int k = 0; k < col; k += TILESIZE) {
 #pragma omp parallel for
@@ -87,8 +87,8 @@ bool Matrix::multiplyCPU_TILED_OMP(Matrix *ref, Matrix *calculated, GPU *gpu) {
 
 					for (int ii = i; ii < i + TILESIZE; ii++) {
 
-						calculated->mem[j * ref->col + ii] +=
-								mem[j * col + kk] * ref->mem[kk * ref->col + ii];
+						calculated->mem[j * B->col + ii] +=
+								mem[j * col + kk] * B->mem[kk * B->col + ii];
 					}
 				}
 			}
@@ -98,22 +98,22 @@ bool Matrix::multiplyCPU_TILED_OMP(Matrix *ref, Matrix *calculated, GPU *gpu) {
 	return true;
 }
 
-bool Matrix::multiplyGPU_STD(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyGPU_STD(Matrix *calculated, GPU *gpu) {
 
-	return multiplyGPU(ref, calculated, MULTYPE_GPU_STD, gpu);
+	return multiplyGPU(calculated, MULTYPE_GPU_STD, gpu);
 }
 
-bool Matrix::multiplyGPU_VEC4(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyGPU_VEC4(Matrix *calculated, GPU *gpu) {
 
-	return multiplyGPU(ref, calculated, MULTYPE_GPU_VEC4, gpu);
+	return multiplyGPU(calculated, MULTYPE_GPU_VEC4, gpu);
 }
 
-bool Matrix::multiplyGPU_VEC8(Matrix *ref, Matrix *calculated, GPU *gpu) {
+bool Matrix::multiplyGPU_VEC8(Matrix *calculated, GPU *gpu) {
 
-	return multiplyGPU(ref, calculated, MULTYPE_GPU_VEC8, gpu);
+	return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
 }
 
-bool Matrix::multiplyGPU(Matrix *ref, Matrix *calculated, enum MULTYPE mulType, GPU *gpu) {
+bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {
 		return false;
@@ -135,24 +135,24 @@ bool Matrix::multiplyGPU(Matrix *ref, Matrix *calculated, enum MULTYPE mulType, 
 
 	cl_mem d_B = clCreateBuffer(gpu->clGPUContext,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			(size_t) (ref->mem_size),
-			ref->mem,
+			(size_t) (B->mem_size),
+			B->mem,
 			&errCode);
 
 	cl_kernel clKernel = clCreateKernel(gpu->clProgram,
-			multipliers[mulType].kernelid, &errCode);
+			funcList[mulType].kernelid, &errCode);
 	gpu->checkErr("clCreateKernel", errCode);
 
-	gpu->globalWorkSize[0] = ref->col;
+	gpu->globalWorkSize[0] = B->col;
 	gpu->globalWorkSize[1] = row;
 
-	int colVec = col / multipliers[mulType].divider;
+	int colVec = col / funcList[mulType].divider;
 
 	errCode = clSetKernelArg(clKernel, 0, sizeof(cl_mem), (void *) &d_A);
 	errCode |= clSetKernelArg(clKernel, 1, sizeof(cl_mem), (void *) &d_B);
 	errCode |= clSetKernelArg(clKernel, 2, sizeof(cl_mem), (void *) &d_C);
 	errCode |= clSetKernelArg(clKernel, 3, sizeof(int), (void *) &colVec);
-	errCode |= clSetKernelArg(clKernel, 4, sizeof(int), (void *) &ref->col);
+	errCode |= clSetKernelArg(clKernel, 4, sizeof(int), (void *) &B->col);
 
 	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue,
 			clKernel,

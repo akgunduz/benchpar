@@ -83,7 +83,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 
 	Matrix* calculated = new Matrix(A->getRow(), B->getCol());
 
-	printOut("\nMultiplication Method: %s \n", A->multipliers[modeID].id);
+	printOut("\nMultiplication Method: %s \n", A->funcList[modeID].id);
 
 	Timer t;
 	double t_min = 10000000.0f, t_max = 0.0f, t_total = 0.0f, consumed = 0.0f;
@@ -96,8 +96,8 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 
 		t.snapshot();
 
-		if (!(A->*(A->multipliers[modeID].f))(B, calculated, gpu)) {
-			printOut("\nMultiplication Method: %s failed\n", A->multipliers[modeID].id);
+		if (!(A->*(A->funcList[modeID].f))(calculated, gpu)) {
+			printOut("\nMultiplication Method: %s failed\n", A->funcList[modeID].id);
 			delete calculated;
 			return NULL;
 		}
@@ -133,9 +133,14 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 				printOut("%.3lf, ", sTime[i]);
 			}
 		}
+		printOut("\n");
 	}
 
-	printOut("\nMultiplication Time: %.3lfms!!!\n", t_total);
+	if (repeat > 1) {
+		repeat--;
+	}
+
+	printOut("Multiplication Time: %.3lfms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {
@@ -150,7 +155,7 @@ bool MatrixApp::process(char fileInput[255]) {
 
 	Timer t;
 
-	Matrix *A, *B;
+	Matrix *A;
 
 	t.snapshot();
 
@@ -159,7 +164,7 @@ bool MatrixApp::process(char fileInput[255]) {
 
 	try {
 
-		A = new Matrix(fileInput, &B);
+		A = new Matrix(fileInput);
 
 	} catch(const std::runtime_error e) {
 
@@ -167,13 +172,13 @@ bool MatrixApp::process(char fileInput[255]) {
 		return false;
 	}
 
-	printOut("Calculate Started... %dx%d with %dx%d\n", A->getRow(), A->getCol(), B->getRow(), B->getCol());
+	printOut("Calculate Started... %dx%d with %dx%d\n", A->getRow(), A->getCol(), A->B->getRow(), A->B->getCol());
 
 	if (seqID == SEQTYPE_NONE) {
 
-		Matrix *C = calculate(A, B, modeID, repeat);
+		Matrix *C = calculate(A, A->B, modeID, repeat);
 		if (C != NULL && sanityID != INVALID_SANITY) {
-			Matrix *D = calculate(A, B, sanityID, 1);
+			Matrix *D = calculate(A, A->B, sanityID, 1);
 
 			if (D != NULL) {
 				if (C->compare(D)) {
@@ -209,7 +214,7 @@ bool MatrixApp::process(char fileInput[255]) {
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, B, i, repeat);
+			calculate(A, A->B, i, repeat);
 		}
 	}
 
@@ -217,7 +222,6 @@ bool MatrixApp::process(char fileInput[255]) {
 	printOut("Total Time: %.3lf ms!!!\n\n", t_diff);
 
 	delete A;
-	delete B;
 
 	return true;
 }
@@ -332,13 +336,12 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 bool MatrixApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
 
-	Matrix *A = new Matrix(row, col, true);
+	Matrix *B = new Matrix(col, row, nullptr, true);
 
-	Matrix *B = new Matrix(col, row, true);
+	Matrix *A = new Matrix(row, col, B, true);
 
-	A->printToFile(printID, B);
+	A->printToFile(printID);
 
 	delete A;
-	delete B;
 	return true;
 }

@@ -7,7 +7,7 @@
 #ifndef __conv_H_
 #define __conv_H_
 
-#include "gpu.h"
+#include "function.h"
 
 #define HEIGHT 1024
 #define WIDTH 1024
@@ -27,10 +27,6 @@
 #define COLUMNS_RESULT_STEPS 8//4
 #define COLUMNS_HALO_STEPS 1
 
-class Conv;
-
-typedef bool (Conv::*fConvFuncs)(Conv *, GPU *);
-
 enum CONVTYPE {
 
 	CONVTYPE_CPU_STD,
@@ -41,22 +37,12 @@ enum CONVTYPE {
 	CONVTYPE_MAX,
 };
 
-struct ConvFuncs {
-
-	const char id[255];
-	const char kernelid[255];
-	int divider;
-	fConvFuncs f;
-};
-
-class Conv {
+class Conv : public Function {
 
 	uint32_t row;
 	uint32_t col;
 
-	size_t size;
-	float *mem;
-	size_t mem_size;
+
 	float *temp;
 	float *filter;
 	uint32_t filter_length;
@@ -65,15 +51,11 @@ class Conv {
 
 public:
 
-	ConvFuncs convFuncs[CONVTYPE_MAX] = {
-			{"CONVTYPE_CPU_STD", "", 1, &Conv::convCPU_STD},
-			{"CONVTYPE_CPU_OMP", "", 1, &Conv::convCPU_OMP},
-			{"CONVTYPE_GPU_STD", "", 1, &Conv::convGPU_STD},
-	};
-
 	Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bool prepare = false);
 	Conv(std::string path, float *filter, uint32_t filter_length);
 	~Conv();
+
+	virtual void initFuncs();
 
 	void printOut();
 	bool printToFile(uint32_t);
@@ -83,7 +65,7 @@ public:
 
 	bool convGPU_STD(Conv *, GPU *);
 
-	bool convGPU(Conv *calculated, enum CONVTYPE convType, GPU *);
+	bool convGPU(Conv *calculated, int type, GPU *);
 
 	void create(uint32_t row, uint32_t col);
 	bool compare(Conv *);

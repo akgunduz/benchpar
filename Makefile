@@ -28,6 +28,7 @@ FILES = \
 		power/power_smart_real.cpp \
 		cpu.cpp \
 		app/app.cpp \
+		app/function.cpp \
 		app/matrix/matrix.cpp \
 		app/matrix/matrixfuncs.cpp \
 		app/matrix/matrixapp.cpp \
@@ -57,7 +58,7 @@ C15_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_
 
 C15_OBJECTS_PATH = Objects/c15
 
-C15_CFLAGS = $(CFLAGS) -O3 -DC15 -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
+C15_CFLAGS = $(CFLAGS) -O3 -D__C15__ -D__ARM__ -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/include
 

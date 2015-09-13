@@ -18,6 +18,8 @@ Scan::Scan(uint32_t size, bool prepare) {
 	if (prepare) {
 		create(size);
 	}
+
+	initFuncs();
 }
 
 Scan::Scan(std::string path) {
@@ -48,11 +50,28 @@ Scan::Scan(std::string path) {
 	}
 
 	fclose(fd);
+
+	initFuncs();
 }
 
 Scan::~Scan() {
 
 	free(mem);
+
+	delete[] funcList;
+}
+
+void Scan::initFuncs() {
+
+	funcList = new FuncList[SCANTYPE_MAX];
+	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", "", 1, (fFuncs)&Scan::scanCPU_STD);
+#ifndef __ARM__
+	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", "", 1, (fFuncs)&Scan::scanCPU_AVX);
+	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", "", 1, (fFuncs)&Scan::scanCPU_SSE);
+	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", "", 1, (fFuncs)&Scan::scanCPU_OMP_SSE);
+	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", "", 1, (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1);
+#endif
+	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", "", 1, (fFuncs)&Scan::scanGPU_STD);
 }
 
 bool Scan::allocMem(uint32_t size) {
