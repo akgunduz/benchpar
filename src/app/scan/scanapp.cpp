@@ -73,13 +73,23 @@ void ScanApp::unLoadGPUKernel() {
 	}
 }
 
+struct test {
+	int index;
+	double time;
+};
+
 Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 
 	if (!A->check()) {
 		return NULL;
 	}
 
+	test s[1000];
+	int sindex = 0;
+
 	Scan* calculated = new Scan(A->getSize());
+
+	printOut("\nScan Method: %s \n", A->scanners[modeID].id);
 
 	Timer t;
 	double t_min = 10000000.0f, t_max = 0.0f, t_total = 0.0f, consumed = 0.0f;
@@ -97,6 +107,7 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 			delete calculated;
 			return NULL;
 		}
+		
 		double t_diff = t.getdiff();
 
 		if (t_min > t_diff) {
@@ -104,6 +115,8 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 		}
 		if (t_diff > t_max) {
 			t_max = t_diff;
+			s[sindex].index = i;
+			s[sindex++].time = t_max;
 		}
 
 		t_total += t_diff;
@@ -113,7 +126,11 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 		consumed = power->read_after();
 	}
 
-	printOut("\nScan Method: %s \n", A->scanners[modeID].id);
+	for (int i = 1; i < sindex; i++) {
+		printOut("Max Detected at : %d, time : %.3lf\n", s[i].index, s[i].time);
+	}
+
+
 	printOut("Scan Time: %.3lf ms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
