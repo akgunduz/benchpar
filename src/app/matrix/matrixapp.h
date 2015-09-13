@@ -29,6 +29,7 @@ public:
 
 	bool process(char fileInputs[255]);
 	bool processDir(const char path[255]);
+	bool processList(char fileInputs[][255], int size);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 

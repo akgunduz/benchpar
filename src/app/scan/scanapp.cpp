@@ -233,10 +233,24 @@ bool ScanApp::processDir(const char path[255]) {
 	return true;
 }
 
+bool ScanApp::processList(char fileInputs[][255], int size) {
+
+	for (int i = 0; i < size; i++) {
+
+		bool status = process(fileInputs[i]);
+		if (!status) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-	char fileInput[255];
+	char fileInputs[MAX_FILE_COUNT][255];
 	int fileID = 0;
+	int fileIndex = 0;
 	bool status;
 
 	for (int i = 0; i < argc; i++) {
@@ -252,20 +266,20 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else {
 
-			if (fileID != 0) {
+			if (fileIndex == MAX_FILE_COUNT) {
 				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
 				fileID = atoi(argv[i]);
-				if (fileID == 0) {
+				if (fileID == 0 || fileIndex > 0) {
 					fileID = 0xFF;
 				}
-				sprintf(fileInput, "scan/ScanInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "scan/ScanInput_%s", argv[i]);
 
 			} else {
 				fileID = 0xFF;
-				sprintf(fileInput, "scan/%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "scan/%s", argv[i]);
 			}
 		}
 
@@ -285,7 +299,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		printOut("Test is running with %d repeats\n", repeat);
 
-		status = process(fileInput);
+		status = processList(fileInputs, fileIndex);
 	}
 
 	if (debugFile) {

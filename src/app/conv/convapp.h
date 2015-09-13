@@ -28,6 +28,7 @@ public:
 
 	bool process(char fileInput[255], char filterInput[255]);
 	bool processDir(const char path[255], char filterInput[255]);
+	bool processList(char fileInputs[][255], char filterInput[255], int size);
 	uint32_t processFilter(char fileInput[255], float **filter);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);

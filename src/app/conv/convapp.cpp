@@ -292,11 +292,25 @@ bool ConvApp::processDir(const char path[255], char filterInput[255]) {
 	return true;
 }
 
+bool ConvApp::processList(char fileInputs[][255], char filterInput[255], int size) {
+
+	for (int i = 0; i < size; i++) {
+
+		bool status = process(fileInputs[i], filterInput);
+		if (!status) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-	char fileInput[255];
 	char filterInput[255];
+	char fileInputs[MAX_FILE_COUNT][255];
 	int fileID = 0;
+	int fileIndex = 0;
 	bool status;
 
 	strcpy(filterInput, "");
@@ -322,20 +336,20 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		} else {
 
-			if (fileID != 0) {
+			if (fileIndex == MAX_FILE_COUNT) {
 				continue;
 			}
 
 			if (isdigit(argv[i][0])) {
 				fileID = atoi(argv[i]);
-				if (fileID == 0) {
+				if (fileID == 0 || fileIndex > 0) {
 					fileID = 0xFF;
 				}
-				sprintf(fileInput, "conv/ConvInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "conv/ConvInput_%s", argv[i]);
 
 			} else {
 				fileID = 0xFF;
-				sprintf(fileInput, "conv/%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "conv/%s", argv[i]);
 			}
 
 		}
@@ -355,7 +369,7 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 		printOut("Test is running with %d repeats\n", repeat);
 
-		status = process(fileInput, filterInput);
+		status = processList(fileInputs, filterInput, fileIndex);
 	}
 
 	if (debugFile) {

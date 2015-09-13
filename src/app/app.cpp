@@ -86,6 +86,8 @@ bool App::printStart(const char* prefix, int fileID) {
 	char dDir[4];
 	if (fileID == 0) {
 		strcpy(dDir, "DIR");
+	} else if (fileID == 0xFF) {
+		strcpy(dDir, "MUL");
 	} else {
 		sprintf(dDir, "F%02d", fileID);
 	}
