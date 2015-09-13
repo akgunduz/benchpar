@@ -43,7 +43,7 @@ App::~App() {
 
 }
 
-void App::setModes(int modeID, int seqID, int sanityID, bool print, int repeat) {
+void App::setModes(int modeID, int seqID, int sanityID, bool print_enabled, bool time_enabled, int repeat) {
 
 	if (modeID < getFuncModeCount(FUNCTYPE_ALL)) {
 		this->modeID = modeID;
@@ -55,7 +55,8 @@ void App::setModes(int modeID, int seqID, int sanityID, bool print, int repeat) 
 		this->sanityID = sanityID;
 	}
 
-	print_enabled = print;
+	this->print_enabled = print_enabled;
+	this->time_enabled = time_enabled;
 	this->repeat = repeat;
 
 }

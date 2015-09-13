@@ -79,9 +79,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 		return NULL;
 	}
 
-#ifdef ENABLE_TIMEARRAY
 	double sTime[MAX_TIMEARRAY_COUNT];
-#endif
 
 	Matrix* calculated = new Matrix(A->getRow(), B->getCol());
 
@@ -103,6 +101,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 			delete calculated;
 			return NULL;
 		}
+		
 		double t_diff = t.getdiff();
 
 		if (i == 0 && repeat > 1) {
@@ -118,27 +117,25 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 
 		t_total += t_diff;
 
-#ifdef ENABLE_TIMEARRAY
-		if (i < MAX_TIMEARRAY_COUNT) {
+		if (time_enabled && i < MAX_TIMEARRAY_COUNT) {
 			sTime[i] = t_diff;
 		}
-#endif
 	}
 
 	if (power != NULL) {
 		consumed = power->read_after();
 	}
 
-#ifdef ENABLE_TIMEARRAY
-	printOut("Time values : ");
-	for (int i = 1; i < repeat; i++) {
-		if (i < MAX_TIMEARRAY_COUNT) {
-			printOut("%.3lf, ", sTime[i]);
+	if (time_enabled && repeat > 1) {
+		printOut("Time values : ");
+		for (int i = 1; i < repeat; i++) {
+			if (i < MAX_TIMEARRAY_COUNT) {
+				printOut("%.3lf, ", sTime[i]);
+			}
 		}
 	}
-#endif
 
-	printOut("Multiplication Time: %.3lfms!!!\n", t_total);
+	printOut("\nMultiplication Time: %.3lfms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
 
 	if (power != NULL && power->getMode() != POWER_OFF) {

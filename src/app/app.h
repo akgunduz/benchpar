@@ -30,6 +30,7 @@ protected:
 	CPU *cpu;
 
 	bool print_enabled;
+	bool time_enabled;
 	int repeat;
 	//char debugFile[255];
 
@@ -49,7 +50,7 @@ public :
 
 	static App* newInstance(APP_MODES, CPU*, GPU*, Power*);
 
-	void setModes(int, int, int, bool print, int repeat);
+	void setModes(int, int, int, bool, bool, int);
 
 	virtual int getFuncModeCount(FUNCTYPE) = 0;
 	virtual bool creator(uint32_t, uint32_t, uint32_t) = 0;

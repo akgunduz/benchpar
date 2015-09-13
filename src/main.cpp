@@ -57,6 +57,7 @@ int main(int argc, const char *argv[]) {
 	enum POWER_MODES powerMode = POWER_OFF;
 
 	bool print_enabled = true;
+	bool time_enabled = false;
 	int repeat = 1;
 	enum SEQTYPE seqID = SEQTYPE_NONE;
 	int modeID = 0;
@@ -149,6 +150,12 @@ int main(int argc, const char *argv[]) {
 				print_enabled = false;
 			}
 
+		} else if (!strcmp (argv[i], "-t")) {
+
+			if (!strcmp(argv[++i], "on")) {
+				time_enabled = true;
+			}
+
 		} else if (!strcmp (argv[i], "-q")) {
 			gpu->platformQuery();
 			delete cpu;
@@ -170,7 +177,7 @@ int main(int argc, const char *argv[]) {
 
 	App *app = App::newInstance(appMode, cpu, gpu, power);
 
-	app->setModes(modeID, seqID, sanityID, print_enabled, repeat);
+	app->setModes(modeID, seqID, sanityID, print_enabled, time_enabled, repeat);
 
 	app->run(filtered_argc, filtered_argv);
 
