@@ -131,10 +131,11 @@ void Matrix::initFuncs() {
 	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", "", 1, (fFuncs)&Matrix::multiplyCPU_TILED);
 	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", "", 1, (fFuncs)&Matrix::multiplyCPU_TILED_BASIC);
 	funcList[MULTYPE_CPU_TILED_OMP].set("MULTYPE_CPU_TILED_OMP", "", 1, (fFuncs)&Matrix::multiplyCPU_TILED_OMP);
+#ifdef __OPENCL__
 	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", "matrixMul", 1, (fFuncs)&Matrix::multiplyGPU_STD);
 	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", "matrixMulVec4", 1, (fFuncs)&Matrix::multiplyGPU_VEC4);
 	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", "matrixMulVec8", 1, (fFuncs)&Matrix::multiplyGPU_VEC8);
-
+#endif
 }
 
 bool Matrix::allocMem(uint32_t row, uint32_t col) {

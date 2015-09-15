@@ -24,12 +24,13 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#ifdef __OPENCL__
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
 #include <CL/cl.h>
 #endif
-
+#endif
 
 #define PATH_LENGTH 255
 #define TILESIZE 32

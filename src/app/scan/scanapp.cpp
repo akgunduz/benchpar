@@ -23,9 +23,9 @@ int ScanApp::getFuncModeCount(FUNCTYPE functype) {
 
 	switch(functype) {
 		case FUNCTYPE_CPU:
-			return SCANTYPE_GPU_STD;
+			return SCANTYPE_CPU_MAX;
 		case FUNCTYPE_GPU:
-			return SCANTYPE_MAX - SCANTYPE_GPU_STD;
+			return SCANTYPE_MAX - SCANTYPE_CPU_MAX;
 		case FUNCTYPE_ALL:
 			return SCANTYPE_MAX;
 	}
@@ -38,7 +38,7 @@ bool ScanApp::loadGPUKernel() {
 	if (!gpu->getEnabled()) {
 		return false;
 	}
-
+#ifdef __OPENCL__
 	char file[PATH_LENGTH];
 
 	sprintf(file, "%s/scan.cl", getcwd(NULL, 0));
@@ -61,16 +61,17 @@ bool ScanApp::loadGPUKernel() {
 	gpu->localWorkSize[1] = 16;
 
 	gpu_kernel_loaded = true;
-
+#endif
 	return true;
 }
 
 void ScanApp::unLoadGPUKernel() {
-
+#ifdef __OPENCL__
 	if (gpu_kernel_loaded) {
 		clReleaseProgram(gpu->clProgram);
 		clReleaseCommandQueue(gpu->clCommandQue);
 	}
+#endif
 }
 
 Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
@@ -203,12 +204,14 @@ bool ScanApp::process(char fileInput[255]) {
 				break;
 			case SEQTYPE_CPU:
 				startIndex = SCANTYPE_CPU_STD;
-				count = SCANTYPE_GPU_STD - SCANTYPE_CPU_STD;
+				count = SCANTYPE_CPU_MAX - SCANTYPE_CPU_STD;
 				break;
+#ifdef __OPENCL__
 			case SEQTYPE_GPU:
 				startIndex = SCANTYPE_GPU_STD;
 				count = SCANTYPE_MAX - SCANTYPE_GPU_STD;
 				break;
+#endif
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {

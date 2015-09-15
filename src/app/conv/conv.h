@@ -31,10 +31,14 @@ enum CONVTYPE {
 
 	CONVTYPE_CPU_STD,
 	CONVTYPE_CPU_OMP,
-
-	CONVTYPE_GPU_STD,
-
-	CONVTYPE_MAX,
+        CONVTYPE_CPU_MAX,
+#ifdef __OPENCL__
+	CONVTYPE_GPU_STD = CONVTYPE_CPU_MAX,
+        CONVTYPE_MAX,
+#else
+        CONVTYPE_MAX = CONVTYPE_CPU_MAX,
+#endif
+	
 };
 
 class Conv : public Function {
@@ -62,11 +66,11 @@ public:
 
 	bool convCPU_STD(Conv *, GPU *);
 	bool convCPU_OMP(Conv *, GPU *);
-
+#ifdef __OPENCL__
 	bool convGPU_STD(Conv *, GPU *);
 
 	bool convGPU(Conv *calculated, int type, GPU *);
-
+#endif
 	void create(uint32_t row, uint32_t col);
 	bool compare(Conv *);
 	bool check();

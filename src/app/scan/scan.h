@@ -17,8 +17,13 @@ enum SCANTYPE {
 	SCANTYPE_CPU_OMP_SSE,
 	SCANTYPE_CPU_OMP_SSEp2_SSEp1,
 #endif
-	SCANTYPE_GPU_STD,
-	SCANTYPE_MAX,
+        SCANTYPE_CPU_MAX,
+#ifdef __OPENCL__
+	SCANTYPE_GPU_STD = SCANTYPE_CPU_MAX,
+        SCANTYPE_MAX,
+#else
+        SCANTYPE_MAX = SCANTYPE_CPU_MAX,
+#endif
 };
 
 class Scan : public Function {

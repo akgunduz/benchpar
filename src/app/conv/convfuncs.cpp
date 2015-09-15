@@ -85,7 +85,7 @@ bool Conv::convCPU_OMP(Conv *calculated, GPU *gpu) {
 	return true;
 }
 
-
+#ifdef __OPENCL__
 bool Conv::convGPU_STD(Conv *calculated, GPU *gpu) {
 
 	return convGPU(calculated, CONVTYPE_GPU_STD, gpu);
@@ -96,7 +96,8 @@ bool Conv::convGPU(Conv *calculated, int type, GPU *gpu) {
 	if (!gpu->getEnabled()) {
 		return false;
 	}
-
+        
+#ifdef __OPENCL__
 	cl_int errCode;
 
 	cl_mem buf_input = clCreateBuffer(gpu->clGPUContext,
@@ -188,6 +189,7 @@ bool Conv::convGPU(Conv *calculated, int type, GPU *gpu) {
 
 	clReleaseKernel(kernelConvRows);
 	clReleaseKernel(kernelConvCols);
-
+#endif
 	return true;
 }
+#endif

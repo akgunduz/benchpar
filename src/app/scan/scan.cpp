@@ -29,7 +29,7 @@ Scan::Scan(std::string path) {
 		throw std::runtime_error("File could not opened!");
 	}
 
-	int res = fscanf(fd, "%d", &size);
+	int res = fscanf(fd, "%d", (int *)&size);
 	if (res == EOF) {
 		fclose(fd);
 		throw std::runtime_error("File Read Error happened!");
@@ -71,7 +71,9 @@ void Scan::initFuncs() {
 	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", "", 1, (fFuncs)&Scan::scanCPU_OMP_SSE);
 	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", "", 1, (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1);
 #endif
+#ifdef __OPENCL__
 	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", "", 1, (fFuncs)&Scan::scanGPU_STD);
+#endif
 }
 
 bool Scan::allocMem(uint32_t size) {
@@ -127,7 +129,7 @@ bool Scan::compare(Scan *ref) {
 
 void Scan::printOut() {
 
-	printf("Printing Out Scan out in Size: %d\n", size);
+	printf("Printing Out Scan out in Size: %d\n", (int)size);
 
 	for (int i = 0; i < size; i++) {
 
@@ -147,7 +149,7 @@ bool Scan::printToFile(uint32_t printID) {
 		return false;
 	}
 
-	fprintf(fd, "%d\n", size);
+	fprintf(fd, "%d\n", (int)size);
 
 	for (int i = 0; i < size; i++) {
 

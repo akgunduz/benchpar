@@ -23,9 +23,9 @@ int MatrixApp::getFuncModeCount(FUNCTYPE functype) {
 
 	switch(functype) {
 		case FUNCTYPE_CPU:
-			return MULTYPE_GPU_STD;
+			return MULTYPE_CPU_MAX;
 		case FUNCTYPE_GPU:
-			return MULTYPE_MAX - MULTYPE_GPU_STD;
+			return MULTYPE_MAX - MULTYPE_CPU_MAX;
 		case FUNCTYPE_ALL:
 			return MULTYPE_MAX;
 	}
@@ -35,6 +35,7 @@ int MatrixApp::getFuncModeCount(FUNCTYPE functype) {
 
 bool MatrixApp::loadGPUKernel() {
 
+#ifdef __OPENCL__
 	if (!gpu->getEnabled()) {
 		return false;
 	}
@@ -57,20 +58,18 @@ bool MatrixApp::loadGPUKernel() {
 		return false;
 	}
 
-	gpu->localWorkSize[0] = 16;
-	gpu->localWorkSize[1] = 16;
-
 	gpu_kernel_loaded = true;
-
+#endif
 	return true;
 }
 
 void MatrixApp::unLoadGPUKernel() {
-
+#ifdef __OPENCL__
 	if (gpu_kernel_loaded) {
 		clReleaseProgram(gpu->clProgram);
 		clReleaseCommandQueue(gpu->clCommandQue);
 	}
+#endif
 }
 
 Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
@@ -205,13 +204,15 @@ bool MatrixApp::process(char fileInput[255]) {
 				break;
 			case SEQTYPE_CPU:
 				startIndex = MULTYPE_CPU_STD;
-				count = MULTYPE_GPU_STD - MULTYPE_CPU_STD;
+				count = MULTYPE_CPU_MAX - MULTYPE_CPU_STD;
 				break;
+#ifdef __OPENCL__
 			case SEQTYPE_GPU:
 				startIndex = MULTYPE_GPU_STD;
 				count = MULTYPE_MAX - MULTYPE_GPU_STD;
 				break;
-		}
+#endif
+                }
 
 		for (int i = startIndex; i < startIndex + count; i++) {
 			calculate(A, A->B, i, repeat);

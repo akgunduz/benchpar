@@ -69,7 +69,6 @@ int main(int argc, const char *argv[]) {
 	setenv("LC_NUMERIC", "C", 1);
         
 	CPU *cpu = new CPU();
-
 	GPU *gpu = new GPU();
 
 	for (int i = 1; i < argc; i++) {

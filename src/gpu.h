@@ -10,15 +10,16 @@
 #include "common.h"
 
 class GPU {
-
-	bool enabled;
-
+    
+        bool enabled;
+        
+public:
+    
+        
+#ifdef __OPENCL__  
 	cl_uint numPlatforms;
 	cl_platform_id* platforms;
 	cl_uint numDevices;
-
-public:
-
 	cl_device_id *clDevices;
 
 	cl_program clProgram;
@@ -28,8 +29,9 @@ public:
 	cl_command_queue clCommandQue;
 
 	size_t  localWorkSize[2], globalWorkSize[2];
-
-	void checkErr(const char *, cl_int);
+        
+#endif
+	void checkErr(const char *, int);
 
 	void platformQuery();
 	bool platformInit();
@@ -38,13 +40,13 @@ public:
 	bool getEnabled();
 
 	void getInfo();
+        
+        bool createCommandQueue(int deviceIndex, unsigned long);
 
 	bool createBuildProgramFromFile(
 			int deviceIndex,
 			const char* buildOptions,
 			const char* fileName);
-
-	bool createCommandQueue(int deviceIndex, cl_command_queue_properties);
 
 	bool createBuildProgram(int deviceIndex,
 			const char* buildOptions,

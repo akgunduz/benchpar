@@ -23,9 +23,9 @@ int ConvApp::getFuncModeCount(FUNCTYPE functype) {
 
 	switch(functype) {
 		case FUNCTYPE_CPU:
-			return CONVTYPE_GPU_STD;
+			return CONVTYPE_CPU_MAX;
 		case FUNCTYPE_GPU:
-			return CONVTYPE_MAX - CONVTYPE_GPU_STD;
+			return CONVTYPE_MAX - CONVTYPE_CPU_MAX;
 		case FUNCTYPE_ALL:
 			return CONVTYPE_MAX;
 	}
@@ -34,7 +34,7 @@ int ConvApp::getFuncModeCount(FUNCTYPE functype) {
 }
 
 bool ConvApp::loadGPUKernel() {
-
+#ifdef __OPENCL__
 	if (!gpu->getEnabled()) {
 		return false;
 	}
@@ -47,7 +47,6 @@ bool ConvApp::loadGPUKernel() {
 	sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable");
 
 	bool res = gpu->createBuildProgramFromFile(0, buildOptions, file);
-
 	if (!res) {
 		printf("Could not load GPU kernel\n");
 		return false;
@@ -62,15 +61,17 @@ bool ConvApp::loadGPUKernel() {
 
 	gpu_kernel_loaded = true;
 
+#endif
 	return true;
 }
 
 void ConvApp::unLoadGPUKernel() {
-
+#ifdef __OPENCL__
 	if (gpu_kernel_loaded) {
 		clReleaseProgram(gpu->clProgram);
 		clReleaseCommandQueue(gpu->clCommandQue);
 	}
+#endif
 }
 
 Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
@@ -260,11 +261,11 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 				break;
 			case SEQTYPE_CPU:
 				startIndex = CONVTYPE_CPU_STD;
-				count = CONVTYPE_GPU_STD - CONVTYPE_CPU_STD;
+				count = CONVTYPE_CPU_MAX - CONVTYPE_CPU_STD;
 				break;
 			case SEQTYPE_GPU:
-				startIndex = CONVTYPE_GPU_STD;
-				count = CONVTYPE_MAX - CONVTYPE_GPU_STD;
+				startIndex = CONVTYPE_CPU_MAX;
+				count = CONVTYPE_MAX - CONVTYPE_CPU_MAX;
 				break;
 		}
 

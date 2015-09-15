@@ -30,9 +30,11 @@ GPU::~GPU() {
 
 bool GPU::platformInit() {
 
-	cl_int errCode;
-
-	errCode = clGetPlatformIDs(0, NULL, &numPlatforms);
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return false;
+#else       
+	cl_int errCode = clGetPlatformIDs(0, NULL, &numPlatforms);
 	checkErr("clGetPlatformIDs", errCode);
 	if (errCode != CL_SUCCESS) {
 		return false;
@@ -79,21 +81,27 @@ bool GPU::platformInit() {
 	}
 
 	return true;
+#endif
 }
 
 bool GPU::platformDeInit() {
-
+#ifdef __OPENCL__ 
 	delete[] platforms;
 	delete[] clDevices;
 
 	clReleaseContext(clGPUContext);
-
+#endif
 	return false;
 }
 
 //OCL program build - from file
 bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	const char* fileName) {
 
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return false;
+#else 
+        
 	cl_int errNum;
 
 	//create programs
@@ -117,7 +125,7 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	
 
 	fclose(fProgramHandle);
 
-	if (res == 0) {
+	if (res == 0 || res != sProgramSize) {
 		printf("cannot read kernel data \n");
 		return false;
 	}
@@ -170,12 +178,17 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	
 	}
 
 	return true;
+#endif
 }
 
 //OCL program build - from const char array
 bool GPU::createBuildProgram(int deviceIndex,
 		const char* buildOptions, const char* source)
 {
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return false;
+#else 
 	cl_int errNum;
 
 	//create program using source
@@ -225,10 +238,15 @@ bool GPU::createBuildProgram(int deviceIndex,
 	}
 
 	return true;
+#endif
 }
 
-bool GPU::createCommandQueue(int deviceIndex, cl_command_queue_properties properties) {
 
+bool GPU::createCommandQueue(int deviceIndex, unsigned long properties) {
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return false;
+#else  
 	cl_int errCode;
 
 	clCommandQue = clCreateCommandQueue(clGPUContext,
@@ -237,10 +255,14 @@ bool GPU::createCommandQueue(int deviceIndex, cl_command_queue_properties proper
 	checkErr("clCreateCommandQueue", errCode);
 
 	return errCode == CL_SUCCESS;
+#endif
 }
 
 void GPU::getInfo() {
-
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return;
+#else 
 	char buffer[256];
 	clGetDeviceInfo(clDevices[0], CL_DEVICE_VENDOR, 256, buffer, NULL);
 	printf("GPU %s is found with %d devices : ", buffer, numDevices);
@@ -249,10 +271,15 @@ void GPU::getInfo() {
 		printf("%s, ", buffer);
 	}
 	printf("\n");
+#endif
 }
 
 void GPU::platformQuery() {
 
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return;
+#else 
 	cl_int errCode;
 
 	size_t size;
@@ -364,7 +391,7 @@ void GPU::platformQuery() {
 		printf("CL_DEVICE_LOCAL_MEM_SIZE is %lu KBs\n", (unsigned long)mem_size/1024);
 
 	}
-
+#endif
 }
 
 bool GPU::getEnabled() {
@@ -372,8 +399,12 @@ bool GPU::getEnabled() {
 	return enabled;
 }
 
-void GPU::checkErr(const char *id, cl_int err)
+void GPU::checkErr(const char *id, int err)
 {
+#ifndef __OPENCL__  
+        printf("GPU - OPENCL is not supported in this platform!!!\n");
+        return;
+#else 
 	switch(err)
 	{
 		case CL_SUCCESS:                                    break;
@@ -425,6 +456,7 @@ void GPU::checkErr(const char *id, cl_int err)
 		case CL_INVALID_GLOBAL_WORK_SIZE:                   printf("%s -> CL_INVALID_GLOBAL_WORK_SIZE\n", id); break;
 		default:                                            printf("%s -> Unknown\n", id);
 	}
+#endif
 }
 
 

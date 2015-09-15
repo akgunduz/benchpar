@@ -16,12 +16,15 @@ enum MULTYPE {
 	MULTYPE_CPU_TILED,
 	MULTYPE_CPU_TILED_BASIC,
 	MULTYPE_CPU_TILED_OMP,
-
-	MULTYPE_GPU_STD,
+        MULTYPE_CPU_MAX,
+#ifdef __OPENCL__
+	MULTYPE_GPU_STD = MULTYPE_CPU_MAX,
 	MULTYPE_GPU_VEC4,
 	MULTYPE_GPU_VEC8,
-
-	MULTYPE_MAX,
+        MULTYPE_MAX
+#else
+        MULTYPE_MAX = MULTYPE_CPU_MAX,
+#endif
 };
 
 
@@ -49,12 +52,13 @@ public:
 	bool multiplyCPU_TILED(Matrix *, GPU *);
 	bool multiplyCPU_TILED_BASIC(Matrix *, GPU *);
 	bool multiplyCPU_TILED_OMP(Matrix *, GPU *);
+#ifdef __OPENCL__
 	bool multiplyGPU_STD(Matrix *, GPU *);
 	bool multiplyGPU_VEC4(Matrix *, GPU *);
 	bool multiplyGPU_VEC8(Matrix *, GPU *);
 
 	bool multiplyGPU(Matrix *ref, int type, GPU *);
-
+#endif
 	void create(uint32_t row, uint32_t col);
 	bool compare(Matrix *);
 	bool check(Matrix *ref);

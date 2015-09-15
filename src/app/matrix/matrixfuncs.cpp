@@ -97,7 +97,7 @@ bool Matrix::multiplyCPU_TILED_OMP(Matrix *calculated, GPU *gpu) {
 
 	return true;
 }
-
+#ifdef __OPENCL__
 bool Matrix::multiplyGPU_STD(Matrix *calculated, GPU *gpu) {
 
 	return multiplyGPU(calculated, MULTYPE_GPU_STD, gpu);
@@ -118,7 +118,7 @@ bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 	if (!gpu->getEnabled()) {
 		return false;
 	}
-
+#ifdef __OPENCL__
 	cl_int errCode;
 
 	cl_mem d_C = clCreateBuffer(gpu->clGPUContext,
@@ -146,6 +146,9 @@ bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 	gpu->globalWorkSize[0] = B->col;
 	gpu->globalWorkSize[1] = row;
 
+	gpu->localWorkSize[0] = 4;
+	gpu->localWorkSize[1] = 4;
+
 	int colVec = col / funcList[mulType].divider;
 
 	errCode = clSetKernelArg(clKernel, 0, sizeof(cl_mem), (void *) &d_A);
@@ -159,7 +162,7 @@ bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 			2,
 			NULL,
 			gpu->globalWorkSize,
-			NULL, //localWorkSize,
+			gpu->localWorkSize,
 			0,
 			NULL,
 			NULL);
@@ -184,6 +187,7 @@ bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 	clReleaseMemObject(d_B);
 
 	clReleaseKernel(clKernel);
-
+#endif
 	return true;
 }
+#endif

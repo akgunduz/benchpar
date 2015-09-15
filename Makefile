@@ -48,9 +48,31 @@ CMD_FILES = $(FILES) \
 OSX_FILES = $(FILES) \
 		power/hid_apple.cpp 
 
-C15_FILES = $(FILES) \
+ARM_FILES = $(FILES) \
 		power/hid_libusb.cpp \
 		power/power_ina.cpp
+
+
+C9_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
+
+C9_OBJECTS_PATH = Objects/c9
+
+C9_CFLAGS = $(CFLAGS) -O3 -D__ARM__ -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=hard -mfpu=neon \
+	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
+	-I$(TOOLCHAIN_PATH)/libs/c9/$(GCC_VERSION)/include
+
+C9_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/lib \
+	-L$(TOOLCHAIN_PATH)/libs/c9/$(GCC_VERSION)/lib $(LDFLAGS) -lusb-1.0
+
+C9_FILES_DIR = $(addprefix $(C9_OBJECTS_PATH)/, $(sort $(dir $(ARM_FILES))))
+
+C9_EXECUTABLE = $(EXECUTABLE)_c9
+
+C9_SOURCES = $(addprefix $(SOURCE_PATH)/, $(ARM_FILES))
+
+C9_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(C9_OBJECTS_PATH)/%.o, $(C9_SOURCES))
+
+C9_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(C9_OBJECTS_PATH)/%.d, $(C9_SOURCES))
 
 
 
@@ -58,18 +80,18 @@ C15_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_
 
 C15_OBJECTS_PATH = Objects/c15
 
-C15_CFLAGS = $(CFLAGS) -O3 -D__C15__ -D__ARM__ -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
+C15_CFLAGS = $(CFLAGS) -O3 -D__OPENCL__ -D__ARM__ -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/include
 
 C15_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/lib \
 	-L$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/lib $(LDFLAGS) -lOpenCL -lusb-1.0
 
-C15_FILES_DIR = $(addprefix $(C15_OBJECTS_PATH)/, $(sort $(dir $(C15_FILES))))
+C15_FILES_DIR = $(addprefix $(C15_OBJECTS_PATH)/, $(sort $(dir $(ARM_FILES))))
 
 C15_EXECUTABLE = $(EXECUTABLE)_c15
 
-C15_SOURCES = $(addprefix $(SOURCE_PATH)/, $(C15_FILES))
+C15_SOURCES = $(addprefix $(SOURCE_PATH)/, $(ARM_FILES))
 
 C15_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(C15_OBJECTS_PATH)/%.o, $(C15_SOURCES))
 
@@ -81,7 +103,7 @@ CMD_CC = g++
 
 CMD_OBJECTS_PATH = Objects/cmd
 
-CMD_CFLAGS = $(CFLAGS) -O3 -mavx
+CMD_CFLAGS = $(CFLAGS) -O3 -mavx -D__OPENCL__ 
 
 CMD_LDFLAGS = -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu $(LDFLAGS) -lOpenCL -ludev
 
@@ -101,7 +123,7 @@ OSX_CC = clang-omp++
 
 OSX_OBJECTS_PATH = Objects/osx
 
-OSX_CFLAGS = $(CFLAGS) -O3 -mavx
+OSX_CFLAGS = $(CFLAGS) -O3 -D__OPENCL__ -mavx
 
 OSX_LDFLAGS = -L/usr/local/lib $(LDFLAGS) -framework OpenCL -framework IOKit -framework CoreFoundation
 
@@ -154,6 +176,21 @@ $(CMD_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
 	$(CMD_CC) $(CMD_CFLAGS) -c -o $@ $<
 
 cmd: $(CMD_OBJECTS_PATH) $(EXEC_PATH) $(CMD_EXECUTABLE) $(CMD_DEPENDENCIES)
+
+
+$(C9_OBJECTS_PATH):
+	@mkdir -p $(C9_FILES_DIR)
+
+$(C9_EXECUTABLE): $(C9_OBJECTS)
+	$(C9_CC) -o $(EXEC_PATH)/$@ $^ $(C9_LDFLAGS) 
+
+$(C9_OBJECTS_PATH)/%.d: $(SOURCE_PATH)/%.cpp
+	$(C9_CC) $(C9_CFLAGS) -MM -MT $(C9_OBJECTS_PATH)/$*.o $< >> $@
+
+$(C9_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
+	$(C9_CC) $(C9_CFLAGS) -c -o $@ $<
+
+c9: $(C9_OBJECTS_PATH) $(EXEC_PATH) $(C9_EXECUTABLE) $(C9_DEPENDENCIES)
 
 
 

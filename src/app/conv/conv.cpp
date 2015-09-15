@@ -76,8 +76,9 @@ void Conv::initFuncs() {
 	funcList = new FuncList[CONVTYPE_MAX];
 	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", "", 1, (fFuncs)&Conv::convCPU_STD);
 	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", "", 1, (fFuncs)&Conv::convCPU_OMP);
+#ifdef __OPENCL__
 	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", "", 1, (fFuncs)&Conv::convGPU_STD);
-
+#endif
 }
 
 bool Conv::allocMem(uint32_t row, uint32_t col) {

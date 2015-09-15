@@ -134,7 +134,7 @@ bool Scan::scanCPU_OMP_SSEp2_SSEp1(Scan *calculated, GPU *gpu) {
 
 #endif
 
-
+#ifdef __OPENCL__
 bool Scan::scanGPU_STD(Scan *calculated, GPU *gpu) {
 
 	return scanGPU(calculated, SCANTYPE_GPU_STD, gpu);
@@ -214,3 +214,4 @@ bool Scan::scanGPU(Scan *calculated, int type, GPU *gpu) {
 */
 	return true;
 }
+#endif
