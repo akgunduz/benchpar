@@ -8,8 +8,8 @@
 
 #include "matrixapp.h"
 
-MatrixApp::MatrixApp(CPU *c, GPU *g, Power *pw) :
-		App(c, g, pw) {
+MatrixApp::MatrixApp(CPU *c, GPU *g, Power *pw, const char *path) :
+		App(c, g, pw, path) {
 
 	loadGPUKernel();
 }
@@ -42,7 +42,7 @@ bool MatrixApp::loadGPUKernel() {
 
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/matrix.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/matrix.cl", getPath());
 
 	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
 
@@ -274,6 +274,7 @@ bool MatrixApp::processList(char fileInputs[][255], int size) {
 
 bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
+        char dirPath[PATH_MAX];
 	char fileInputs[MAX_FILE_COUNT][255];
 	int fileID = 0;
 	int fileIndex = 0;
@@ -301,11 +302,11 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 				if (fileID == 0 || fileIndex > 0) {
 					fileID = 0xFF;
 				}
-				sprintf(fileInputs[fileIndex++], "matrix/MatrixInput_%s", argv[i]);
-
+				sprintf(fileInputs[fileIndex++], "%s/matrix/MatrixInput_%s", getPath(), argv[i]);
+                                
 			} else {
 				fileID = 0xFF;
-				sprintf(fileInputs[fileIndex++], "matrix/%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "%s/matrix/%s", getPath(), argv[i]);
 			}
 		}
 
@@ -316,10 +317,12 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	}
 
 	if (fileID == 0) {
+                
+                sprintf(dirPath, "%s/matrix", getPath());
 
 		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
 
-		status = processDir("matrix");
+		status = processDir(dirPath);
 
 	} else {
 
@@ -341,7 +344,7 @@ bool MatrixApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
 
 	Matrix *A = new Matrix(row, col, B, true);
 
-	A->printToFile(printID);
+	A->printToFile(getPath(), printID);
 
 	delete A;
 	return true;

@@ -16,7 +16,7 @@ class MatrixApp : public App {
 
 public:
 
-	MatrixApp(CPU *c, GPU *g, Power *pw);
+	MatrixApp(CPU *c, GPU *g, Power *pw, const char *path);
 	~MatrixApp();
 
 	virtual bool loadGPUKernel();

@@ -64,15 +64,15 @@ Scan::~Scan() {
 void Scan::initFuncs() {
 
 	funcList = new FuncList[SCANTYPE_MAX];
-	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", "", 1, (fFuncs)&Scan::scanCPU_STD);
+	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", (fFuncs)&Scan::scanCPU_STD, 0);
 #ifndef __ARM__
-	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", "", 1, (fFuncs)&Scan::scanCPU_AVX);
-	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", "", 1, (fFuncs)&Scan::scanCPU_SSE);
-	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", "", 1, (fFuncs)&Scan::scanCPU_OMP_SSE);
-	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", "", 1, (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1);
+	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", (fFuncs)&Scan::scanCPU_AVX, 0);
+	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", (fFuncs)&Scan::scanCPU_SSE, 0);
+	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", (fFuncs)&Scan::scanCPU_OMP_SSE, 0);
+	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1, 0);
 #endif
 #ifdef __OPENCL__
-	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", "", 1, (fFuncs)&Scan::scanGPU_STD);
+	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", (fFuncs)&Scan::scanGPU_STD, 0);
 #endif
 }
 
@@ -140,9 +140,9 @@ void Scan::printOut() {
 	}
 }
 
-bool Scan::printToFile(uint32_t printID) {
+bool Scan::printToFile(const char *path, uint32_t printID) {
 
-	std::string file(getcwd(NULL, 0));
+	std::string file(path);
 	file.append("/scan/ScanInput_" + std::to_string(printID));
 	FILE *fd = fopen(file.c_str(), "w");
 	if (!fd) {

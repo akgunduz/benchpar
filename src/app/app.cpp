@@ -11,32 +11,32 @@
 #include "convapp.h"
 #include "scanapp.h"
 
-App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power) {
+App *App::newInstance(APP_MODES mode, CPU *cpu, GPU *gpu, Power *power, const char *path) {
 
 	App *app = NULL;
 
 	switch(mode) {
 		case MATRIX_MODE:
 		default:
-			app = new MatrixApp(cpu, gpu, power);
+			app = new MatrixApp(cpu, gpu, power, path);
 			break;
 		case SCAN_MODE:
-			app = new ScanApp(cpu, gpu, power);
+			app = new ScanApp(cpu, gpu, power, path);
 			break;
 		case CONV_MODE:
-			app = new ConvApp(cpu, gpu, power);
+			app = new ConvApp(cpu, gpu, power, path);
 			break;
 	}
 
 	return app;
 }
 
-App::App(CPU *c, GPU *g, Power *pw):
+App::App(CPU *c, GPU *g, Power *pw, const char *path):
 		cpu(c), gpu(g), power(pw) {
 
 	print_enabled = true;
 	repeat = 1;
-
+        setPath(path);
 };
 
 App::~App() {
@@ -97,7 +97,24 @@ bool App::printStart(const char* prefix, int fileID) {
 #if defined __APPLE__
 	strcpy(dOS, "OSX");
 #elif defined __ARM__
-	strcpy(dOS, "ARM");
+        switch(cpu->getCoreType()) {
+                case CORE_A15:
+                        strcpy(dOS, "XU3");
+                        break;
+                case CORE_A9:
+                        strcpy(dOS, "_U3");
+                        break;
+                case CORE_A8:
+                        strcpy(dOS, "BGL");
+                        break;
+                case CORE_A7:
+                        strcpy(dOS, "RSP");
+                        break;
+                default:
+                        strcpy(dOS, "ARM");
+                        break;
+        }
+	
 #else
 	strcpy(dOS, "LNX");
 #endif
@@ -109,7 +126,7 @@ bool App::printStart(const char* prefix, int fileID) {
 			ptm->tm_mday, ptm->tm_mon + 1, ptm->tm_year + 1900,
 			ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
 
-	sprintf(dFile, "%s/%s_%s_%s_%s_R%d_%s", getcwd(NULL, 0), prefix, dOS, dMode, dDir, repeat, dTime);
+	sprintf(dFile, "%s/%s_%s_%s_%s_R%d_%s", getPath(), prefix, dOS, dMode, dDir, repeat, dTime);
 
 	debugFile = fopen(dFile, "w");
 
@@ -129,6 +146,34 @@ void App::printOut(const char* format, ...) {
 	vprintf(format, arglist);
 
 	va_end(arglist);
+}
+
+bool App::endCheck(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return 0;
+    size_t lenstr = strlen(str);
+    size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
+void App::setPath(const char *ref)
+{
+        const char *pos = strrchr(ref, '/');
+        
+        strcpy(path, "");
+        
+     //   strcpy(path, getcwd(NULL, 0));
+     //   strcat(path, "/");
+        strncat(path, ref, pos - ref + 1);
+        printf("Working path : %s\n", path);
+}
+
+const char* App::getPath() 
+{
+        return path;
 }
 
 

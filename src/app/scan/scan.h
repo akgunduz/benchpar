@@ -39,7 +39,7 @@ public:
 	virtual void initFuncs();
 
 	void printOut();
-	bool printToFile(uint32_t);
+	bool printToFile(const char *, uint32_t);
 
 	bool scanCPU_STD(Scan *, GPU *);
 

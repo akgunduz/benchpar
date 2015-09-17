@@ -174,7 +174,7 @@ int main(int argc, const char *argv[]) {
 
 	Power *power = Power::newInstance(powerMode, cpu->powerCoreCount);
 
-	App *app = App::newInstance(appMode, cpu, gpu, power);
+	App *app = App::newInstance(appMode, cpu, gpu, power, argv[0]);
 
 	app->setModes(modeID, seqID, sanityID, print_enabled, time_enabled, repeat);
 

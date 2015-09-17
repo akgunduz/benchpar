@@ -46,7 +46,7 @@ public:
 	virtual void initFuncs();
 
 	void printOut();
-	bool printToFile(uint32_t);
+	bool printToFile(const char *, uint32_t);
 
 	bool multiplyCPU_STD(Matrix *, GPU *);
 	bool multiplyCPU_TILED(Matrix *, GPU *);

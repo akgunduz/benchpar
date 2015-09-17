@@ -38,6 +38,8 @@ enum CORETYPE {
 	CORE_BROADWELL,
 	CORE_A15,
 	CORE_A7,
+        CORE_A9,
+        CORE_A8,
 	CORE_MAX
 };
 
@@ -55,15 +57,16 @@ public:
 
 	const char names[CORE_MAX][30] = {
                 "CORE_UNKNOWN",
-				"CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP",
+                "CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP",
                 "CORE_IVYBRIDGE", "CORE_IVYBRIDGE_EP", 
                 "CORE_HASWELL", "CORE_HASWELL_EP", 
                 "CORE_BROADWELL", 
-                "CORE_A15", "CORE_A7"
+                "CORE_A15", "CORE_A7", "CORE_A9", "CORE_A8"
 	};
 
 	CPU();
 	bool detectCPU();
+        CORETYPE getCoreType();
 };
 
 

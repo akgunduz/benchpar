@@ -15,7 +15,7 @@ class ScanApp : public App  {
 
 public:
 
-	ScanApp(CPU *c, GPU *g, Power *pw);
+	ScanApp(CPU *c, GPU *g, Power *pw, const char *);
 	~ScanApp();
 
 	virtual bool loadGPUKernel();

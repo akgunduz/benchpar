@@ -16,7 +16,6 @@
 #define ITERATIONS 100
 
 #define KERNEL_RADIUS 2
-#define KERNEL_LENGTH (2 * KERNEL_RADIUS + 1)
 
 #define ROWS_BLOCKDIM_X 16//32
 #define ROWS_BLOCKDIM_Y 4//8
@@ -27,6 +26,8 @@
 #define COLUMNS_RESULT_STEPS 8//4
 #define COLUMNS_HALO_STEPS 1
 
+#define KERNEL_LENGTH (2 * KERNEL_RADIUS + 1)
+
 enum CONVTYPE {
 
 	CONVTYPE_CPU_STD,
@@ -34,6 +35,7 @@ enum CONVTYPE {
         CONVTYPE_CPU_MAX,
 #ifdef __OPENCL__
 	CONVTYPE_GPU_STD = CONVTYPE_CPU_MAX,
+        CONVTYPE_GPU_VEC4,
         CONVTYPE_MAX,
 #else
         CONVTYPE_MAX = CONVTYPE_CPU_MAX,
@@ -62,12 +64,13 @@ public:
 	virtual void initFuncs();
 
 	void printOut();
-	bool printToFile(uint32_t);
+	bool printToFile(const char *, uint32_t);
 
 	bool convCPU_STD(Conv *, GPU *);
 	bool convCPU_OMP(Conv *, GPU *);
 #ifdef __OPENCL__
 	bool convGPU_STD(Conv *, GPU *);
+        bool convGPU_VEC4(Conv *, GPU *);
 
 	bool convGPU(Conv *calculated, int type, GPU *);
 #endif

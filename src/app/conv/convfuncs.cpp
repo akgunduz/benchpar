@@ -91,6 +91,11 @@ bool Conv::convGPU_STD(Conv *calculated, GPU *gpu) {
 	return convGPU(calculated, CONVTYPE_GPU_STD, gpu);
 }
 
+bool Conv::convGPU_VEC4(Conv *calculated, GPU *gpu) {
+
+	return convGPU(calculated, CONVTYPE_GPU_VEC4, gpu);
+}
+
 bool Conv::convGPU(Conv *calculated, int type, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {
@@ -133,10 +138,10 @@ bool Conv::convGPU(Conv *calculated, int type, GPU *gpu) {
 	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_filter, CL_FALSE, 0, filter_length * sizeof(float), filter, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueWriteBuffer", errCode);
 
-	cl_kernel kernelConvRows = clCreateKernel(gpu->clProgram, "convolutionRows", &errCode);
+	cl_kernel kernelConvRows = clCreateKernel(gpu->clProgram, funcList[type].kernelid[0], &errCode);
 	gpu->checkErr("clCreateKernel", errCode);
 
-	cl_kernel kernelConvCols = clCreateKernel(gpu->clProgram, "convolutionColumns", &errCode);
+	cl_kernel kernelConvCols = clCreateKernel(gpu->clProgram, funcList[type].kernelid[1], &errCode);
 	gpu->checkErr("clCreateKernel", errCode);
 
 

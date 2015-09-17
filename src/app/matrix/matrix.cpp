@@ -126,15 +126,21 @@ Matrix::~Matrix() {
 
 void Matrix::initFuncs() {
 
+        const char *kernelIDs[] = {
+                "matrixMul",
+                "matrixMulVec4",
+                "matrixMulVec8"
+        };
+        
 	funcList = new FuncList[MULTYPE_MAX];
-	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", "", 1, (fFuncs)&Matrix::multiplyCPU_STD);
-	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", "", 1, (fFuncs)&Matrix::multiplyCPU_TILED);
-	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", "", 1, (fFuncs)&Matrix::multiplyCPU_TILED_BASIC);
-	funcList[MULTYPE_CPU_TILED_OMP].set("MULTYPE_CPU_TILED_OMP", "", 1, (fFuncs)&Matrix::multiplyCPU_TILED_OMP);
+	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0);
+	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0);
+	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0);
+	funcList[MULTYPE_CPU_TILED_OMP].set("MULTYPE_CPU_TILED_OMP", (fFuncs)&Matrix::multiplyCPU_TILED_OMP, 0);
 #ifdef __OPENCL__
-	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", "matrixMul", 1, (fFuncs)&Matrix::multiplyGPU_STD);
-	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", "matrixMulVec4", 1, (fFuncs)&Matrix::multiplyGPU_VEC4);
-	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", "matrixMulVec8", 1, (fFuncs)&Matrix::multiplyGPU_VEC8);
+	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", (fFuncs)&Matrix::multiplyGPU_STD, 1, &kernelIDs[0]);
+	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", (fFuncs)&Matrix::multiplyGPU_VEC4, 1, &kernelIDs[1]);
+	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, &kernelIDs[2]);
 #endif
 }
 
@@ -217,9 +223,9 @@ void Matrix::printOut() {
 }
 
 #if 0
-bool Matrix::printToFile(uint32_t printID) {
+bool Matrix::printToFile(const char *path, uint32_t printID) {
 
-	std::string file(getcwd(NULL, 0));
+	std::string file(path);
 	file.append("/MatrixInput_" + std::to_string(printID));
 	FILE *fd = fopen(file.c_str(), "w");
 	if (!fd) {
@@ -248,9 +254,9 @@ bool Matrix::printToFile(uint32_t printID) {
 }
 #endif
 
-bool Matrix::printToFile(uint32_t printID) {
+bool Matrix::printToFile(const char *path, uint32_t printID) {
 
-	std::string file(getcwd(NULL, 0));
+	std::string file(path);
 	file.append("/matrix/MatrixInput_" + std::to_string(printID));
 	FILE *fd = fopen(file.c_str(), "w");
 	if (!fd) {

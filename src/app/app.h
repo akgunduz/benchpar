@@ -28,6 +28,8 @@ protected:
 	Power *power;
 	GPU *gpu;
 	CPU *cpu;
+        
+        char path[PATH_MAX];
 
 	bool print_enabled;
 	bool time_enabled;
@@ -44,13 +46,16 @@ protected:
 
 protected:
 
-	App(CPU *c, GPU *g, Power *pw);
+	App(CPU *c, GPU *g, Power *pw, const char *path);
 
 public :
 
-	static App* newInstance(APP_MODES, CPU*, GPU*, Power*);
+	static App* newInstance(APP_MODES, CPU*, GPU*, Power*, const char *);
 
 	void setModes(int, int, int, bool, bool, int);
+        void setPath(const char *ref);
+        const char *getPath();
+        bool endCheck(const char *, const char *);
 
 	virtual int getFuncModeCount(FUNCTYPE) = 0;
 	virtual bool creator(uint32_t, uint32_t, uint32_t) = 0;

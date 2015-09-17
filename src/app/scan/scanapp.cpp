@@ -8,8 +8,8 @@
 
 #include "scanapp.h"
 
-ScanApp::ScanApp(CPU *c, GPU *g, Power *pw) :
-		App(c, g, pw) {
+ScanApp::ScanApp(CPU *c, GPU *g, Power *pw, const char *path) :
+		App(c, g, pw, path) {
 
 	loadGPUKernel();
 }
@@ -41,7 +41,7 @@ bool ScanApp::loadGPUKernel() {
 #ifdef __OPENCL__
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/scan.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/scan.cl", getPath());
 
 	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
 
@@ -275,6 +275,7 @@ bool ScanApp::processList(char fileInputs[][255], int size) {
 
 bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
+        char dirPath[PATH_MAX];
 	char fileInputs[MAX_FILE_COUNT][255];
 	int fileID = 0;
 	int fileIndex = 0;
@@ -302,11 +303,11 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 				if (fileID == 0 || fileIndex > 0) {
 					fileID = 0xFF;
 				}
-				sprintf(fileInputs[fileIndex++], "scan/ScanInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "%s/scan/ScanInput_%s", getPath(), argv[i]);
 
 			} else {
 				fileID = 0xFF;
-				sprintf(fileInputs[fileIndex++], "scan/%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "%s/scan/%s", getPath(), argv[i]);
 			}
 		}
 
@@ -317,10 +318,12 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	}
 
 	if (fileID == 0) {
+                
+                sprintf(dirPath, "%s/scan", getPath());
 
 		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
 
-		status = processDir("scan");
+		status = processDir(dirPath);
 
 	} else {
 
@@ -340,7 +343,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 bool ScanApp::creator(uint32_t printID, uint32_t size, uint32_t unused) {
 
 	Scan *A = new Scan(size, true);
-	A->printToFile(printID);
+	A->printToFile(getPath(), printID);
 	delete A;
 	return true;
 }

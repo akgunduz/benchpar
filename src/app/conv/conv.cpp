@@ -74,10 +74,19 @@ Conv::~Conv() {
 void Conv::initFuncs() {
 
 	funcList = new FuncList[CONVTYPE_MAX];
-	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", "", 1, (fFuncs)&Conv::convCPU_STD);
-	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", "", 1, (fFuncs)&Conv::convCPU_OMP);
+        const char *kernelIDs[] = {
+                "convRows5_float",
+                "convRows5_float",
+                
+                "convRows5Vec4_float",
+                "convCols5Vec4_float",
+        };
+        
+	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0);
+	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", (fFuncs)&Conv::convCPU_OMP, 0);
 #ifdef __OPENCL__
-	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", "", 1, (fFuncs)&Conv::convGPU_STD);
+	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", (fFuncs)&Conv::convGPU_STD, 2, &kernelIDs[0]);
+        funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, &kernelIDs[/*2*/0]);
 #endif
 }
 
@@ -168,9 +177,9 @@ void Conv::printOut() {
 	}
 }
 
-bool Conv::printToFile(uint32_t printID) {
+bool Conv::printToFile(const char *path, uint32_t printID) {
 
-	std::string file(getcwd(NULL, 0));
+	std::string file(path);
 	file.append("/conv/ConvInput_" + std::to_string(printID));
 	FILE *fd = fopen(file.c_str(), "w");
 	if (!fd) {

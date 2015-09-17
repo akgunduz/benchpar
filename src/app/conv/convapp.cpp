@@ -8,8 +8,8 @@
 
 #include "convapp.h"
 
-ConvApp::ConvApp(CPU *c, GPU *g, Power *pw) :
-		App(c, g, pw) {
+ConvApp::ConvApp(CPU *c, GPU *g, Power *pw, const char *path) :
+		App(c, g, pw, path) {
 
 	loadGPUKernel();
 }
@@ -41,10 +41,25 @@ bool ConvApp::loadGPUKernel() {
 
 	char file[PATH_LENGTH];
 
-	sprintf(file, "%s/conv.cl", getcwd(NULL, 0));
+	sprintf(file, "%s/conv.cl", getPath());
 
-	char buildOptions[2048];
-	sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable");
+        char buildOptions[2048];
+        sprintf(buildOptions, "\
+                                     -cl-fast-relaxed-math -cl-mad-enable \
+                                    -D KERNEL_RADIUS=%u\
+                                    -D ROWS_BLOCKDIM_X=%u -D COLUMNS_BLOCKDIM_X=%u\
+                                    -D ROWS_BLOCKDIM_Y=%u -D COLUMNS_BLOCKDIM_Y=%u\
+                                    -D ROWS_RESULT_STEPS=%u -D COLUMNS_RESULT_STEPS=%u\
+                                    -D ROWS_HALO_STEPS=%u -D COLUMNS_HALO_STEPS=%u\
+                                    ",
+                                    KERNEL_RADIUS,
+                                    ROWS_BLOCKDIM_X,   COLUMNS_BLOCKDIM_X,
+                                    ROWS_BLOCKDIM_Y,   COLUMNS_BLOCKDIM_Y,
+                                    ROWS_RESULT_STEPS, COLUMNS_RESULT_STEPS,
+                                    ROWS_HALO_STEPS,   COLUMNS_HALO_STEPS
+                                    );
+        
+        //sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable");
 
 	bool res = gpu->createBuildProgramFromFile(0, buildOptions, file);
 	if (!res) {
@@ -224,7 +239,7 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 
 	} catch(const std::runtime_error e) {
 
-		printOut("Scan A could not created!!!, Exception : %s\n", e.what());
+		printOut("Conv A could not created!!!, Exception : %s\n", e.what());
 		return false;
 	}
 
@@ -300,7 +315,8 @@ bool ConvApp::processDir(const char path[255], char filterInput[255]) {
 			continue;
 		}
 
-		if (strncmp(ent->d_name, "ConvInput", 9) != 0) {
+		if ((strncmp(ent->d_name, "ConvInput", 9) != 0) || 
+                                (endCheck(ent->d_name, ".md5"))) {
 			continue;
 		}
 
@@ -330,6 +346,7 @@ bool ConvApp::processList(char fileInputs[][255], char filterInput[255], int siz
 
 bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
+        char dirPath[PATH_MAX];
 	char filterInput[255];
 	char fileInputs[MAX_FILE_COUNT][255];
 	int fileID = 0;
@@ -352,9 +369,9 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 		} else if (!strcmp (argv[i], "-f")) {
 
 			if (isdigit(argv[++i][0])) {
-				sprintf(filterInput, "conv/FilterInput_%s", argv[i]);
+				sprintf(filterInput, "%s/conv/FilterInput_%s", getPath(), argv[i]);
 			} else {
-				sprintf(filterInput, "conv/%s", argv[i]);
+				sprintf(filterInput, "%s/conv/%s", getPath(), argv[i]);
 			}
 
 		} else {
@@ -368,11 +385,11 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 				if (fileID == 0 || fileIndex > 0) {
 					fileID = 0xFF;
 				}
-				sprintf(fileInputs[fileIndex++], "conv/ConvInput_%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "%s/conv/ConvInput_%s", getPath(), argv[i]);
 
 			} else {
 				fileID = 0xFF;
-				sprintf(fileInputs[fileIndex++], "conv/%s", argv[i]);
+				sprintf(fileInputs[fileIndex++], "%s/conv/%s", getPath(), argv[i]);
 			}
 
 		}
@@ -384,9 +401,11 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	if (fileID == 0) {
 
+                sprintf(dirPath, "%s/conv", getPath());
+
 		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
 
-		status = processDir("conv", filterInput);
+		status = processDir(dirPath, filterInput);
 
 	} else {
 
@@ -406,7 +425,7 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 bool ConvApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
 
 	Conv *A = new Conv(row, col, NULL, 0, true);
-	A->printToFile(printID);
+	A->printToFile(getPath(), printID);
 	delete A;
 	return true;
 }

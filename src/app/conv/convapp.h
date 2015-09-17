@@ -15,7 +15,7 @@ class ConvApp : public App  {
 
 public:
 
-	ConvApp(CPU *c, GPU *g, Power *pw);
+	ConvApp(CPU *c, GPU *g, Power *pw, const char *path);
 	~ConvApp();
 
 	virtual bool loadGPUKernel();

@@ -113,7 +113,7 @@ bool Matrix::multiplyGPU_VEC8(Matrix *calculated, GPU *gpu) {
 	return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
 }
 
-bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
+bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {
 		return false;
@@ -140,7 +140,7 @@ bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 			&errCode);
 
 	cl_kernel clKernel = clCreateKernel(gpu->clProgram,
-			funcList[mulType].kernelid, &errCode);
+			funcList[type].kernelid[0], &errCode);
 	gpu->checkErr("clCreateKernel", errCode);
 
 	gpu->globalWorkSize[0] = B->col;
@@ -149,7 +149,7 @@ bool Matrix::multiplyGPU(Matrix *calculated, int mulType, GPU *gpu) {
 	gpu->localWorkSize[0] = 4;
 	gpu->localWorkSize[1] = 4;
 
-	int colVec = col / funcList[mulType].divider;
+	int colVec = col;
 
 	errCode = clSetKernelArg(clKernel, 0, sizeof(cl_mem), (void *) &d_A);
 	errCode |= clSetKernelArg(clKernel, 1, sizeof(cl_mem), (void *) &d_B);

@@ -120,3 +120,8 @@ bool CPU::detectCPU() {
 	return true;
 }
 
+CORETYPE CPU::getCoreType()
+{
+        return cores[coreCount - 1].type;
+}
+

@@ -9,6 +9,8 @@
 
 #include "gpu.h"
 
+#define MAX_ARGUMENT 10
+
 class Function;
 
 typedef bool (Function::*fFuncs)(Function *, GPU *);
@@ -18,17 +20,13 @@ class FuncList {
 public:
 
 	const char *id;
-	const char *kernelid;
-	int divider;
+	char kernelid[MAX_ARGUMENT][PATH_MAX];
+	int argument[MAX_ARGUMENT];
+        int argCount = 0;
 	fFuncs f;
 
-	FuncList(){}
-	void set(const char *id, const char *kernelid, int divider, fFuncs func) {
-		this->id = id;
-		this->kernelid = kernelid;
-		this->divider = divider;
-		this->f = func;
-	};
+	FuncList();
+        void set(const char *id, fFuncs func, int argCount, const char *kernelid[] = NULL, int argument[] = NULL);
 };
 
 class Function {

@@ -52,6 +52,28 @@ ARM_FILES = $(FILES) \
 		power/hid_libusb.cpp \
 		power/power_ina.cpp
 
+ARM_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
+
+ARM_OBJECTS_PATH = Objects/arm
+
+ARM_CFLAGS = $(CFLAGS) -O3 -D__ARM__ -mfloat-abi=hard -mfpu=neon \
+	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
+	-I$(TOOLCHAIN_PATH)/libs/arm/$(GCC_VERSION)/include
+
+ARM_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/lib \
+	-L$(TOOLCHAIN_PATH)/libs/arm/$(GCC_VERSION)/lib $(LDFLAGS) -lusb-1.0
+
+ARM_FILES_DIR = $(addprefix $(ARM_OBJECTS_PATH)/, $(sort $(dir $(ARM_FILES))))
+
+ARM_EXECUTABLE = $(EXECUTABLE)_arm
+
+ARM_SOURCES = $(addprefix $(SOURCE_PATH)/, $(ARM_FILES))
+
+ARM_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(ARM_OBJECTS_PATH)/%.o, $(ARM_SOURCES))
+
+ARM_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(ARM_OBJECTS_PATH)/%.d, $(ARM_SOURCES))
+
+
 
 C9_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
 
@@ -176,6 +198,23 @@ $(CMD_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
 	$(CMD_CC) $(CMD_CFLAGS) -c -o $@ $<
 
 cmd: $(CMD_OBJECTS_PATH) $(EXEC_PATH) $(CMD_EXECUTABLE) $(CMD_DEPENDENCIES)
+	
+	
+	
+$(ARM_OBJECTS_PATH):
+	@mkdir -p $(ARM_FILES_DIR)
+
+$(ARM_EXECUTABLE): $(ARM_OBJECTS)
+	$(ARM_CC) -o $(EXEC_PATH)/$@ $^ $(ARM_LDFLAGS) 
+
+$(ARM_OBJECTS_PATH)/%.d: $(SOURCE_PATH)/%.cpp
+	$(ARM_CC) $(ARM_CFLAGS) -MM -MT $(ARM_OBJECTS_PATH)/$*.o $< >> $@
+
+$(ARM_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
+	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
+
+arm: $(ARM_OBJECTS_PATH) $(EXEC_PATH) $(ARM_EXECUTABLE) $(ARM_DEPENDENCIES)
+
 
 
 $(C9_OBJECTS_PATH):
