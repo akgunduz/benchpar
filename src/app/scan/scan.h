@@ -9,6 +9,20 @@
 
 #include "function.h"
 
+#define SIZE 512 * 1024
+#define ALIGNMENT 16
+#define RANGE 10
+
+#define WORKGROUP_SIZE 256
+
+#define ARRAY_LENGTH 256 * 1024 //(8 * WORKGROUP_SIZE)
+
+#define MAX_BATCH_ELEMENTS   (64 * 1048576)
+#define MIN_SHORT_ARRAY_SIZE (4)
+#define MAX_SHORT_ARRAY_SIZE (4 * WORKGROUP_SIZE)
+#define MIN_LARGE_ARRAY_SIZE (8 * WORKGROUP_SIZE)
+#define MAX_LARGE_ARRAY_SIZE (4 * WORKGROUP_SIZE * WORKGROUP_SIZE)
+
 enum SCANTYPE {
 	SCANTYPE_CPU_STD,
 #ifndef __ARM__
@@ -32,14 +46,15 @@ class Scan : public Function {
 
 public:
 
-	Scan(uint32_t size, bool prepare = false);
-	Scan(std::string path);
+	Scan(uint32_t size, GPU *, bool prepare = false);
+	Scan(std::string path, GPU *);
 	~Scan();
 
 	virtual void initFuncs();
 
-	void printOut();
 	bool printToFile(const char *, uint32_t);
+        
+        unsigned int iSnapUp(unsigned int, unsigned int);
 
 	bool scanCPU_STD(Scan *, GPU *);
 

@@ -118,76 +118,58 @@ bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 	if (!gpu->getEnabled()) {
 		return false;
 	}
-#ifdef __OPENCL__
+
 	cl_int errCode;
 
-	cl_mem d_C = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_WRITE,
-			(size_t) (calculated->mem_size),
-			NULL,
-			&errCode);
+        size_t  localWorkSize[2], globalWorkSize[2];
+        
+	globalWorkSize[0] = B->col;
+	globalWorkSize[1] = row;
 
-	cl_mem d_A = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			(size_t) (mem_size),
-			mem,
-			&errCode);
-
-	cl_mem d_B = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			(size_t) (B->mem_size),
-			B->mem,
-			&errCode);
-
-	cl_kernel clKernel = clCreateKernel(gpu->clProgram,
-			funcList[type].kernelid[0], &errCode);
-	gpu->checkErr("clCreateKernel", errCode);
-
-	gpu->globalWorkSize[0] = B->col;
-	gpu->globalWorkSize[1] = row;
-
-	gpu->localWorkSize[0] = 4;
-	gpu->localWorkSize[1] = 4;
+	localWorkSize[0] = 4;
+	localWorkSize[1] = 4;
 
 	int colVec = col;
+        
+#ifndef __ARM__
+	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_mem, CL_FALSE, 0, mem_size, mem, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueWriteBuffer", errCode);
+        
+        errCode = clEnqueueWriteBuffer(gpu->clCommandQue, B->buf_mem, CL_FALSE, 0, mem_size, B->mem, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueWriteBuffer", errCode);
+#else
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, B->buf_mem, B->mem, 0, NULL, NULL);
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, calculated->buf_mem, calculated->mem, 0, NULL, NULL);
+#endif
 
-	errCode = clSetKernelArg(clKernel, 0, sizeof(cl_mem), (void *) &d_A);
-	errCode |= clSetKernelArg(clKernel, 1, sizeof(cl_mem), (void *) &d_B);
-	errCode |= clSetKernelArg(clKernel, 2, sizeof(cl_mem), (void *) &d_C);
-	errCode |= clSetKernelArg(clKernel, 3, sizeof(int), (void *) &colVec);
-	errCode |= clSetKernelArg(clKernel, 4, sizeof(int), (void *) &B->col);
-
-	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue,
-			clKernel,
-			2,
-			NULL,
-			gpu->globalWorkSize,
-			gpu->localWorkSize,
-			0,
-			NULL,
-			NULL);
-	gpu->checkErr("clEnqueueNDRangeKernel", errCode);
-
-	//retrieve result from device
-	errCode = clEnqueueReadBuffer(gpu->clCommandQue,
-			d_C,
-			CL_TRUE,
-			0,
-			calculated->mem_size,
-			calculated->mem,
-			0,
-			NULL,
-			NULL);
-	gpu->checkErr("clEnqueueReadBuffer", errCode);
-
+	errCode = clSetKernelArg(funcList[type].kernels[0], 0, sizeof(cl_mem), (void *) &buf_mem);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 1, sizeof(cl_mem), (void *) &B->buf_mem);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 2, sizeof(cl_mem), (void *) &calculated->buf_mem);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 3, sizeof(int), (void *) &colVec);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 4, sizeof(int), (void *) &B->col);
+        
+        errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[0], 2, 
+                NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueNDRangeKernel", errCode);
+        
+#ifndef __ARM__
+        errCode = clEnqueueReadBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE, 0, 
+                calculated->mem_size, calculated->mem, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueReadBuffer", errCode);
+#else
+        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        
+        B->mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, B->buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        
+        calculated->mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+#endif
+        
 	clFinish(gpu->clCommandQue);
 
-	clReleaseMemObject(d_A);
-	clReleaseMemObject(d_C);
-	clReleaseMemObject(d_B);
-
-	clReleaseKernel(clKernel);
-#endif
 	return true;
 }
 #endif

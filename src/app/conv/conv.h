@@ -13,7 +13,6 @@
 #define WIDTH 1024
 #define FILTER_LENGTH 5
 #define RANGE 10
-#define ITERATIONS 100
 
 #define KERNEL_RADIUS 2
 
@@ -21,7 +20,7 @@
 #define ROWS_BLOCKDIM_Y 4//8
 #define COLUMNS_BLOCKDIM_X 16//32
 #define COLUMNS_BLOCKDIM_Y 8
-#define ROWS_RESULT_STEPS 8//4
+#define ROWS_RESULT_STEPS 4
 #define ROWS_HALO_STEPS 1
 #define COLUMNS_RESULT_STEPS 8//4
 #define COLUMNS_HALO_STEPS 1
@@ -57,13 +56,12 @@ class Conv : public Function {
 
 public:
 
-	Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bool prepare = false);
-	Conv(std::string path, float *filter, uint32_t filter_length);
+	Conv(uint32_t row, uint32_t col, GPU *, float *filter, uint32_t filter_length, bool prepare = false);
+	Conv(std::string path, GPU *, float *filter, uint32_t filter_length);
 	~Conv();
 
 	virtual void initFuncs();
 
-	void printOut();
 	bool printToFile(const char *, uint32_t);
 
 	bool convCPU_STD(Conv *, GPU *);

@@ -27,8 +27,6 @@ public:
 	cl_context clGPUContext;
 
 	cl_command_queue clCommandQue;
-
-	size_t  localWorkSize[2], globalWorkSize[2];
         
 #endif
 	void checkErr(const char *, int);

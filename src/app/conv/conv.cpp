@@ -7,8 +7,12 @@
 
 #define EPSILON 0.001f //FLT_MIN
 
-Conv::Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bool prepare) {
+Conv::Conv(uint32_t row, uint32_t col, GPU *gpu, float *filter,
+                uint32_t filter_length, bool prepare)    :
+		Function(gpu) {
 
+        initFuncs();
+        
 	this->row = row;
 	this->col = col;
 	this->filter_length = filter_length;
@@ -22,12 +26,13 @@ Conv::Conv(uint32_t row, uint32_t col, float *filter, uint32_t filter_length, bo
 	if (prepare) {
 		create(row, col);
 	}
-
-	initFuncs();
 }
 
-Conv::Conv(std::string path, float *filter, uint32_t filter_length) {
+Conv::Conv(std::string path, GPU *gpu, float *filter, uint32_t filter_length)    :
+		Function(gpu) {
 
+	initFuncs();
+        
 	FILE *fd = fopen(path.c_str(), "r");
 	if (!fd) {
 		throw std::runtime_error("File could not opened!");
@@ -60,28 +65,32 @@ Conv::Conv(std::string path, float *filter, uint32_t filter_length) {
 	}
 
 	fclose(fd);
-
-	initFuncs();
 }
 
 Conv::~Conv() {
 
-	free(mem);
-
-	delete[] funcList;
+#if defined (__ARM__) && defined (__OPENCL__)
+        clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        clReleaseMemObject(buf_mem);
+#else
+#ifdef __OPENCL__
+        clReleaseMemObject(buf_mem); 
+#endif
+        free(mem);
+#endif
+        
+        delete[] funcList;
 }
 
 void Conv::initFuncs() {
 
-	funcList = new FuncList[CONVTYPE_MAX];
         const char *kernelIDs[] = {
                 "convRows5_float",
                 "convRows5_float",
-                
                 "convRows5Vec4_float",
                 "convCols5Vec4_float",
         };
-        
+        funcList = FuncList::createArray(CONVTYPE_MAX, gpu);
 	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0);
 	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", (fFuncs)&Conv::convCPU_OMP, 0);
 #ifdef __OPENCL__
@@ -95,30 +104,46 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
 	size = (size_t) (row * col);
 	mem_size = sizeof(float) * size;
 
+#if defined (__ARM__) && defined (__OPENCL__)
+        cl_int errCode;
+        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+        gpu->checkErr("clCreateBuffer", errCode);
+        
+        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        gpu->checkErr("clEnqueueMapBuffer", errCode);
+#else
 	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
 		return false;
 	}
-
-	res = posix_memalign((void**)&temp, ALIGNMENT, mem_size);
+        
+        res = posix_memalign((void**)&temp, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
-		free(mem);
+                free(mem);
 		return false;
 	}
 
 	int check = (int)((unsigned long long)mem % ALIGNMENT);
-	check |= (int)((unsigned long long)temp % ALIGNMENT);
+        check |= (int)((unsigned long long)temp % ALIGNMENT);
 	if (check != 0) {
 		free(mem);
-		free(temp);
+                free(temp);
 		printf("Alignment failed!\n");
 		return false;
 	}
-
+        
+#ifdef __OPENCL__
+        cl_int errCode;
+        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
+                mem_size, NULL, &errCode);
+        gpu->checkErr("clCreateBuffer", errCode);
+#endif
+#endif
 	return true;
-
 }
 
 void Conv::create(uint32_t row, uint32_t col) {
@@ -140,10 +165,12 @@ void Conv::create(uint32_t row, uint32_t col) {
 bool Conv::compare(Conv *ref) {
 
 	printf("Comparing Convs\n");
+        
+        consoleOut(10);
 
-	for (int i = 0; i < row; i++) {
+	for (int i = 2; i < row - 2; i++) {
 
-		for (int j = 0; j < col; j++) {
+		for (int j = 2; j < col - 2; j++) {
 
 			float val1 = *(mem + i * col + j);
 			float val2 = *(ref->mem + i * col + j);
@@ -157,24 +184,6 @@ bool Conv::compare(Conv *ref) {
 	}
 
 	return true;
-}
-
-void Conv::printOut() {
-
-	printf("Printing Out Conv in Sizes; Row: %d, Column: %d\n", row, col);
-
-	for (int i = 0; i < row; i++) {
-
-		for (int j = 0; j < col; j++) {
-
-			printf("%f", *(mem + i * col + j));
-			if (j < col - 1) {
-				printf(",");
-			}
-
-		}
-		printf("\n");
-	}
 }
 
 bool Conv::printToFile(const char *path, uint32_t printID) {

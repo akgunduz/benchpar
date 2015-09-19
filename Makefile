@@ -125,7 +125,7 @@ CMD_CC = g++
 
 CMD_OBJECTS_PATH = Objects/cmd
 
-CMD_CFLAGS = $(CFLAGS) -O3 -mavx -D__OPENCL__ 
+CMD_CFLAGS = $(CFLAGS) -O0 -mavx -D__OPENCL__ 
 
 CMD_LDFLAGS = -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu $(LDFLAGS) -lOpenCL -ludev
 

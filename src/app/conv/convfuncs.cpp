@@ -39,6 +39,8 @@ bool Conv::convCPU_STD(Conv *calculated, GPU *gpu) {
 			calculated->mem[j*col + i] = acc;
 		}
 	}
+        
+        consoleOut(10);
 
 	return true;
 }
@@ -102,99 +104,84 @@ bool Conv::convGPU(Conv *calculated, int type, GPU *gpu) {
 		return false;
 	}
         
-#ifdef __OPENCL__
 	cl_int errCode;
-
-	cl_mem buf_input = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_ONLY,
-			(size_t) (mem_size),
-			NULL,
-			&errCode);
-
-	cl_mem buf_output = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_WRITE_ONLY,
-			(size_t) (mem_size),
-			NULL,
-			&errCode);
-
-	cl_mem buf_temp = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_WRITE,
-			(size_t) (mem_size),
-			NULL,
-			&errCode);
-
-	cl_mem buf_filter = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_ONLY,
-			(size_t) (filter_length * sizeof(float)),
-			NULL,
-			&errCode);
+        cl_mem buf_temp = clCreateBuffer(gpu->clGPUContext,
+                CL_MEM_READ_WRITE,
+                (size_t) (mem_size),
+                NULL,
+                &errCode);
+        
+        cl_mem buf_filter = clCreateBuffer(gpu->clGPUContext,
+                CL_MEM_READ_ONLY,
+                (size_t) (filter_length * sizeof(float)),
+                NULL,
+                &errCode);
 
 	size_t  localWorkSizeRows[2], globalWorkSizeRows[2];
 	size_t  localWorkSizeCols[2], globalWorkSizeCols[2];
 
-	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_input, CL_FALSE, 0, mem_size, mem, 0, NULL, NULL);
+#ifndef __ARM__
+	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_mem, CL_FALSE, 0, mem_size, mem, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueWriteBuffer", errCode);
+#else
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, calculated->buf_mem, calculated->mem, 0, NULL, NULL);
+#endif
 
 	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_filter, CL_FALSE, 0, filter_length * sizeof(float), filter, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueWriteBuffer", errCode);
 
-	cl_kernel kernelConvRows = clCreateKernel(gpu->clProgram, funcList[type].kernelid[0], &errCode);
-	gpu->checkErr("clCreateKernel", errCode);
-
-	cl_kernel kernelConvCols = clCreateKernel(gpu->clProgram, funcList[type].kernelid[1], &errCode);
-	gpu->checkErr("clCreateKernel", errCode);
-
-
-	errCode  = clSetKernelArg(kernelConvRows, 0, sizeof(cl_mem), (void*)&buf_temp);
-	errCode |= clSetKernelArg(kernelConvRows, 1, sizeof(cl_mem), (void*)&buf_input);
-	errCode |= clSetKernelArg(kernelConvRows, 2, sizeof(cl_mem), (void*)&buf_filter);
-	errCode |= clSetKernelArg(kernelConvRows, 3, sizeof(int),    (void*)&col);
-	errCode |= clSetKernelArg(kernelConvRows, 4, sizeof(int),    (void*)&row);
-	errCode |= clSetKernelArg(kernelConvRows, 5, sizeof(int),    (void*)&col);
+	errCode  = clSetKernelArg(funcList[type].kernels[0], 0, sizeof(cl_mem), (void*)&buf_temp);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 1, sizeof(cl_mem), (void*)&buf_mem);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 2, sizeof(cl_mem), (void*)&buf_filter);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 3, sizeof(int),    (void*)&col);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 4, sizeof(int),    (void*)&row);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 5, sizeof(int),    (void*)&col);
 	gpu->checkErr("clSetKernelArg", errCode);
 
 	localWorkSizeRows[0] = ROWS_BLOCKDIM_X;
 	localWorkSizeRows[1] = ROWS_BLOCKDIM_Y;
 
-	globalWorkSizeRows[0] = col / ROWS_RESULT_STEPS;
+	globalWorkSizeRows[0] = col / 4;
 	globalWorkSizeRows[1] = row;
-
-	errCode  = clSetKernelArg(kernelConvCols, 0, sizeof(cl_mem), (void*)&buf_output);
-	errCode |= clSetKernelArg(kernelConvCols, 1, sizeof(cl_mem), (void*)&buf_temp);
-	errCode |= clSetKernelArg(kernelConvCols, 2, sizeof(cl_mem), (void*)&buf_filter);
-	errCode |= clSetKernelArg(kernelConvCols, 3, sizeof(int),    (void*)&col);
-	errCode |= clSetKernelArg(kernelConvCols, 4, sizeof(int),    (void*)&row);
-	errCode |= clSetKernelArg(kernelConvCols, 5, sizeof(int),    (void*)&col);
+        
+        errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[0], 2, NULL, globalWorkSizeRows, localWorkSizeRows, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueNDRangeKernel", errCode);
+        
+        
+	errCode  = clSetKernelArg(funcList[type].kernels[1], 0, sizeof(cl_mem), (void*)&calculated->buf_mem);
+	errCode |= clSetKernelArg(funcList[type].kernels[1], 1, sizeof(cl_mem), (void*)&buf_temp);
+	errCode |= clSetKernelArg(funcList[type].kernels[1], 2, sizeof(cl_mem), (void*)&buf_filter);
+	errCode |= clSetKernelArg(funcList[type].kernels[1], 3, sizeof(int),    (void*)&col);
+	errCode |= clSetKernelArg(funcList[type].kernels[1], 4, sizeof(int),    (void*)&row);
+	errCode |= clSetKernelArg(funcList[type].kernels[1], 5, sizeof(int),    (void*)&col);
 	gpu->checkErr("clSetKernelArg", errCode);
-
 
 	localWorkSizeCols[0] = COLUMNS_BLOCKDIM_X;
 	localWorkSizeCols[1] = COLUMNS_BLOCKDIM_Y;
 
-	globalWorkSizeCols[0] = col;
-	globalWorkSizeCols[1] = row / COLUMNS_RESULT_STEPS;
+	globalWorkSizeCols[0] = col / 4;
+	globalWorkSizeCols[1] = row;
 
-	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, kernelConvRows, 2, NULL, globalWorkSizeRows, localWorkSizeRows, 0, NULL, NULL);
+	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[1], 2, NULL, globalWorkSizeCols, localWorkSizeCols, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueNDRangeKernel", errCode);
-
-
-	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, kernelConvCols, 2, NULL, globalWorkSizeCols, localWorkSizeCols, 0, NULL, NULL);
-	gpu->checkErr("clEnqueueNDRangeKernel", errCode);
-
-	errCode = clEnqueueReadBuffer(gpu->clCommandQue, buf_output, CL_TRUE, 0, mem_size, calculated->mem, 0, NULL, NULL);
+        
+#ifndef __ARM__
+	errCode = clEnqueueReadBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE, 0, mem_size, calculated->mem, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueReadBuffer", errCode);
-
+#else
+        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        
+        calculated->mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);  
+#endif
 
 	clFinish(gpu->clCommandQue);
 
-	clReleaseMemObject(buf_input);
-	clReleaseMemObject(buf_output);
 	clReleaseMemObject(buf_temp);
 	clReleaseMemObject(buf_filter);
 
-	clReleaseKernel(kernelConvRows);
-	clReleaseKernel(kernelConvCols);
-#endif
 	return true;
 }
 #endif

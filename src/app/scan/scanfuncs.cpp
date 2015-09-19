@@ -8,6 +8,11 @@
 
 #include "scan.h"
 
+unsigned int Scan::iSnapUp(unsigned int dividend, unsigned int divisor)
+{
+    return ((dividend % divisor) == 0) ? dividend : (dividend - dividend % divisor + divisor);
+}
+
 bool Scan::scanCPU_STD(Scan *calculated, GPU *gpu) {
 
 	float sum = 0;
@@ -145,73 +150,104 @@ bool Scan::scanGPU(Scan *calculated, int type, GPU *gpu) {
 	if (!gpu->getEnabled()) {
 		return false;
 	}
-/*
+ 
 	cl_int errCode;
+        
+	unsigned int local1size = (4 * WORKGROUP_SIZE);
+	unsigned int elements = size / local1size;
+	unsigned int local2size = ARRAY_LENGTH / local1size;
 
-	cl_mem d_C = clCreateBuffer(gpu->clGPUContext,
+	cl_mem buf_temp = clCreateBuffer(gpu->clGPUContext,
 			CL_MEM_READ_WRITE,
-			(size_t) (calculated->mem_size),
-			NULL,
-			&errCode);
-
-	cl_mem d_A = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			(size_t) (mem_size),
-			mem,
+			NULL,
 			&errCode);
 
-	cl_mem d_B = clCreateBuffer(gpu->clGPUContext,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			(size_t) (ref->mem_size),
-			ref->mem,
-			&errCode);
+#ifndef __ARM__
+	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_mem, CL_FALSE, 0, mem_size, mem, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueWriteBuffer", errCode);
+#else
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, calculated->buf_mem, calculated->mem, 0, NULL, NULL);
+#endif
+        
+        errCode  = clSetKernelArg(funcList[type].kernels[0], 0, sizeof(cl_mem), (void *)&calculated->buf_mem);
+        errCode |= clSetKernelArg(funcList[type].kernels[0], 1, sizeof(cl_mem), (void *)&buf_mem);
+        errCode |= clSetKernelArg(funcList[type].kernels[0], 2, 2 * WORKGROUP_SIZE * sizeof(float), NULL);
+        errCode |= clSetKernelArg(funcList[type].kernels[0], 3, sizeof(unsigned int), (void *)&local1size);
+	gpu->checkErr("clSetKernelArg", errCode);
 
-	cl_kernel clKernel = clCreateKernel(gpu->clProgram,
-			multipliers[mulType].kernelid, &errCode);
-	gpu->checkErr("clCreateKernel", errCode);
+        size_t  localWorkSize1 = WORKGROUP_SIZE;
+        size_t  globalWorkSize1 = size / 4;
 
-	gpu->globalWorkSize[0] = ref->col;
-	gpu->globalWorkSize[1] = row;
-
-	int colVec = col / multipliers[mulType].divider;
-
-	errCode = clSetKernelArg(clKernel, 0, sizeof(cl_mem), (void *) &d_A);
-	errCode |= clSetKernelArg(clKernel, 1, sizeof(cl_mem), (void *) &d_B);
-	errCode |= clSetKernelArg(clKernel, 2, sizeof(cl_mem), (void *) &d_C);
-	errCode |= clSetKernelArg(clKernel, 3, sizeof(int), (void *) &colVec);
-	errCode |= clSetKernelArg(clKernel, 4, sizeof(int), (void *) &ref->col);
-
-	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue,
-			clKernel,
-			2,
-			NULL,
-			gpu->globalWorkSize,
-			NULL, //localWorkSize,
-			0,
-			NULL,
-			NULL);
+        errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[0], 1, 
+                NULL, &globalWorkSize1, &localWorkSize1, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueNDRangeKernel", errCode);
+/*
+        float *temp = (float *)malloc(mem_size);
+        errCode = clEnqueueReadBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE, 0, mem_size, temp, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueReadBuffer", errCode);
+        
+        printf("calc\n");
+        for (int i = 0; i < 10; i++) {
+                printf("%f ", temp[i]);
+        }   
+        printf("\n");
+        free(temp);
+      */  
+        
+        errCode  = clSetKernelArg(funcList[type].kernels[1], 0, sizeof(cl_mem), (void *)&buf_temp);
+        errCode |= clSetKernelArg(funcList[type].kernels[1], 1, sizeof(cl_mem), (void *)&calculated->buf_mem);
+        errCode |= clSetKernelArg(funcList[type].kernels[1], 2, sizeof(cl_mem), (void *)&buf_mem);
+        errCode |= clSetKernelArg(funcList[type].kernels[1], 3, 2 * WORKGROUP_SIZE * sizeof(float), NULL);
+        errCode |= clSetKernelArg(funcList[type].kernels[1], 4, sizeof(unsigned int), (void *)&elements);
+        errCode |= clSetKernelArg(funcList[type].kernels[1], 5, sizeof(unsigned int), (void *)&local2size);
+	gpu->checkErr("clSetKernelArg", errCode);
 
-	//retrieve result from device
-	errCode = clEnqueueReadBuffer(gpu->clCommandQue,
-			d_C,
-			CL_TRUE,
-			0,
-			calculated->mem_size,
-			calculated->mem,
-			0,
-			NULL,
-			NULL);
-	gpu->checkErr("clEnqueueReadBuffer", errCode);
+        size_t  localWorkSize2 = WORKGROUP_SIZE;
+        size_t  globalWorkSize2 = iSnapUp(elements, WORKGROUP_SIZE);
+/*
+        temp = (float *)malloc(mem_size);
+        errCode = clEnqueueReadBuffer(gpu->clCommandQue, buf_temp, CL_TRUE, 0, mem_size, temp, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueReadBuffer", errCode);
+        
+        printf("Temp\n");
+        for (int i = 0; i < 10; i++) {
+                printf("%f ", temp[i]);
+        }   
+        printf("\n");
+        free(temp);
+   */     
+	errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[1], 1, NULL, &globalWorkSize2, &localWorkSize2, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueNDRangeKernel", errCode);
+        
+        errCode  = clSetKernelArg(funcList[type].kernels[2], 0, sizeof(cl_mem), (void *)&calculated->buf_mem);
+        errCode |= clSetKernelArg(funcList[type].kernels[2], 1, sizeof(cl_mem), (void *)&buf_temp);
+        gpu->checkErr("clSetKernelArg", errCode);
+        
+        size_t localWorkSize3 = WORKGROUP_SIZE;
+        size_t globalWorkSize3 = elements * WORKGROUP_SIZE;
 
+        errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[2], 1, NULL, &globalWorkSize3, &localWorkSize3, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueNDRangeKernel", errCode);
+
+#ifndef __ARM__
+        errCode = clEnqueueReadBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE, 0, mem_size, calculated->mem, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueReadBuffer", errCode);
+#else
+        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        
+        calculated->mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, calculated->buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);  
+#endif
+
+    //    calculated->consoleOut(10);
+        
 	clFinish(gpu->clCommandQue);
 
-	clReleaseMemObject(d_A);
-	clReleaseMemObject(d_C);
-	clReleaseMemObject(d_B);
+	clReleaseMemObject(buf_temp);
 
-	clReleaseKernel(clKernel);
-*/
 	return true;
 }
 #endif

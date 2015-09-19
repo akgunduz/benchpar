@@ -43,7 +43,14 @@ bool ScanApp::loadGPUKernel() {
 
 	sprintf(file, "%s/scan.cl", getPath());
 
-	bool res = gpu->createBuildProgramFromFile(0, NULL, file);
+        char buildOptions[2048];
+        sprintf(buildOptions,  "\
+                                    -cl-fast-relaxed-math -cl-mad-enable \
+                                    -D WORKGROUP_SIZE=%u\
+                                    ",
+                                    WORKGROUP_SIZE);
+        
+	bool res = gpu->createBuildProgramFromFile(0, buildOptions, file);
 
 	if (!res) {
 		printf("Could not load GPU kernel\n");
@@ -56,9 +63,6 @@ bool ScanApp::loadGPUKernel() {
 		clReleaseProgram(gpu->clProgram);
 		return false;
 	}
-
-	gpu->localWorkSize[0] = 16;
-	gpu->localWorkSize[1] = 16;
 
 	gpu_kernel_loaded = true;
 #endif
@@ -82,7 +86,7 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 
 	double sTime[MAX_TIMEARRAY_COUNT];
 
-	Scan* calculated = new Scan(A->getSize());
+	Scan* calculated = new Scan(A->getSize(), gpu);
 
 	printOut("\nScan Method: %s \n", A->funcList[modeID].id);
 
@@ -163,7 +167,7 @@ bool ScanApp::process(char fileInput[255]) {
 
 	try {
 
-		A = new Scan(fileInput);
+		A = new Scan(fileInput, gpu);
 
 	} catch(const std::runtime_error e) {
 
@@ -245,7 +249,8 @@ bool ScanApp::processDir(const char path[255]) {
 			continue;
 		}
 
-		if (strncmp(ent->d_name, "ScanInput", 9) != 0) {
+                if ((strncmp(ent->d_name, "ScanInput", 9) != 0) || 
+                                (endCheck(ent->d_name, ".md5"))) {
 			continue;
 		}
 
@@ -342,7 +347,7 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 bool ScanApp::creator(uint32_t printID, uint32_t size, uint32_t unused) {
 
-	Scan *A = new Scan(size, true);
+	Scan *A = new Scan(size, gpu, true);
 	A->printToFile(getPath(), printID);
 	delete A;
 	return true;

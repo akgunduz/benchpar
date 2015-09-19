@@ -39,13 +39,12 @@ public:
 
 	Matrix *B;
 
-	Matrix(uint32_t row, uint32_t col, Matrix *B = nullptr, bool prepare = false);
-	Matrix(std::string path);
+	Matrix(uint32_t row, uint32_t col, GPU *, Matrix *B = nullptr, bool prepare = false);
+	Matrix(std::string path, GPU *);
 	~Matrix();
 
 	virtual void initFuncs();
 
-	void printOut();
 	bool printToFile(const char *, uint32_t);
 
 	bool multiplyCPU_STD(Matrix *, GPU *);

@@ -80,7 +80,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 
 	double sTime[MAX_TIMEARRAY_COUNT];
 
-	Matrix* calculated = new Matrix(A->getRow(), B->getCol());
+	Matrix* calculated = new Matrix(A->getRow(), B->getCol(), gpu);
 
 	printOut("\nMultiplication Method: %s \n", A->funcList[modeID].id);
 
@@ -163,7 +163,7 @@ bool MatrixApp::process(char fileInput[255]) {
 
 	try {
 
-		A = new Matrix(fileInput);
+		A = new Matrix(fileInput, gpu);
 
 	} catch(const std::runtime_error e) {
 
@@ -244,8 +244,9 @@ bool MatrixApp::processDir(const char path[255]) {
 		if (ent->d_type != DT_REG) {
 			continue;
 		}
-
-		if (strncmp(ent->d_name, "MatrixInput", 11) != 0) {
+                
+                if ((strncmp(ent->d_name, "MatrixInput", 11) != 0) || 
+                                (endCheck(ent->d_name, ".md5"))) {
 			continue;
 		}
 
@@ -340,9 +341,9 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 bool MatrixApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
 
-	Matrix *B = new Matrix(col, row, nullptr, true);
+	Matrix *B = new Matrix(col, row, gpu, nullptr, true);
 
-	Matrix *A = new Matrix(row, col, B, true);
+	Matrix *A = new Matrix(row, col, gpu, B, true);
 
 	A->printToFile(getPath(), printID);
 

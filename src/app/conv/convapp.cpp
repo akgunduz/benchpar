@@ -97,7 +97,7 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 
 	double sTime[MAX_TIMEARRAY_COUNT];
 
-	Conv* calculated = new Conv(A->getRow(), A->getCol(), A->getFilter(), A->getFilterLength());
+	Conv* calculated = new Conv(A->getRow(), A->getCol(), gpu, A->getFilter(), A->getFilterLength());
 
 	printOut("\nConv Method: %s \n", A->funcList[modeID].id);
 
@@ -235,7 +235,7 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 		uint32_t filter_length;
 
 		filter_length = processFilter(filterInput, &filter);
-		A = new Conv(fileInput, filter, filter_length);
+		A = new Conv(fileInput, gpu, filter, filter_length);
 
 	} catch(const std::runtime_error e) {
 

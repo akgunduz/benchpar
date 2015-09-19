@@ -10,8 +10,11 @@
 
 #define EPSILON 1.0f
 
-Matrix::Matrix(uint32_t row, uint32_t col, Matrix *B, bool prepare) {
+Matrix::Matrix(uint32_t row, uint32_t col, GPU *gpu, Matrix *B, bool prepare)    :
+		Function(gpu) {
 
+        initFuncs();
+        
 	this->row = row;
 	this->col = col;
 	this->B = B;
@@ -24,7 +27,6 @@ Matrix::Matrix(uint32_t row, uint32_t col, Matrix *B, bool prepare) {
 		create(row, col);
 	}
 
-	initFuncs();
 }
 
 #if 0
@@ -65,8 +67,11 @@ Matrix::Matrix(std::string path) {
 #endif
 
 
-Matrix::Matrix(std::string path) {
+Matrix::Matrix(std::string path, GPU *gpu)    :
+		Function(gpu) {
 
+        initFuncs();
+        
 	FILE *fd = fopen(path.c_str(), "r");
 	if (!fd) {
 		throw std::runtime_error("File could not opened!");
@@ -83,7 +88,7 @@ Matrix::Matrix(std::string path) {
 		throw std::runtime_error("Memory insufficient!");
 	}
 
-	B = new Matrix(col, row, nullptr, false);
+	B = new Matrix(col, row, gpu, nullptr, false);
 
 	for (int i = 0; i < row; i++) {
 
@@ -110,18 +115,25 @@ Matrix::Matrix(std::string path) {
 	}
 
 	fclose(fd);
-
-	initFuncs();
 }
 
 Matrix::~Matrix() {
 
-	free(mem);
+#if defined (__ARM__) && defined (__OPENCL__)
+        clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        clReleaseMemObject(buf_mem);
+#else
+#ifdef __OPENCL__
+        clReleaseMemObject(buf_mem); 
+#endif
+        free(mem);
+#endif
+        
+        delete[] funcList;
+
 	if (B != nullptr) {
 		delete B;
 	}
-
-	delete[] funcList;
 }
 
 void Matrix::initFuncs() {
@@ -132,7 +144,7 @@ void Matrix::initFuncs() {
                 "matrixMulVec8"
         };
         
-	funcList = new FuncList[MULTYPE_MAX];
+        funcList = FuncList::createArray(MULTYPE_MAX, gpu);
 	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0);
 	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0);
 	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0);
@@ -147,9 +159,19 @@ void Matrix::initFuncs() {
 bool Matrix::allocMem(uint32_t row, uint32_t col) {
 
 	size = (size_t) (row * col);
-	mem_size = sizeof(float) * size;
-
-	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
+	mem_size = sizeof(float) * size;        
+        
+#if defined (__ARM__) && defined (__OPENCL__)
+        cl_int errCode;
+        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+        gpu->checkErr("clCreateBuffer", errCode);
+        
+        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        gpu->checkErr("clEnqueueMapBuffer", errCode);
+#else
+        int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
 		return false;
@@ -161,7 +183,14 @@ bool Matrix::allocMem(uint32_t row, uint32_t col) {
 		printf("Alignment failed!\n");
 		return false;
 	}
-
+        
+#ifdef __OPENCL__
+        cl_int errCode;
+        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
+                mem_size, NULL, &errCode);
+        gpu->checkErr("clCreateBuffer", errCode);
+#endif
+#endif
 	return true;
 }
 
@@ -201,25 +230,6 @@ bool Matrix::compare(Matrix *ref) {
 	}
 
 	return true;
-}
-
-void Matrix::printOut() {
-
-	printf("Printing Out Matrix in Sizes; Row: %d, Column: %d\n", row, col);
-
-	for (int i = 0; i < row; i++) {
-
-		for (int j = 0; j < col; j++) {
-
-			printf("%f", *(mem + i * col + j));
-			if (j < col - 1) {
-				printf(",");
-			}
-
-		}
-		printf("\n");
-	}
-
 }
 
 #if 0
