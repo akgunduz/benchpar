@@ -242,8 +242,6 @@ bool Scan::scanGPU(Scan *calculated, int type, GPU *gpu) {
                 CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);  
 #endif
 
-    //    calculated->consoleOut(10);
-        
 	clFinish(gpu->clCommandQue);
 
 	clReleaseMemObject(buf_temp);

@@ -113,6 +113,11 @@ bool Matrix::multiplyGPU_VEC8(Matrix *calculated, GPU *gpu) {
 	return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
 }
 
+bool Matrix::multiplyGPU_DISC(Matrix *calculated, GPU *gpu) {
+
+	return multiplyGPU(calculated, MULTYPE_GPU_DISC, gpu);
+}
+
 bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 
 	if (!gpu->getEnabled()) {
@@ -126,8 +131,8 @@ bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 	globalWorkSize[0] = B->col;
 	globalWorkSize[1] = row;
 
-	localWorkSize[0] = 4;
-	localWorkSize[1] = 4;
+	localWorkSize[0] = 16;
+	localWorkSize[1] = 16;
 
 	int colVec = col;
         

@@ -454,7 +454,7 @@ void GPU::checkErr(const char *id, int err)
 		case CL_INVALID_BUFFER_SIZE:                        printf("%s -> CL_INVALID_BUFFER_SIZE\n", id); break;
 		case CL_INVALID_MIP_LEVEL:                          printf("%s -> CL_INVALID_MIP_LEVEL\n", id); break;
 		case CL_INVALID_GLOBAL_WORK_SIZE:                   printf("%s -> CL_INVALID_GLOBAL_WORK_SIZE\n", id); break;
-		default:                                            printf("%s -> Unknown\n", id);
+		default:                                            printf("%s -> Unknown %d\n", id, err);
 	}
 #endif
 }

@@ -16,10 +16,10 @@
 
 #define KERNEL_RADIUS 2
 
-#define ROWS_BLOCKDIM_X 16//32
+#define ROWS_BLOCKDIM_X 4//32
 #define ROWS_BLOCKDIM_Y 4//8
-#define COLUMNS_BLOCKDIM_X 16//32
-#define COLUMNS_BLOCKDIM_Y 8
+#define COLUMNS_BLOCKDIM_X 4//32
+#define COLUMNS_BLOCKDIM_Y 4
 #define ROWS_RESULT_STEPS 4
 #define ROWS_HALO_STEPS 1
 #define COLUMNS_RESULT_STEPS 8//4
@@ -35,6 +35,7 @@ enum CONVTYPE {
 #ifdef __OPENCL__
 	CONVTYPE_GPU_STD = CONVTYPE_CPU_MAX,
         CONVTYPE_GPU_VEC4,
+        CONVTYPE_GPU_COMB,
         CONVTYPE_MAX,
 #else
         CONVTYPE_MAX = CONVTYPE_CPU_MAX,
@@ -49,6 +50,7 @@ class Conv : public Function {
 
 
 	float *temp;
+        cl_mem buf_temp;
 	float *filter;
 	uint32_t filter_length;
 
@@ -69,6 +71,7 @@ public:
 #ifdef __OPENCL__
 	bool convGPU_STD(Conv *, GPU *);
         bool convGPU_VEC4(Conv *, GPU *);
+        bool convGPU_COMB(Conv *, GPU *);
 
 	bool convGPU(Conv *calculated, int type, GPU *);
 #endif

@@ -180,10 +180,11 @@ int main(int argc, const char *argv[]) {
 
 	app->run(filtered_argc, filtered_argv);
 
+        delete app;
+        delete power;
+        delete gpu;
 	delete cpu;
-	delete gpu;
-	delete power;
-	delete app;
+
 	return 0;
 
 }

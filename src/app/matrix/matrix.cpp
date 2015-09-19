@@ -141,7 +141,8 @@ void Matrix::initFuncs() {
         const char *kernelIDs[] = {
                 "matrixMul",
                 "matrixMulVec4",
-                "matrixMulVec8"
+                "matrixMulVec8",
+                "matrixMulDiscrete"
         };
         
         funcList = FuncList::createArray(MULTYPE_MAX, gpu);
@@ -153,6 +154,7 @@ void Matrix::initFuncs() {
 	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", (fFuncs)&Matrix::multiplyGPU_STD, 1, &kernelIDs[0]);
 	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", (fFuncs)&Matrix::multiplyGPU_VEC4, 1, &kernelIDs[1]);
 	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, &kernelIDs[2]);
+        funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, &kernelIDs[3]);
 #endif
 }
 

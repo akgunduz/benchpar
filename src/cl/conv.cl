@@ -440,7 +440,7 @@ kernel void convCombined5Vec4_float(__global float4* restrict out,
 			    + in_c5.z * filter[3]
 			    + in_c5.w * filter[4];
 				
-		barrier(CLK_GLOBAL_MEM_FENCE);
+		//barrier(CLK_LOCAL_MEM_FENCE);
 		
 		in_t1 = *(in + (offset - 2*width4 + 1));
 		in_t2 = *(in + (offset -   width4 + 1));

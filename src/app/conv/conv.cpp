@@ -70,11 +70,18 @@ Conv::Conv(std::string path, GPU *gpu, float *filter, uint32_t filter_length)   
 Conv::~Conv() {
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        cl_int errCode;
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
         clReleaseMemObject(buf_mem);
+
+        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_temp, temp, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueUnmapMemObject, temp", errCode);
+        clReleaseMemObject(buf_temp);
 #else
 #ifdef __OPENCL__
         clReleaseMemObject(buf_mem); 
+        clReleaseMemObject(buf_temp);
 #endif
         free(mem);
 #endif
@@ -86,16 +93,23 @@ void Conv::initFuncs() {
 
         const char *kernelIDs[] = {
                 "convRows5_float",
-                "convRows5_float",
+                "convCols5_float",
                 "convRows5Vec4_float",
                 "convCols5Vec4_float",
+                "convCombined5Vec4_float"
         };
+        
+        int args[] = {
+            1, 0, 4, 0
+        };
+        
         funcList = FuncList::createArray(CONVTYPE_MAX, gpu);
 	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0);
 	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", (fFuncs)&Conv::convCPU_OMP, 0);
 #ifdef __OPENCL__
-	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", (fFuncs)&Conv::convGPU_STD, 2, &kernelIDs[0]);
-        funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, &kernelIDs[/*2*/0]);
+	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", (fFuncs)&Conv::convGPU_STD, 2, &kernelIDs[0], &args[0]);
+        funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, &kernelIDs[2], &args[2]);
+        funcList[CONVTYPE_GPU_COMB].set("CONVTYPE_GPU_COMB", (fFuncs)&Conv::convGPU_COMB, 1, &kernelIDs[4], &args[2]);
 #endif
 }
 
@@ -112,7 +126,15 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
         
         mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
                 CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
-        gpu->checkErr("clEnqueueMapBuffer", errCode);
+        gpu->checkErr("clEnqueueMapBuffer1, mem", errCode);
+        
+        buf_temp = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+        gpu->checkErr("clCreateBuffer", errCode);
+        
+        temp = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_temp, CL_TRUE,
+                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+        gpu->checkErr("clEnqueueMapBuffer1, temp", errCode);
 #else
 	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
@@ -141,6 +163,10 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
         buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
                 mem_size, NULL, &errCode);
         gpu->checkErr("clCreateBuffer", errCode);
+        
+        buf_temp = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
+                mem_size, NULL, &errCode);
+        gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
 	return true;
@@ -165,12 +191,10 @@ void Conv::create(uint32_t row, uint32_t col) {
 bool Conv::compare(Conv *ref) {
 
 	printf("Comparing Convs\n");
-        
-        consoleOut(10);
 
-	for (int i = 2; i < row - 2; i++) {
+	for (int i = 4; i < row - 4; i++) {
 
-		for (int j = 2; j < col - 2; j++) {
+		for (int j = 4; j < col - 4; j++) {
 
 			float val1 = *(mem + i * col + j);
 			float val2 = *(ref->mem + i * col + j);

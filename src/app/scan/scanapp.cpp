@@ -142,6 +142,10 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 		}
 		printOut("\n");
 	}
+        
+        if (repeat > 1) {
+		repeat--;
+	}
 
 	printOut("Scan Time: %.3lf ms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);

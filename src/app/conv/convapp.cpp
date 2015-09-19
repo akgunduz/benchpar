@@ -151,6 +151,11 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 		}
 		printOut("\n");
 	}
+        
+        if (repeat > 1) {
+		repeat--;
+	}
+
 
 	printOut("Conv Time: %.3lfms!!!\n", t_total);
 	printOut("Min Time: %.3lfms, Max Time: %.3lfms, Avg Time: %.3lfms\n", t_min, t_max, t_total / repeat);
@@ -257,6 +262,7 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 				} else {
 					printOut("Sanity check failed\n");
 				}
+
 				delete D;
 			}
 
