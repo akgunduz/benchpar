@@ -10,7 +10,7 @@ FuncList::FuncList() {
 }
 
 FuncList::~FuncList() { 
-        for (int i = 0; i < argCount; i++) {
+        for (int i = 0; i < kernelCount; i++) {
                 clReleaseKernel(kernels[i]);
         }
 }
@@ -25,23 +25,34 @@ FuncList* FuncList::createArray(int size, GPU* gpu) {
         return list;
 }
 
-void FuncList::set(const char *id, fFuncs func, int argCount, const char *kernelid[], int argument[]) {
+void FuncList::set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[], int argument[]) {
         
         cl_int errCode;
         
         this->id = id;
+        
+        if (kernelCount > MAX_ARGUMENT) {
+            kernelCount = MAX_ARGUMENT;
+        }
+        
         if (argCount > MAX_ARGUMENT) {
             argCount = MAX_ARGUMENT;
         }
 
+        this->kernelCount = kernelCount;
         this->argCount = argCount;
 
-        for (int i = 0; i < argCount; i++) {
+        for (int i = 0; i < kernelCount; i++) {
                 
             if (kernelid != NULL) {
+                strcpy(kernelID[i], kernelid[i]);
                 kernels[i] = clCreateKernel(gpu->clProgram, kernelid[i], &errCode);
                 gpu->checkErr("clCreateKernel", errCode);
             }
+
+        }
+        
+        for (int i = 0; i < argCount; i++) {
             
             if (argument != NULL) {
                 this->argument[i] = argument[i];
@@ -62,21 +73,18 @@ Function::~Function() {
 
 }
 
-void Function::consoleOut(int max) {
+void Function::consoleOut(int offset, int max) {
 
 	printf("Printing Out in Size: %d\n", (int)size);
 
-	for (int i = 0; i < size; i++) {
+	for (int i = offset; i < size; i++) {
 
                 if (i == max) {
                         printf("\n");
                         return;
                 }
                 
-		printf("%f,", mem[i]);
-		if (i % 30 == 0){
-			printf("\n");
-		}
+		printf("%f, ", mem[i]);
 	}
 }
 

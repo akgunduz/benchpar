@@ -223,7 +223,10 @@ bool ScanApp::process(char fileInput[255]) {
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, i, repeat);
+			Scan *C = calculate(A, i, repeat);
+                        if (C != NULL) {
+                            delete C;
+                        }
 		}
 	}
 

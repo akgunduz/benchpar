@@ -291,7 +291,10 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, i, repeat);
+			Conv *C = calculate(A, i, repeat);
+                        if (C != NULL) {
+                            delete C;
+                        }
 		}
 	}
 

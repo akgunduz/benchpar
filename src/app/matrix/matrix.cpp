@@ -120,7 +120,8 @@ Matrix::Matrix(std::string path, GPU *gpu)    :
 Matrix::~Matrix() {
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
         clReleaseMemObject(buf_mem);
 #else
 #ifdef __OPENCL__
@@ -142,19 +143,36 @@ void Matrix::initFuncs() {
                 "matrixMul",
                 "matrixMulVec4",
                 "matrixMulVec8",
+#ifndef __ARM__
                 "matrixMulDiscrete"
+#endif
+        };
+        
+        int args[] = {
+#ifdef __ARM__
+            1, 1, 4, 4,
+            4, 1, 4, 4,
+            8, 1, 4, 4,
+#else
+            1, 1, 32, 8,
+            4, 1, 32, 8,
+            8, 1, 32, 8,
+            1, 1, 16, 16
+#endif
         };
         
         funcList = FuncList::createArray(MULTYPE_MAX, gpu);
-	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0);
-	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0);
-	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0);
-	funcList[MULTYPE_CPU_TILED_OMP].set("MULTYPE_CPU_TILED_OMP", (fFuncs)&Matrix::multiplyCPU_TILED_OMP, 0);
+	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0, 0);
+	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0, 0);
+	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0, 0);
+	funcList[MULTYPE_CPU_TILED_OMP].set("MULTYPE_CPU_TILED_OMP", (fFuncs)&Matrix::multiplyCPU_TILED_OMP, 0, 0);
 #ifdef __OPENCL__
-	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", (fFuncs)&Matrix::multiplyGPU_STD, 1, &kernelIDs[0]);
-	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", (fFuncs)&Matrix::multiplyGPU_VEC4, 1, &kernelIDs[1]);
-	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, &kernelIDs[2]);
-        funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, &kernelIDs[3]);
+	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", (fFuncs)&Matrix::multiplyGPU_STD, 1, 4, &kernelIDs[0], &args[0]);
+	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", (fFuncs)&Matrix::multiplyGPU_VEC4, 1, 4, &kernelIDs[1], &args[4]);
+	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, 4, &kernelIDs[2], &args[8]);
+#ifndef __ARM__
+        funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, 4, &kernelIDs[3], &args[12]);
+#endif
 #endif
 }
 
@@ -193,6 +211,7 @@ bool Matrix::allocMem(uint32_t row, uint32_t col) {
         gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
+        memset(mem, 0, mem_size);
 	return true;
 }
 
@@ -206,7 +225,7 @@ void Matrix::create(uint32_t row, uint32_t col) {
 
 		for (int j = 0; j < col; j++) {
 
-			*(mem + i * col + j) = (float)(rand()  / (RAND_MAX + 1.));
+			*(mem + i * col + j) = 1.0f; //(float)(rand()  / (RAND_MAX + 1.));
 
 		}
 	}
@@ -215,6 +234,10 @@ void Matrix::create(uint32_t row, uint32_t col) {
 bool Matrix::compare(Matrix *ref) {
 
 	printf("Comparing Matrixes\n");
+        
+        consoleOut(60, 70);
+        
+        ref->consoleOut(60, 70);
 
 	for (int i = 0; i < row; i++) {
 
@@ -230,7 +253,7 @@ bool Matrix::compare(Matrix *ref) {
 
 		}
 	}
-
+        
 	return true;
 }
 

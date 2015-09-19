@@ -215,7 +215,10 @@ bool MatrixApp::process(char fileInput[255]) {
                 }
 
 		for (int i = startIndex; i < startIndex + count; i++) {
-			calculate(A, A->B, i, repeat);
+			Matrix *C = calculate(A, A->B, i, repeat);
+                        if (C != NULL) {
+                            delete C;
+                        }
 		}
 	}
 

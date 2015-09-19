@@ -126,16 +126,19 @@ bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 
 	cl_int errCode;
 
-        size_t  localWorkSize[2], globalWorkSize[2];
+        size_t localWorkSize[2], globalWorkSize[2];
         
-	globalWorkSize[0] = B->col;
-	globalWorkSize[1] = row;
+	globalWorkSize[0] = B->col / funcList[type].argument[0];
+	globalWorkSize[1] = row / funcList[type].argument[1];
 
-	localWorkSize[0] = 16;
-	localWorkSize[1] = 16;
-
-	int colVec = col;
-        
+	localWorkSize[0] = funcList[type].argument[2];
+	localWorkSize[1] = funcList[type].argument[3];
+      /*  
+        printf("Kernel : %s, G1 : %d, G2 : %d, L1 : %d, L2 : %d\n", 
+                funcList[type].kernelID[0],
+                globalWorkSize[0], globalWorkSize[1],
+                localWorkSize[0], localWorkSize[1]);
+        */
 #ifndef __ARM__
 	errCode = clEnqueueWriteBuffer(gpu->clCommandQue, buf_mem, CL_FALSE, 0, mem_size, mem, 0, NULL, NULL);
 	gpu->checkErr("clEnqueueWriteBuffer", errCode);
@@ -151,7 +154,7 @@ bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 	errCode = clSetKernelArg(funcList[type].kernels[0], 0, sizeof(cl_mem), (void *) &buf_mem);
 	errCode |= clSetKernelArg(funcList[type].kernels[0], 1, sizeof(cl_mem), (void *) &B->buf_mem);
 	errCode |= clSetKernelArg(funcList[type].kernels[0], 2, sizeof(cl_mem), (void *) &calculated->buf_mem);
-	errCode |= clSetKernelArg(funcList[type].kernels[0], 3, sizeof(int), (void *) &colVec);
+	errCode |= clSetKernelArg(funcList[type].kernels[0], 3, sizeof(int), (void *) &col);
 	errCode |= clSetKernelArg(funcList[type].kernels[0], 4, sizeof(int), (void *) &B->col);
         
         errCode = clEnqueueNDRangeKernel(gpu->clCommandQue, funcList[type].kernels[0], 2, 

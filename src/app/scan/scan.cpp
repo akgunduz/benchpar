@@ -59,7 +59,8 @@ Scan::Scan(std::string path, GPU *gpu)  :
 Scan::~Scan() {
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
         clReleaseMemObject(buf_mem);
 #else
 #ifdef __OPENCL__
@@ -80,15 +81,15 @@ void Scan::initFuncs() {
         };
 
         funcList = FuncList::createArray(SCANTYPE_MAX, gpu);
-	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", (fFuncs)&Scan::scanCPU_STD, 0);
+	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", (fFuncs)&Scan::scanCPU_STD, 0, 0);
 #ifndef __ARM__
-	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", (fFuncs)&Scan::scanCPU_AVX, 0);
-	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", (fFuncs)&Scan::scanCPU_SSE, 0);
-	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", (fFuncs)&Scan::scanCPU_OMP_SSE, 0);
-	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1, 0);
+	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", (fFuncs)&Scan::scanCPU_AVX, 0, 0);
+	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", (fFuncs)&Scan::scanCPU_SSE, 0, 0);
+	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", (fFuncs)&Scan::scanCPU_OMP_SSE, 0, 0);
+	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1, 0, 0);
 #endif
 #ifdef __OPENCL__
-	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", (fFuncs)&Scan::scanGPU_STD, 3, &kernelIDs[0]);
+	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", (fFuncs)&Scan::scanGPU_STD, 3, 0, &kernelIDs[0]);
 #endif
 }
 
@@ -127,6 +128,7 @@ bool Scan::allocMem(uint32_t size) {
         gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
+        memset(mem, 0, mem_size);
 	return true;
 }
 

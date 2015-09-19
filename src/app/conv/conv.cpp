@@ -70,8 +70,7 @@ Conv::Conv(std::string path, GPU *gpu, float *filter, uint32_t filter_length)   
 Conv::~Conv() {
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        cl_int errCode;
-        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+        cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
         gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
         clReleaseMemObject(buf_mem);
 
@@ -100,16 +99,16 @@ void Conv::initFuncs() {
         };
         
         int args[] = {
-            1, 0, 4, 0
+            1, 4
         };
         
         funcList = FuncList::createArray(CONVTYPE_MAX, gpu);
-	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0);
-	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", (fFuncs)&Conv::convCPU_OMP, 0);
+	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0, 0);
+	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", (fFuncs)&Conv::convCPU_OMP, 0, 0);
 #ifdef __OPENCL__
-	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", (fFuncs)&Conv::convGPU_STD, 2, &kernelIDs[0], &args[0]);
-        funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, &kernelIDs[2], &args[2]);
-        funcList[CONVTYPE_GPU_COMB].set("CONVTYPE_GPU_COMB", (fFuncs)&Conv::convGPU_COMB, 1, &kernelIDs[4], &args[2]);
+	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", (fFuncs)&Conv::convGPU_STD, 2, 1, &kernelIDs[0], &args[0]);
+        funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, 1, &kernelIDs[2], &args[1]);
+        funcList[CONVTYPE_GPU_COMB].set("CONVTYPE_GPU_COMB", (fFuncs)&Conv::convGPU_COMB, 1, 1, &kernelIDs[4], &args[1]);
 #endif
 }
 
@@ -169,6 +168,7 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
         gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
+        memset(mem, 0, mem_size);
 	return true;
 }
 

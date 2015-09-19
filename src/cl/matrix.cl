@@ -130,6 +130,8 @@ __kernel void matrixMulVec4(__global float4 const *A,
     C4[i*nv4 + j] = accum;
 }
 
+/*2048 dahil olmak uzere artan boylarda calismiyor....*/
+
 //vectorized - float8
 __kernel void matrixMulVec8(__global float* A, 
                             __global float* B,
@@ -179,6 +181,37 @@ __kernel void matrixMulVec8(__global float* A,
     //C[i * wB + j] = dot(sum, (float8)(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f)); //compiler could find float8 version...
 }
 
+/*
+__kernel void matrixMulVec8(__global float8 const *A, 
+                            __global float8 const *B,
+                            __global float8 *C,
+                            int wA,
+                            int wB)
+{
+    __global float8* A8 = (__global float8*)A;
+    __global float8* B8 = (__global float8*)B;
+    __global float8* C8 = (__global float8*)C;
+    uint nv8 = wA / 8;
+    
+    uint j = get_global_id(0);
+    uint i = get_global_id(1);
+    float8 accum = (float8) 0.0f;
+    for(uint k = 0; k < nv8; ++k)
+    {
+        float8 a  = A8 [     i * nv8 + k];
+        float8 b0 = B8 [ (8*k+0) * nv8 + j];
+        float8 b1 = B8 [ (8*k+1) * nv8 + j];
+        float8 b2 = B8 [ (8*k+2) * nv8 + j];
+        float8 b3 = B8 [ (8*k+3) * nv8 + j];
+        float8 b4 = B8 [ (8*k+4) * nv8 + j];
+        float8 b5 = B8 [ (8*k+5) * nv8 + j];
+        float8 b6 = B8 [ (8*k+6) * nv8 + j];
+        float8 b7 = B8 [ (8*k+7) * nv8 + j];
+        accum += a.s0*b0 + a.s1*b1 + a.s2*b2 + a.s3*b3 + a.s4*b4 + a.s5*b5 + a.s6*b6 + a.s7*b7;
+    }
+    C8[i*nv8 + j] = accum;
+}
+*/
 __kernel void
 matrixMulDiscrete(__global float* A, 
           __global float* B, 

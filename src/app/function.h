@@ -25,12 +25,14 @@ public:
         
         GPU *gpu;
         
+        int kernelCount = 0;
         cl_kernel kernels[MAX_ARGUMENT];
+        char kernelID[MAX_ARGUMENT][255];
 	fFuncs f;
 
 	FuncList();
         ~FuncList();
-        void set(const char *id, fFuncs func, int argCount, const char *kernelid[] = NULL, int argument[] = NULL);
+        void set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[] = NULL, int argument[] = NULL);
         static FuncList* createArray(int size, GPU*);
 };
 
@@ -50,7 +52,7 @@ public:
 	Function(GPU *);
         virtual ~Function();
         
-        void consoleOut(int);
+        void consoleOut(int, int);
         
 	virtual void initFuncs() = 0;
 
