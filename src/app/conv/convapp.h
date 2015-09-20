@@ -31,7 +31,7 @@ public:
 	bool processList(char fileInputs[][PATH_MAX], char filterInput[PATH_MAX], int size);
 	uint32_t processFilter(char fileInput[PATH_MAX], float **filter);
 
-	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
+	virtual bool run(int argc, char argv[ARGV_MAX][ARGV_LENGTH]);
 };
 
 

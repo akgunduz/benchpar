@@ -344,7 +344,7 @@ bool ConvApp::processList(char fileInputs[][PATH_MAX], char filterInput[PATH_MAX
 	return true;
 }
 
-bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
+bool ConvApp::run(int argc, char argv[ARGV_MAX][ARGV_LENGTH]) {
 
 	char dirPath[PATH_MAX];
 	char filterInput[PATH_MAX];

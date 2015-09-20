@@ -31,7 +31,7 @@ public:
 	bool processDir(const char path[PATH_MAX]);
 	bool processList(char fileInputs[][PATH_MAX], int size);
 
-	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
+	virtual bool run(int argc, char argv[ARGV_MAX][ARGV_LENGTH]);
 
 };
 

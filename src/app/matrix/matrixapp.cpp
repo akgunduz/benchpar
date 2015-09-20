@@ -277,7 +277,7 @@ bool MatrixApp::processList(char fileInputs[][PATH_MAX], int size) {
 	return true;
 }
 
-bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
+bool MatrixApp::run(int argc, char argv[ARGV_MAX][ARGV_LENGTH]) {
 
 	char dirPath[PATH_MAX];
 	char fileInputs[MAX_FILE_COUNT][PATH_MAX];
