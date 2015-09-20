@@ -15,7 +15,7 @@
 #define CPU_SANDYBRIDGE_EP	45
 #define CPU_IVYBRIDGE		58
 #define CPU_IVYBRIDGE_EP	62
-#define CPU_HASWELL		60
+#define CPU_HASWELL			60
 #define CPU_HASWELL_EP		63
 #define CPU_BROADWELL		61
 
@@ -38,8 +38,8 @@ enum CORETYPE {
 	CORE_BROADWELL,
 	CORE_A15,
 	CORE_A7,
-        CORE_A9,
-        CORE_A8,
+	CORE_A9,
+	CORE_A8,
 	CORE_MAX
 };
 
@@ -56,17 +56,17 @@ public:
 	Core cores[MAX_CORE_COUNT];
 
 	const char names[CORE_MAX][30] = {
-                "CORE_UNKNOWN",
-                "CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP",
-                "CORE_IVYBRIDGE", "CORE_IVYBRIDGE_EP", 
-                "CORE_HASWELL", "CORE_HASWELL_EP", 
-                "CORE_BROADWELL", 
-                "CORE_A15", "CORE_A7", "CORE_A9", "CORE_A8"
+			"CORE_UNKNOWN",
+			"CORE_SANDYBRIDGE", "CORE_SANDYBRIDGE_EP",
+			"CORE_IVYBRIDGE", "CORE_IVYBRIDGE_EP",
+			"CORE_HASWELL", "CORE_HASWELL_EP",
+			"CORE_BROADWELL",
+			"CORE_A15", "CORE_A7", "CORE_A9", "CORE_A8"
 	};
 
 	CPU();
 	bool detectCPU();
-        CORETYPE getCoreType();
+	CORETYPE getCoreType();
 };
 
 

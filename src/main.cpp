@@ -67,7 +67,7 @@ int main(int argc, const char *argv[]) {
 	char filtered_argv[ARGV_MAX][ARGV_LENGTH];
 
 	setenv("LC_NUMERIC", "C", 1);
-        
+
 	CPU *cpu = new CPU();
 	GPU *gpu = new GPU();
 
@@ -180,9 +180,9 @@ int main(int argc, const char *argv[]) {
 
 	app->run(filtered_argc, filtered_argv);
 
-        delete app;
-        delete power;
-        delete gpu;
+	delete app;
+	delete power;
+	delete gpu;
 	delete cpu;
 
 	return 0;

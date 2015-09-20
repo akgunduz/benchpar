@@ -13,8 +13,8 @@
 Matrix::Matrix(uint32_t row, uint32_t col, GPU *gpu, Matrix *B, bool prepare)    :
 		Function(gpu) {
 
-        initFuncs();
-        
+	initFuncs();
+
 	this->row = row;
 	this->col = col;
 	this->B = B;
@@ -29,49 +29,11 @@ Matrix::Matrix(uint32_t row, uint32_t col, GPU *gpu, Matrix *B, bool prepare)   
 
 }
 
-#if 0
-Matrix::Matrix(std::string path) {
-
-	FILE *fd = fopen(path.c_str(), "r");
-	if (!fd) {
-		throw std::runtime_error("File could not opened!");
-	}
-
-	int res = fscanf(fd, "%d,%d", &row, &col);
-	if (res == EOF) {
-		fclose(fd);
-		throw std::runtime_error("File Read Error happened!");
-	}
-
-	if (!allocMem(row, col)) {
-		fclose(fd);
-		throw std::runtime_error("Memory insufficient!");
-	}
-
-	for (int i = 0; i < row; i++) {
-
-		for (int j = 0; j < col; j++) {
-
-			res = fscanf(fd, "%f,", mem + i * col + j);
-			if (res == EOF) {
-				fclose(fd);
-				throw std::runtime_error("File Read Error happened!");
-			}
-		}
-	}
-
-	this->B = nullptr;
-
-	fclose(fd);
-}
-#endif
-
-
 Matrix::Matrix(std::string path, GPU *gpu)    :
 		Function(gpu) {
 
-        initFuncs();
-        
+	initFuncs();
+
 	FILE *fd = fopen(path.c_str(), "r");
 	if (!fd) {
 		throw std::runtime_error("File could not opened!");
@@ -120,17 +82,17 @@ Matrix::Matrix(std::string path, GPU *gpu)    :
 Matrix::~Matrix() {
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
-        gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
-        clReleaseMemObject(buf_mem);
+	cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
+	clReleaseMemObject(buf_mem);
 #else
 #ifdef __OPENCL__
-        clReleaseMemObject(buf_mem); 
+	clReleaseMemObject(buf_mem);
 #endif
-        free(mem);
+	free(mem);
 #endif
-        
-        delete[] funcList;
+
+	delete[] funcList;
 
 	if (B != nullptr) {
 		delete B;
@@ -139,26 +101,26 @@ Matrix::~Matrix() {
 
 void Matrix::initFuncs() {
 
-        const char *kernelIDs[] = {
-                "matrixMul",
-                "matrixMulVec4",
-                "matrixMulVec8",
-                "matrixMulDiscrete"
-        };
-        
-        int args[] = {
+	const char *kernelIDs[] = {
+			"matrixMul",
+			"matrixMulVec4",
+			"matrixMulVec8",
+			"matrixMulDiscrete"
+	};
+
+	int args[] = {
 #ifdef __ARM__
-            1, 1, 4, 4,
-            4, 1, 4, 4,
-            8, 1, 4, 4,
+		1, 1, 4, 4,
+		4, 1, 4, 4,
+		8, 1, 4, 4,
 #else
-            1, 1, 32, 8,
-            4, 1, 32, 8,
-            8, 1, 32, 8,
-            1, 1, 16, 16
+		1, 1, 32, 8,
+		4, 1, 32, 8,
+		8, 1, 32, 8,
+		1, 1, 16, 16
 #endif
-        };
-        
+	};
+
 	funcList = FuncList::createArray(MULTYPE_MAX, gpu);
 	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0, 0);
 	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0, 0);
@@ -169,7 +131,7 @@ void Matrix::initFuncs() {
 	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", (fFuncs)&Matrix::multiplyGPU_VEC4, 1, 4, &kernelIDs[1], &args[4]);
 	//funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, 4, &kernelIDs[2], &args[8]);
 #ifndef __ARM__
-    funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, 4, &kernelIDs[3], &args[12]);
+	funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, 4, &kernelIDs[3], &args[12]);
 #endif
 #endif
 }
@@ -177,19 +139,19 @@ void Matrix::initFuncs() {
 bool Matrix::allocMem(uint32_t row, uint32_t col) {
 
 	size = (size_t) (row * col);
-	mem_size = sizeof(float) * size;        
-        
+	mem_size = sizeof(float) * size;
+
 #if defined (__ARM__) && defined (__OPENCL__)
-        cl_int errCode;
-        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
-                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
-        
-        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
-                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
-        gpu->checkErr("clEnqueueMapBuffer", errCode);
+	cl_int errCode;
+	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+			CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
+
+	mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+			CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+	gpu->checkErr("clEnqueueMapBuffer", errCode);
 #else
-        int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
+	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
 		return false;
@@ -201,15 +163,15 @@ bool Matrix::allocMem(uint32_t row, uint32_t col) {
 		printf("Alignment failed!\n");
 		return false;
 	}
-        
+
 #ifdef __OPENCL__
-        cl_int errCode;
-        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
-                mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
+	cl_int errCode;
+	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE,
+			mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
-        memset(mem, 0, mem_size);
+	memset(mem, 0, mem_size);
 	return true;
 }
 
@@ -232,7 +194,7 @@ void Matrix::create(uint32_t row, uint32_t col) {
 bool Matrix::compare(Matrix *ref) {
 
 	printf("Comparing Matrixes\n");
-        
+
 	for (int i = 0; i < row; i++) {
 
 		for (int j = 0; j < col; j++) {
@@ -247,41 +209,9 @@ bool Matrix::compare(Matrix *ref) {
 
 		}
 	}
-        
-	return true;
-}
-
-#if 0
-bool Matrix::printToFile(const char *path, uint32_t printID) {
-
-	std::string file(path);
-	file.append("/MatrixInput_" + std::to_string(printID));
-	FILE *fd = fopen(file.c_str(), "w");
-	if (!fd) {
-		return false;
-	}
-
-	fprintf(fd, "%d,%d\n\n", row, col);
-
-	for (int i = 0; i < row; i++) {
-
-		for (int j = 0; j < col; j++) {
-
-			fprintf(fd, "%f", *(mem + i * col + j));
-			if (j < col - 1) {
-				fprintf(fd, ",");
-			}
-
-		}
-		fprintf(fd, "\n");
-	}
-
-	fclose(fd);
 
 	return true;
-
 }
-#endif
 
 bool Matrix::printToFile(const char *path, uint32_t printID) {
 

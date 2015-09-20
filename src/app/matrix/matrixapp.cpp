@@ -60,6 +60,7 @@ bool MatrixApp::loadGPUKernel() {
 
 	gpu_kernel_loaded = true;
 #endif
+
 	return true;
 }
 
@@ -100,7 +101,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 			delete calculated;
 			return NULL;
 		}
-		
+
 		double t_diff = t.getdiff();
 
 		if (i == 0 && repeat > 1) {
@@ -150,7 +151,7 @@ Matrix* MatrixApp::calculate(Matrix *A, Matrix *B, int modeID, int repeat) {
 	return calculated;
 }
 
-bool MatrixApp::process(char fileInput[255]) {
+bool MatrixApp::process(char fileInput[PATH_MAX]) {
 
 	Timer t;
 
@@ -212,13 +213,13 @@ bool MatrixApp::process(char fileInput[255]) {
 				count = MULTYPE_MAX - MULTYPE_GPU_STD;
 				break;
 #endif
-                }
+		}
 
 		for (int i = startIndex; i < startIndex + count; i++) {
 			Matrix *C = calculate(A, A->B, i, repeat);
-                        if (C != NULL) {
-                            delete C;
-                        }
+			if (C != NULL) {
+				delete C;
+			}
 		}
 	}
 
@@ -230,9 +231,9 @@ bool MatrixApp::process(char fileInput[255]) {
 	return true;
 }
 
-bool MatrixApp::processDir(const char path[255]) {
+bool MatrixApp::processDir(const char path[PATH_MAX]) {
 
-	char fileInput[255];
+	char fileInput[PATH_MAX];
 
 	struct dirent *ent;
 
@@ -247,9 +248,9 @@ bool MatrixApp::processDir(const char path[255]) {
 		if (ent->d_type != DT_REG) {
 			continue;
 		}
-                
-                if ((strncmp(ent->d_name, "MatrixInput", 11) != 0) || 
-                                (endCheck(ent->d_name, ".md5"))) {
+
+		if ((strncmp(ent->d_name, "MatrixInput", 11) != 0) ||
+				(endCheck(ent->d_name, ".md5"))) {
 			continue;
 		}
 
@@ -263,7 +264,7 @@ bool MatrixApp::processDir(const char path[255]) {
 	return true;
 }
 
-bool MatrixApp::processList(char fileInputs[][255], int size) {
+bool MatrixApp::processList(char fileInputs[][PATH_MAX], int size) {
 
 	for (int i = 0; i < size; i++) {
 
@@ -278,8 +279,8 @@ bool MatrixApp::processList(char fileInputs[][255], int size) {
 
 bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-        char dirPath[PATH_MAX];
-	char fileInputs[MAX_FILE_COUNT][255];
+	char dirPath[PATH_MAX];
+	char fileInputs[MAX_FILE_COUNT][PATH_MAX];
 	int fileID = 0;
 	int fileIndex = 0;
 	bool status;
@@ -307,7 +308,7 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 					fileID = 0xFF;
 				}
 				sprintf(fileInputs[fileIndex++], "%s/matrix/MatrixInput_%s", getPath(), argv[i]);
-                                
+
 			} else {
 				fileID = 0xFF;
 				sprintf(fileInputs[fileIndex++], "%s/matrix/%s", getPath(), argv[i]);
@@ -321,8 +322,8 @@ bool MatrixApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	}
 
 	if (fileID == 0) {
-                
-                sprintf(dirPath, "%s/matrix", getPath());
+
+		sprintf(dirPath, "%s/matrix", getPath());
 
 		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
 

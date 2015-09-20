@@ -32,9 +32,9 @@ public:
 	fFuncs f;
 
 	FuncList();
-        ~FuncList();
-        void set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[] = NULL, int argument[] = NULL);
-        static FuncList* createArray(int size, GPU*);
+	~FuncList();
+	void set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[] = NULL, int argument[] = NULL);
+	static FuncList* createArray(int size, GPU*);
 };
 
 class Function {
@@ -43,10 +43,10 @@ protected :
 	size_t size;
 	float *mem;
 #ifdef __OPENCL__
-    cl_mem buf_mem;
+	cl_mem buf_mem;
 #endif
 	size_t mem_size;
-        
+
 	GPU *gpu;
 
 public:
@@ -56,7 +56,7 @@ public:
 	virtual ~Function();
 
 	void consoleOut(int, int);
-        
+
 	virtual void initFuncs() = 0;
 
 };

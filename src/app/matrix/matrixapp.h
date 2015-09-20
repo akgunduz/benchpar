@@ -27,9 +27,9 @@ public:
 	virtual int getFuncModeCount(FUNCTYPE);
 	virtual bool creator(uint32_t, uint32_t, uint32_t);
 
-	bool process(char fileInputs[255]);
-	bool processDir(const char path[255]);
-	bool processList(char fileInputs[][255], int size);
+	bool process(char fileInputs[PATH_MAX]);
+	bool processDir(const char path[PATH_MAX]);
+	bool processList(char fileInputs[][PATH_MAX], int size);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 

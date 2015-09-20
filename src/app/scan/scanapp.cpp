@@ -19,9 +19,9 @@ ScanApp::~ScanApp() {
 	unLoadGPUKernel();
 }
 
-int ScanApp::getFuncModeCount(FUNCTYPE functype) {
+int ScanApp::getFuncModeCount(FUNCTYPE funcType) {
 
-	switch(functype) {
+	switch(funcType) {
 		case FUNCTYPE_CPU:
 			return SCANTYPE_CPU_MAX;
 		case FUNCTYPE_GPU:
@@ -45,7 +45,7 @@ bool ScanApp::loadGPUKernel() {
 
 	char buildOptions[2048];
 	sprintf(buildOptions,  "-cl-fast-relaxed-math -cl-mad-enable -D WORKGROUP_SIZE=%u",	WORKGROUP_SIZE);
-        
+
 	bool res = gpu->createBuildProgramFromFile(0, buildOptions, file);
 
 	if (!res) {
@@ -102,7 +102,7 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 			delete calculated;
 			return NULL;
 		}
-		
+
 		double t_diff = t.getdiff();
 
 		if (i == 0 && repeat > 1) {
@@ -138,8 +138,8 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 		}
 		printOut("\n");
 	}
-        
-        if (repeat > 1) {
+
+	if (repeat > 1) {
 		repeat--;
 	}
 
@@ -154,7 +154,7 @@ Scan* ScanApp::calculate(Scan *A, int modeID, int repeat) {
 	return calculated;
 }
 
-bool ScanApp::process(char fileInput[255]) {
+bool ScanApp::process(char fileInput[PATH_MAX]) {
 
 	Timer t;
 
@@ -220,9 +220,9 @@ bool ScanApp::process(char fileInput[255]) {
 
 		for (int i = startIndex; i < startIndex + count; i++) {
 			Scan *C = calculate(A, i, repeat);
-                        if (C != NULL) {
-                            delete C;
-                        }
+			if (C != NULL) {
+				delete C;
+			}
 		}
 	}
 
@@ -234,9 +234,9 @@ bool ScanApp::process(char fileInput[255]) {
 	return true;
 }
 
-bool ScanApp::processDir(const char path[255]) {
+bool ScanApp::processDir(const char path[PATH_MAX]) {
 
-	char fileInput[255];
+	char fileInput[PATH_MAX];
 
 	struct dirent *ent;
 
@@ -252,8 +252,8 @@ bool ScanApp::processDir(const char path[255]) {
 			continue;
 		}
 
-                if ((strncmp(ent->d_name, "ScanInput", 9) != 0) || 
-                                (endCheck(ent->d_name, ".md5"))) {
+		if ((strncmp(ent->d_name, "ScanInput", 9) != 0) ||
+				(endCheck(ent->d_name, ".md5"))) {
 			continue;
 		}
 
@@ -268,7 +268,7 @@ bool ScanApp::processDir(const char path[255]) {
 	return true;
 }
 
-bool ScanApp::processList(char fileInputs[][255], int size) {
+bool ScanApp::processList(char fileInputs[][PATH_MAX], int size) {
 
 	for (int i = 0; i < size; i++) {
 
@@ -283,8 +283,8 @@ bool ScanApp::processList(char fileInputs[][255], int size) {
 
 bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-        char dirPath[PATH_MAX];
-	char fileInputs[MAX_FILE_COUNT][255];
+	char dirPath[PATH_MAX];
+	char fileInputs[MAX_FILE_COUNT][PATH_MAX];
 	int fileID = 0;
 	int fileIndex = 0;
 	bool status;
@@ -326,8 +326,8 @@ bool ScanApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 	}
 
 	if (fileID == 0) {
-                
-                sprintf(dirPath, "%s/scan", getPath());
+
+		sprintf(dirPath, "%s/scan", getPath());
 
 		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
 

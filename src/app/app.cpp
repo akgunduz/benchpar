@@ -36,7 +36,7 @@ App::App(CPU *c, GPU *g, Power *pw, const char *path):
 
 	print_enabled = true;
 	repeat = 1;
-        setPath(path);
+	setPath(path);
 };
 
 App::~App() {
@@ -97,23 +97,23 @@ bool App::printStart(const char* prefix, int fileID) {
 #if defined __APPLE__
 	strcpy(dOS, "OSX");
 #elif defined __ARM__
-        switch(cpu->getCoreType()) {
-                case CORE_A15:
-                        strcpy(dOS, "XU3");
-                        break;
-                case CORE_A9:
-                        strcpy(dOS, "_U3");
-                        break;
-                case CORE_A8:
-                        strcpy(dOS, "BGL");
-                        break;
-                case CORE_A7:
-                        strcpy(dOS, "RSP");
-                        break;
-                default:
-                        strcpy(dOS, "ARM");
-                        break;
-        }
+	switch(cpu->getCoreType()) {
+			case CORE_A15:
+					strcpy(dOS, "XU3");
+					break;
+			case CORE_A9:
+					strcpy(dOS, "_U3");
+					break;
+			case CORE_A8:
+					strcpy(dOS, "BGL");
+					break;
+			case CORE_A7:
+					strcpy(dOS, "RSP");
+					break;
+			default:
+					strcpy(dOS, "ARM");
+					break;
+	}
 	
 #else
 	strcpy(dOS, "LNX");
@@ -150,30 +150,34 @@ void App::printOut(const char* format, ...) {
 
 bool App::endCheck(const char *str, const char *suffix)
 {
-    if (!str || !suffix)
-        return 0;
-    size_t lenstr = strlen(str);
-    size_t lensuffix = strlen(suffix);
-    if (lensuffix >  lenstr)
-        return 0;
-    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+	if (!str || !suffix)
+		return 0;
+
+	size_t lenstr = strlen(str);
+	size_t lensuffix = strlen(suffix);
+
+	if (lensuffix >  lenstr) {
+		return 0;
+	}
+
+	return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
 
 void App::setPath(const char *ref)
 {
-        const char *pos = strrchr(ref, '/');
-        
-        strcpy(path, "");
-        
-     //   strcpy(path, getcwd(NULL, 0));
-     //   strcat(path, "/");
-        strncat(path, ref, pos - ref + 1);
-        printf("Working path : %s\n", path);
+	const char *pos = strrchr(ref, '/');
+
+	strcpy(path, "");
+
+	//   strcpy(path, getcwd(NULL, 0));
+	//   strcat(path, "/");
+	strncat(path, ref, pos - ref + 1);
+	printf("Working path : %s\n", path);
 }
 
-const char* App::getPath() 
+const char* App::getPath()
 {
-        return path;
+	return path;
 }
 
 

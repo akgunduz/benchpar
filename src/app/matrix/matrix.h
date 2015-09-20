@@ -22,9 +22,9 @@ enum MULTYPE {
 	MULTYPE_GPU_VEC4,
 	//MULTYPE_GPU_VEC8,
 #ifndef __ARM__
-    MULTYPE_GPU_DISC,
+	MULTYPE_GPU_DISC,
 #endif
-    MULTYPE_MAX
+	MULTYPE_MAX
 #else
 	MULTYPE_MAX = MULTYPE_CPU_MAX,
 #endif
@@ -59,7 +59,7 @@ public:
 	bool multiplyGPU_VEC4(Matrix *, GPU *);
 	bool multiplyGPU_VEC8(Matrix *, GPU *);
 #ifndef __ARM__
-    bool multiplyGPU_DISC(Matrix *, GPU *);
+	bool multiplyGPU_DISC(Matrix *, GPU *);
 #endif
 	bool multiplyGPU(Matrix *ref, int type, GPU *);
 #endif

@@ -42,19 +42,19 @@ enum SCANTYPE {
 
 class Scan : public Function {
 
-	bool allocMem(uint32_t size);
+	bool allocMem(size_t size);
 
 public:
 
-	Scan(uint32_t size, GPU *, bool prepare = false);
+	Scan(size_t size, GPU *, bool prepare = false);
 	Scan(std::string path, GPU *);
 	~Scan();
 
 	virtual void initFuncs();
 
 	bool printToFile(const char *, uint32_t);
-        
-        unsigned int iSnapUp(unsigned int, unsigned int);
+
+	unsigned int iSnapUp(unsigned int, unsigned int);
 
 	bool scanCPU_STD(Scan *, GPU *);
 
@@ -69,11 +69,11 @@ public:
 
 	bool scanGPU(Scan *calculated, int type, GPU *);
 
-	void create(uint32_t size);
+	void create(size_t size);
 	bool compare(Scan *);
 	bool check();
 
-	uint32_t getSize();
+	size_t getSize();
 };
 
 

@@ -11,7 +11,7 @@ Conv::Conv(uint32_t row, uint32_t col, GPU *gpu, float *filter,
                 uint32_t filter_length, bool prepare)    :
 		Function(gpu) {
 
-        initFuncs();
+	initFuncs();
         
 	this->row = row;
 	this->col = col;
@@ -70,37 +70,37 @@ Conv::Conv(std::string path, GPU *gpu, float *filter, uint32_t filter_length)   
 Conv::~Conv() {
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
-        gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
-        clReleaseMemObject(buf_mem);
+	cl_int errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_mem, mem, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueUnmapMemObject, mem", errCode);
+	clReleaseMemObject(buf_mem);
 
-        errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_temp, temp, 0, NULL, NULL);
-        gpu->checkErr("clEnqueueUnmapMemObject, temp", errCode);
-        clReleaseMemObject(buf_temp);
+	errCode = clEnqueueUnmapMemObject(gpu->clCommandQue, buf_temp, temp, 0, NULL, NULL);
+	gpu->checkErr("clEnqueueUnmapMemObject, temp", errCode);
+	clReleaseMemObject(buf_temp);
 #else
 #ifdef __OPENCL__
-        clReleaseMemObject(buf_mem); 
-        clReleaseMemObject(buf_temp);
+	clReleaseMemObject(buf_mem);
+	clReleaseMemObject(buf_temp);
 #endif
-        free(mem);
+	free(mem);
 #endif
         
-        delete[] funcList;
+	delete[] funcList;
 }
 
 void Conv::initFuncs() {
 
-        const char *kernelIDs[] = {
-                "convRows5_float",
-                "convCols5_float",
-                "convRows5Vec4_float",
-                "convCols5Vec4_float",
-                "convCombined5Vec4_float"
-        };
-        
-        int args[] = {
-            1, 4
-        };
+	const char *kernelIDs[] = {
+			"convRows5_float",
+			"convCols5_float",
+			"convRows5Vec4_float",
+			"convCols5Vec4_float",
+			"convCombined5Vec4_float"
+	};
+
+	int args[] = {
+		1, 4
+	};
         
 	funcList = FuncList::createArray(CONVTYPE_MAX, gpu);
 	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0, 0);
@@ -118,22 +118,22 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
 	mem_size = sizeof(float) * size;
 
 #if defined (__ARM__) && defined (__OPENCL__)
-        cl_int errCode;
-        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
-                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
-        
-        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
-                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
-        gpu->checkErr("clEnqueueMapBuffer1, mem", errCode);
-        
-        buf_temp = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
-                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
-        
-        temp = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_temp, CL_TRUE,
-                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
-        gpu->checkErr("clEnqueueMapBuffer1, temp", errCode);
+	cl_int errCode;
+	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+			CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
+
+	mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+			CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+	gpu->checkErr("clEnqueueMapBuffer1, mem", errCode);
+
+	buf_temp = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+			CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
+
+	temp = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_temp, CL_TRUE,
+			CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+	gpu->checkErr("clEnqueueMapBuffer1, temp", errCode);
 #else
 	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
@@ -141,7 +141,7 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
 		return false;
 	}
         
-        res = posix_memalign((void**)&temp, ALIGNMENT, mem_size);
+	res = posix_memalign((void**)&temp, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
                 free(mem);
@@ -149,7 +149,7 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
 	}
 
 	int check = (int)((unsigned long long)mem % ALIGNMENT);
-        check |= (int)((unsigned long long)temp % ALIGNMENT);
+	check |= (int)((unsigned long long)temp % ALIGNMENT);
 	if (check != 0) {
 		free(mem);
                 free(temp);
@@ -158,17 +158,17 @@ bool Conv::allocMem(uint32_t row, uint32_t col) {
 	}
         
 #ifdef __OPENCL__
-        cl_int errCode;
-        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
-                mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
-        
-        buf_temp = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
-                mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
+	cl_int errCode;
+	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE,
+			mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
+
+	buf_temp = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE,
+			mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
-        memset(mem, 0, mem_size);
+	memset(mem, 0, mem_size);
 	return true;
 }
 

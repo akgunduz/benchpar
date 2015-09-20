@@ -48,7 +48,6 @@ class Conv : public Function {
 	uint32_t row;
 	uint32_t col;
 
-
 	float *temp;
 #ifdef __OPENCL__
 	cl_mem buf_temp;

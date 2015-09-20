@@ -7,11 +7,11 @@
 
 #define EPSILON 10.0
 
-Scan::Scan(uint32_t size, GPU *gpu, bool prepare)   :
+Scan::Scan(size_t size, GPU *gpu, bool prepare)   :
 		Function(gpu) {
 
-        initFuncs();
-        
+	initFuncs();
+
 	this->size = size;
 
 	if (!allocMem(size)) {
@@ -25,9 +25,9 @@ Scan::Scan(uint32_t size, GPU *gpu, bool prepare)   :
 
 Scan::Scan(std::string path, GPU *gpu)  :
 		Function(gpu) {
-        
-        initFuncs();
-        
+
+	initFuncs();
+
 	FILE *fd = fopen(path.c_str(), "r");
 	if (!fd) {
 		throw std::runtime_error("File could not opened!");
@@ -64,16 +64,16 @@ Scan::~Scan() {
         clReleaseMemObject(buf_mem);
 #else
 #ifdef __OPENCL__
-        clReleaseMemObject(buf_mem); 
+	clReleaseMemObject(buf_mem);
 #endif
-        free(mem);
+	free(mem);
 #endif
 
 	delete[] funcList;
 }
 
 void Scan::initFuncs() {
-        
+
 	const char *kernelIDs[] = {
 			"scanExclusiveLocal1",
 			"scanExclusiveLocal2",
@@ -93,11 +93,11 @@ void Scan::initFuncs() {
 #endif
 }
 
-bool Scan::allocMem(uint32_t size) {
+bool Scan::allocMem(size_t size) {
 
 	this->size = size;
 	mem_size = sizeof(float) * size;
-        
+
 #if defined (__ARM__) && defined (__OPENCL__)
 	cl_int errCode;
 	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
@@ -120,21 +120,21 @@ bool Scan::allocMem(uint32_t size) {
 		printf("Alignment failed!\n");
 		return false;
 	}
-        
+
 #ifdef __OPENCL__
-        cl_int errCode;
-        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE, 
-                mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
+	cl_int errCode;
+	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE,
+			mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
 	memset(mem, 0, mem_size);
 	return true;
 }
 
-void Scan::create(uint32_t size) {
+void Scan::create(size_t size) {
 
-	printf("Preparing Input in Size: %d\n", size);
+	printf("Preparing Input in Size: %ld\n", size);
 
 	srand((unsigned)time(NULL));
 
@@ -190,7 +190,7 @@ bool Scan::check() {
 	return true;
 }
 
-uint32_t Scan::getSize() {
+size_t Scan::getSize() {
 
 	return size;
 }

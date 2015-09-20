@@ -33,7 +33,7 @@ bool GPU::platformInit() {
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return false;
-#else       
+#else
 	cl_int errCode = clGetPlatformIDs(0, NULL, &numPlatforms);
 	checkErr("clGetPlatformIDs", errCode);
 	if (errCode != CL_SUCCESS) {
@@ -85,7 +85,7 @@ bool GPU::platformInit() {
 }
 
 bool GPU::platformDeInit() {
-#ifdef __OPENCL__ 
+#ifdef __OPENCL__
 	delete[] platforms;
 	delete[] clDevices;
 
@@ -100,8 +100,8 @@ bool GPU::createBuildProgramFromFile(int deviceIndex, const char* buildOptions,	
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return false;
-#else 
-        
+#else
+
 	cl_int errNum;
 
 	//create programs
@@ -188,7 +188,7 @@ bool GPU::createBuildProgram(int deviceIndex,
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return false;
-#else 
+#else
 	cl_int errNum;
 
 	//create program using source
@@ -246,7 +246,7 @@ bool GPU::createCommandQueue(int deviceIndex, unsigned long properties) {
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return false;
-#else  
+#else
 	cl_int errCode;
 
 	clCommandQue = clCreateCommandQueue(clGPUContext,
@@ -262,7 +262,7 @@ void GPU::getInfo() {
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return;
-#else 
+#else
 	char buffer[256];
 	clGetDeviceInfo(clDevices[0], CL_DEVICE_VENDOR, 256, buffer, NULL);
 	printf("GPU %s is found with %d devices : ", buffer, numDevices);
@@ -279,7 +279,7 @@ void GPU::platformQuery() {
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return;
-#else 
+#else
 	cl_int errCode;
 
 	size_t size;
@@ -404,7 +404,7 @@ void GPU::checkErr(const char *id, int err)
 #ifndef __OPENCL__  
         printf("GPU - OPENCL is not supported in this platform!!!\n");
         return;
-#else 
+#else
 	switch(err)
 	{
 		case CL_SUCCESS:                                    break;

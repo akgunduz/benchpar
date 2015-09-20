@@ -5,71 +5,71 @@
 
 #include "function.h"
 
-FuncList::FuncList() { 
+FuncList::FuncList() {
 
 }
 
 FuncList::~FuncList() {
 #ifdef __OPENCL__
-        for (int i = 0; i < kernelCount; i++) {
+	for (int i = 0; i < kernelCount; i++) {
 
-                clReleaseKernel(kernels[i]);
-        }
+		clReleaseKernel(kernels[i]);
+	}
 #endif
 }
 
 FuncList* FuncList::createArray(int size, GPU* gpu) {
-        
-        FuncList* list = new FuncList[size];
-        for (int i = 0; i < size; i++) {
-                list[i].gpu = gpu;
-        }
-        
-        return list;
+
+	FuncList* list = new FuncList[size];
+	for (int i = 0; i < size; i++) {
+		list[i].gpu = gpu;
+	}
+
+	return list;
 }
 
 void FuncList::set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[], int argument[]) {
 
-        this->id = id;
-        
-        if (kernelCount > MAX_ARGUMENT) {
-            kernelCount = MAX_ARGUMENT;
-        }
-        
-        if (argCount > MAX_ARGUMENT) {
-            argCount = MAX_ARGUMENT;
-        }
+	this->id = id;
 
-        this->kernelCount = kernelCount;
-        this->argCount = argCount;
+	if (kernelCount > MAX_ARGUMENT) {
+		kernelCount = MAX_ARGUMENT;
+	}
+
+	if (argCount > MAX_ARGUMENT) {
+		argCount = MAX_ARGUMENT;
+	}
+
+	this->kernelCount = kernelCount;
+	this->argCount = argCount;
 
 #ifdef __OPENCL__
-		cl_int errCode;
+	cl_int errCode;
 
-        for (int i = 0; i < kernelCount; i++) {
-                
-            if (kernelid != NULL) {
-                kernels[i] = clCreateKernel(gpu->clProgram, kernelid[i], &errCode);
-                gpu->checkErr("clCreateKernel", errCode);
+	for (int i = 0; i < kernelCount; i++) {
 
-            }
-        }
+		if (kernelid != NULL) {
+			kernels[i] = clCreateKernel(gpu->clProgram, kernelid[i], &errCode);
+			gpu->checkErr("clCreateKernel", errCode);
+
+		}
+	}
 #endif
-        for (int i = 0; i < argCount; i++) {
-            
-            if (argument != NULL) {
-                this->argument[i] = argument[i];
-            } else {
-                this->argument[i] = 0;
-            }
+	for (int i = 0; i < argCount; i++) {
 
-        }
+		if (argument != NULL) {
+			this->argument[i] = argument[i];
+		} else {
+			this->argument[i] = 0;
+		}
 
-        this->f = func;
+	}
+
+	this->f = func;
 };
 
 Function::Function(GPU *gpu) {
-        this->gpu = gpu;
+	this->gpu = gpu;
 }
 
 Function::~Function() {
@@ -82,11 +82,11 @@ void Function::consoleOut(int offset, int max) {
 
 	for (int i = offset; i < size; i++) {
 
-                if (i == max) {
-                        printf("\n");
-                        return;
-                }
-                
+		if (i == max) {
+			printf("\n");
+			return;
+		}
+
 		printf("%f, ", mem[i]);
 	}
 }

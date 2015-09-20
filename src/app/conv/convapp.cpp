@@ -43,16 +43,14 @@ bool ConvApp::loadGPUKernel() {
 
 	sprintf(file, "%s/conv.cl", getPath());
 
-        char buildOptions[2048];
-        sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable -D KERNEL_RADIUS=%u -D ROWS_BLOCKDIM_X=%u -D COLUMNS_BLOCKDIM_X=%u -D ROWS_BLOCKDIM_Y=%u -D COLUMNS_BLOCKDIM_Y=%u -D ROWS_RESULT_STEPS=%u -D COLUMNS_RESULT_STEPS=%u -D ROWS_HALO_STEPS=%u -D COLUMNS_HALO_STEPS=%u",
-                                    KERNEL_RADIUS,
-                                    ROWS_BLOCKDIM_X,   COLUMNS_BLOCKDIM_X,
-                                    ROWS_BLOCKDIM_Y,   COLUMNS_BLOCKDIM_Y,
-                                    ROWS_RESULT_STEPS, COLUMNS_RESULT_STEPS,
-                                    ROWS_HALO_STEPS,   COLUMNS_HALO_STEPS
-                                    );
-        
-        //sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable");
+	char buildOptions[2048];
+	sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable -D KERNEL_RADIUS=%u -D ROWS_BLOCKDIM_X=%u -D COLUMNS_BLOCKDIM_X=%u -D ROWS_BLOCKDIM_Y=%u -D COLUMNS_BLOCKDIM_Y=%u -D ROWS_RESULT_STEPS=%u -D COLUMNS_RESULT_STEPS=%u -D ROWS_HALO_STEPS=%u -D COLUMNS_HALO_STEPS=%u",
+			KERNEL_RADIUS,
+			ROWS_BLOCKDIM_X,   COLUMNS_BLOCKDIM_X,
+			ROWS_BLOCKDIM_Y,   COLUMNS_BLOCKDIM_Y,
+			ROWS_RESULT_STEPS, COLUMNS_RESULT_STEPS,
+			ROWS_HALO_STEPS,   COLUMNS_HALO_STEPS
+	);
 
 	bool res = gpu->createBuildProgramFromFile(0, buildOptions, file);
 	if (!res) {
@@ -144,8 +142,8 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 		}
 		printOut("\n");
 	}
-        
-        if (repeat > 1) {
+
+	if (repeat > 1) {
 		repeat--;
 	}
 
@@ -161,7 +159,7 @@ Conv* ConvApp::calculate(Conv *A, int modeID, int repeat) {
 	return calculated;
 }
 
-uint32_t ConvApp::processFilter(char fileInput[255], float **filter) {
+uint32_t ConvApp::processFilter(char fileInput[PATH_MAX], float **filter) {
 
 	uint32_t filter_length = 0;
 
@@ -216,7 +214,7 @@ uint32_t ConvApp::processFilter(char fileInput[255], float **filter) {
 	return filter_length;
 }
 
-bool ConvApp::process(char fileInput[255], char filterInput[255]) {
+bool ConvApp::process(char fileInput[PATH_MAX], char filterInput[PATH_MAX]) {
 
 	Timer t;
 
@@ -285,9 +283,9 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 
 		for (int i = startIndex; i < startIndex + count; i++) {
 			Conv *C = calculate(A, i, repeat);
-                        if (C != NULL) {
-                            delete C;
-                        }
+			if (C != NULL) {
+				delete C;
+			}
 		}
 	}
 
@@ -299,9 +297,9 @@ bool ConvApp::process(char fileInput[255], char filterInput[255]) {
 	return true;
 }
 
-bool ConvApp::processDir(const char path[255], char filterInput[255]) {
+bool ConvApp::processDir(const char path[PATH_MAX], char filterInput[PATH_MAX]) {
 
-	char fileInput[255];
+	char fileInput[PATH_MAX];
 
 	struct dirent *ent;
 
@@ -317,8 +315,8 @@ bool ConvApp::processDir(const char path[255], char filterInput[255]) {
 			continue;
 		}
 
-		if ((strncmp(ent->d_name, "ConvInput", 9) != 0) || 
-                                (endCheck(ent->d_name, ".md5"))) {
+		if ((strncmp(ent->d_name, "ConvInput", 9) != 0) ||
+				(endCheck(ent->d_name, ".md5"))) {
 			continue;
 		}
 
@@ -333,7 +331,7 @@ bool ConvApp::processDir(const char path[255], char filterInput[255]) {
 	return true;
 }
 
-bool ConvApp::processList(char fileInputs[][255], char filterInput[255], int size) {
+bool ConvApp::processList(char fileInputs[][PATH_MAX], char filterInput[PATH_MAX], int size) {
 
 	for (int i = 0; i < size; i++) {
 
@@ -348,9 +346,9 @@ bool ConvApp::processList(char fileInputs[][255], char filterInput[255], int siz
 
 bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
-        char dirPath[PATH_MAX];
-	char filterInput[255];
-	char fileInputs[MAX_FILE_COUNT][255];
+	char dirPath[PATH_MAX];
+	char filterInput[PATH_MAX];
+	char fileInputs[MAX_FILE_COUNT][PATH_MAX];
 	int fileID = 0;
 	int fileIndex = 0;
 	bool status;
@@ -403,7 +401,7 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 	if (fileID == 0) {
 
-                sprintf(dirPath, "%s/conv", getPath());
+		sprintf(dirPath, "%s/conv", getPath());
 
 		printOut("Test is running in Directory Mode with %d repeats\n", repeat);
 
@@ -426,7 +424,7 @@ bool ConvApp::run(int argc, const char argv[][ARGV_LENGTH]) {
 
 bool ConvApp::creator(uint32_t printID, uint32_t row, uint32_t col) {
 
-	Conv *A = new Conv(row, col, NULL, 0, true);
+	Conv *A = new Conv(row, col, gpu, NULL, 0, true);
 	A->printToFile(getPath(), printID);
 	delete A;
 	return true;

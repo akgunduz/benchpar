@@ -26,10 +26,10 @@ public:
 	virtual int getFuncModeCount(FUNCTYPE);
 	virtual bool creator(uint32_t, uint32_t, uint32_t);
 
-	bool process(char fileInput[255], char filterInput[255]);
-	bool processDir(const char path[255], char filterInput[255]);
-	bool processList(char fileInputs[][255], char filterInput[255], int size);
-	uint32_t processFilter(char fileInput[255], float **filter);
+	bool process(char fileInput[PATH_MAX], char filterInput[PATH_MAX]);
+	bool processDir(const char path[PATH_MAX], char filterInput[PATH_MAX]);
+	bool processList(char fileInputs[][PATH_MAX], char filterInput[PATH_MAX], int size);
+	uint32_t processFilter(char fileInput[PATH_MAX], float **filter);
 
 	virtual bool run(int argc, const char argv[][ARGV_LENGTH]);
 };
