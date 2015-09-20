@@ -20,14 +20,14 @@ class FuncList {
 public:
 
 	const char *id;
-        int argCount = 0;
-        int argument[MAX_ARGUMENT];
-        
-        GPU *gpu;
-        
-        int kernelCount = 0;
+	int argCount = 0;
+	int argument[MAX_ARGUMENT];
+
+	GPU *gpu;
+
+	int kernelCount = 0;
 #ifdef __OPENCL__
-        cl_kernel kernels[MAX_ARGUMENT];
+	cl_kernel kernels[MAX_ARGUMENT];
 #endif
 	fFuncs f;
 
@@ -53,9 +53,9 @@ public:
 	FuncList* funcList;
 
 	Function(GPU *);
-        virtual ~Function();
-        
-        void consoleOut(int, int);
+	virtual ~Function();
+
+	void consoleOut(int, int);
         
 	virtual void initFuncs() = 0;
 

@@ -102,13 +102,13 @@ void Conv::initFuncs() {
             1, 4
         };
         
-        funcList = FuncList::createArray(CONVTYPE_MAX, gpu);
+	funcList = FuncList::createArray(CONVTYPE_MAX, gpu);
 	funcList[CONVTYPE_CPU_STD].set("CONVTYPE_CPU_STD", (fFuncs)&Conv::convCPU_STD, 0, 0);
 	funcList[CONVTYPE_CPU_OMP].set("CONVTYPE_CPU_OMP", (fFuncs)&Conv::convCPU_OMP, 0, 0);
 #ifdef __OPENCL__
 	funcList[CONVTYPE_GPU_STD].set("CONVTYPE_GPU_STD", (fFuncs)&Conv::convGPU_STD, 2, 1, &kernelIDs[0], &args[0]);
-        funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, 1, &kernelIDs[2], &args[1]);
-        funcList[CONVTYPE_GPU_COMB].set("CONVTYPE_GPU_COMB", (fFuncs)&Conv::convGPU_COMB, 1, 1, &kernelIDs[4], &args[1]);
+	funcList[CONVTYPE_GPU_VEC4].set("CONVTYPE_GPU_VEC4", (fFuncs)&Conv::convGPU_VEC4, 2, 1, &kernelIDs[2], &args[1]);
+	funcList[CONVTYPE_GPU_COMB].set("CONVTYPE_GPU_COMB", (fFuncs)&Conv::convGPU_COMB, 1, 1, &kernelIDs[4], &args[1]);
 #endif
 }
 

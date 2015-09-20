@@ -29,9 +29,7 @@ FuncList* FuncList::createArray(int size, GPU* gpu) {
 }
 
 void FuncList::set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[], int argument[]) {
-        
 
-        
         this->id = id;
         
         if (kernelCount > MAX_ARGUMENT) {
@@ -51,8 +49,6 @@ void FuncList::set(const char *id, fFuncs func, int kernelCount, int argCount, c
         for (int i = 0; i < kernelCount; i++) {
                 
             if (kernelid != NULL) {
-
-				cl_int errCode;
                 kernels[i] = clCreateKernel(gpu->clProgram, kernelid[i], &errCode);
                 gpu->checkErr("clCreateKernel", errCode);
 

@@ -43,12 +43,8 @@ bool ScanApp::loadGPUKernel() {
 
 	sprintf(file, "%s/scan.cl", getPath());
 
-        char buildOptions[2048];
-        sprintf(buildOptions,  "\
-                                    -cl-fast-relaxed-math -cl-mad-enable \
-                                    -D WORKGROUP_SIZE=%u\
-                                    ",
-                                    WORKGROUP_SIZE);
+	char buildOptions[2048];
+	sprintf(buildOptions,  "-cl-fast-relaxed-math -cl-mad-enable -D WORKGROUP_SIZE=%u",	WORKGROUP_SIZE);
         
 	bool res = gpu->createBuildProgramFromFile(0, buildOptions, file);
 

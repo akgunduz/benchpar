@@ -44,14 +44,7 @@ bool ConvApp::loadGPUKernel() {
 	sprintf(file, "%s/conv.cl", getPath());
 
         char buildOptions[2048];
-        sprintf(buildOptions, "\
-                                     -cl-fast-relaxed-math -cl-mad-enable \
-                                    -D KERNEL_RADIUS=%u\
-                                    -D ROWS_BLOCKDIM_X=%u -D COLUMNS_BLOCKDIM_X=%u\
-                                    -D ROWS_BLOCKDIM_Y=%u -D COLUMNS_BLOCKDIM_Y=%u\
-                                    -D ROWS_RESULT_STEPS=%u -D COLUMNS_RESULT_STEPS=%u\
-                                    -D ROWS_HALO_STEPS=%u -D COLUMNS_HALO_STEPS=%u\
-                                    ",
+        sprintf(buildOptions, "-cl-fast-relaxed-math -cl-mad-enable -D KERNEL_RADIUS=%u -D ROWS_BLOCKDIM_X=%u -D COLUMNS_BLOCKDIM_X=%u -D ROWS_BLOCKDIM_Y=%u -D COLUMNS_BLOCKDIM_Y=%u -D ROWS_RESULT_STEPS=%u -D COLUMNS_RESULT_STEPS=%u -D ROWS_HALO_STEPS=%u -D COLUMNS_HALO_STEPS=%u",
                                     KERNEL_RADIUS,
                                     ROWS_BLOCKDIM_X,   COLUMNS_BLOCKDIM_X,
                                     ROWS_BLOCKDIM_Y,   COLUMNS_BLOCKDIM_Y,

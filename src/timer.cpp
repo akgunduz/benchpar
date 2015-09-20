@@ -10,15 +10,27 @@
 
 double Timer::getTime() {
 
+#ifdef __APPLE__
 	struct timeval refTime;
 	int res = gettimeofday(&refTime, nullptr);
+
 	if (res != 0) {
 		printf("Can not get time!!!\n");
 		return 0;
 	}
 
 	return refTime.tv_sec * 1000 + (double)refTime.tv_usec / 1000;
+#else
+	struct timespec refTime;
+	int res = clock_gettime(CLOCK_BOOTTIME, &refTime);
 
+	if (res != 0) {
+		printf("Can not get time!!!\n");
+		return 0;
+	}
+
+	return refTime.tv_sec * 1000 + (double)refTime.tv_nsec / 1000000;
+#endif
 }
 
 double Timer::snapshot() {

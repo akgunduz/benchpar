@@ -25,10 +25,13 @@
 #include <stdarg.h>
 
 #ifndef __ARM__
-#include <xmmintrin.h>
 #endif
 
-//#define __OPENCL__
+#ifdef __APPLE__
+#ifndef __OPENCL__
+#define __OPENCL__
+#endif
+#endif
 
 #ifdef __OPENCL__
 #ifdef __APPLE__

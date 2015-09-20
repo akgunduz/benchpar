@@ -74,13 +74,13 @@ Scan::~Scan() {
 
 void Scan::initFuncs() {
         
-        const char *kernelIDs[] = {
-                "scanExclusiveLocal1",
-                "scanExclusiveLocal2",
-                "uniformUpdate"
-        };
+	const char *kernelIDs[] = {
+			"scanExclusiveLocal1",
+			"scanExclusiveLocal2",
+			"uniformUpdate"
+	};
 
-        funcList = FuncList::createArray(SCANTYPE_MAX, gpu);
+	funcList = FuncList::createArray(SCANTYPE_MAX, gpu);
 	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", (fFuncs)&Scan::scanCPU_STD, 0, 0);
 #ifndef __ARM__
 	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", (fFuncs)&Scan::scanCPU_AVX, 0, 0);
@@ -99,14 +99,14 @@ bool Scan::allocMem(uint32_t size) {
 	mem_size = sizeof(float) * size;
         
 #if defined (__ARM__) && defined (__OPENCL__)
-        cl_int errCode;
-        buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
-                CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
-        gpu->checkErr("clCreateBuffer", errCode);
-        
-        mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
-                CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
-        gpu->checkErr("clEnqueueMapBuffer", errCode);
+	cl_int errCode;
+	buf_mem = clCreateBuffer(gpu->clGPUContext, CL_MEM_READ_WRITE |
+			CL_MEM_ALLOC_HOST_PTR, mem_size, NULL, &errCode);
+	gpu->checkErr("clCreateBuffer", errCode);
+
+	mem = (float *) clEnqueueMapBuffer(gpu->clCommandQue, buf_mem, CL_TRUE,
+			CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
+	gpu->checkErr("clEnqueueMapBuffer", errCode);
 #else
 	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
