@@ -125,7 +125,7 @@ CMD_CC = g++
 
 CMD_OBJECTS_PATH = Objects/cmd
 
-CMD_CFLAGS = $(CFLAGS) -O0 -mavx -D__OPENCL__ 
+CMD_CFLAGS = $(CFLAGS) -O0 -march=native -D__OPENCL__ 
 
 CMD_LDFLAGS = -L/usr/local/lib -L/usr/lib/x86_64-linux-gnu $(LDFLAGS) -lOpenCL -ludev
 
@@ -145,7 +145,7 @@ OSX_CC = clang-omp++
 
 OSX_OBJECTS_PATH = Objects/osx
 
-OSX_CFLAGS = $(CFLAGS) -O3 -D__OPENCL__ -mavx
+OSX_CFLAGS = $(CFLAGS) -O3 -march=native -D__OPENCL__
 
 OSX_LDFLAGS = -L/usr/local/lib $(LDFLAGS) -framework OpenCL -framework IOKit -framework CoreFoundation
 

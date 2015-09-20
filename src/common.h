@@ -24,6 +24,12 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#ifndef __ARM__
+#include <xmmintrin.h>
+#endif
+
+//#define __OPENCL__
+
 #ifdef __OPENCL__
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>

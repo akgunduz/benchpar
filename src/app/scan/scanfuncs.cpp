@@ -25,7 +25,6 @@ bool Scan::scanCPU_STD(Scan *calculated, GPU *gpu) {
 }
 
 #ifndef __ARM__
-
 inline __m256 scan_AVX(__m256 x)
 {
 	__m256 t0, t1;
@@ -67,7 +66,6 @@ inline __m128 scan_SSE(__m128 x)
 }
 
 bool Scan::scanCPU_SSE(Scan *calculated, GPU *gpu) {
-
 	__m128 offset = _mm_setzero_ps();
 	for (int i = 0; i < size; i+=4)
 	{

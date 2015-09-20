@@ -110,13 +110,16 @@ bool Matrix::multiplyGPU_VEC4(Matrix *calculated, GPU *gpu) {
 
 bool Matrix::multiplyGPU_VEC8(Matrix *calculated, GPU *gpu) {
 
-	return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
+	//return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
+	return true;
 }
 
+#ifndef __ARM__
 bool Matrix::multiplyGPU_DISC(Matrix *calculated, GPU *gpu) {
 
 	return multiplyGPU(calculated, MULTYPE_GPU_DISC, gpu);
 }
+#endif
 
 bool Matrix::multiplyGPU(Matrix *calculated, int type, GPU *gpu) {
 

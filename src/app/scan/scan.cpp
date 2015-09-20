@@ -108,7 +108,7 @@ bool Scan::allocMem(uint32_t size) {
                 CL_MAP_READ | CL_MAP_WRITE, 0, mem_size, 0, NULL, NULL, &errCode);
         gpu->checkErr("clEnqueueMapBuffer", errCode);
 #else
-        int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
+	int res = posix_memalign((void**)&mem, ALIGNMENT, mem_size);
 	if (res != 0) {
 		printf("Alloc failed! : %d\n", errno);
 		return false;
@@ -128,7 +128,7 @@ bool Scan::allocMem(uint32_t size) {
         gpu->checkErr("clCreateBuffer", errCode);
 #endif
 #endif
-        memset(mem, 0, mem_size);
+	memset(mem, 0, mem_size);
 	return true;
 }
 

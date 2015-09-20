@@ -26,8 +26,9 @@ public:
         GPU *gpu;
         
         int kernelCount = 0;
+#ifdef __OPENCL__
         cl_kernel kernels[MAX_ARGUMENT];
-        char kernelID[MAX_ARGUMENT][255];
+#endif
 	fFuncs f;
 
 	FuncList();
@@ -41,10 +42,12 @@ class Function {
 protected :
 	size_t size;
 	float *mem;
-        cl_mem buf_mem;
+#ifdef __OPENCL__
+    cl_mem buf_mem;
+#endif
 	size_t mem_size;
         
-        GPU *gpu;
+	GPU *gpu;
 
 public:
 	FuncList* funcList;

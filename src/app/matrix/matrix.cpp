@@ -143,9 +143,7 @@ void Matrix::initFuncs() {
                 "matrixMul",
                 "matrixMulVec4",
                 "matrixMulVec8",
-#ifndef __ARM__
                 "matrixMulDiscrete"
-#endif
         };
         
         int args[] = {
@@ -161,7 +159,7 @@ void Matrix::initFuncs() {
 #endif
         };
         
-        funcList = FuncList::createArray(MULTYPE_MAX, gpu);
+	funcList = FuncList::createArray(MULTYPE_MAX, gpu);
 	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0, 0);
 	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0, 0);
 	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0, 0);
@@ -169,9 +167,9 @@ void Matrix::initFuncs() {
 #ifdef __OPENCL__
 	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", (fFuncs)&Matrix::multiplyGPU_STD, 1, 4, &kernelIDs[0], &args[0]);
 	funcList[MULTYPE_GPU_VEC4].set("MULTYPE_GPU_VEC4", (fFuncs)&Matrix::multiplyGPU_VEC4, 1, 4, &kernelIDs[1], &args[4]);
-	funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, 4, &kernelIDs[2], &args[8]);
+	//funcList[MULTYPE_GPU_VEC8].set("MULTYPE_GPU_VEC8", (fFuncs)&Matrix::multiplyGPU_VEC8, 1, 4, &kernelIDs[2], &args[8]);
 #ifndef __ARM__
-        funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, 4, &kernelIDs[3], &args[12]);
+    funcList[MULTYPE_GPU_DISC].set("MULTYPE_GPU_DISC", (fFuncs)&Matrix::multiplyGPU_DISC, 1, 4, &kernelIDs[3], &args[12]);
 #endif
 #endif
 }
@@ -235,10 +233,6 @@ bool Matrix::compare(Matrix *ref) {
 
 	printf("Comparing Matrixes\n");
         
-        consoleOut(60, 70);
-        
-        ref->consoleOut(60, 70);
-
 	for (int i = 0; i < row; i++) {
 
 		for (int j = 0; j < col; j++) {

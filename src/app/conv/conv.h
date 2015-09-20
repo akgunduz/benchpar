@@ -31,14 +31,14 @@ enum CONVTYPE {
 
 	CONVTYPE_CPU_STD,
 	CONVTYPE_CPU_OMP,
-        CONVTYPE_CPU_MAX,
+	CONVTYPE_CPU_MAX,
 #ifdef __OPENCL__
 	CONVTYPE_GPU_STD = CONVTYPE_CPU_MAX,
-        CONVTYPE_GPU_VEC4,
-        CONVTYPE_GPU_COMB,
-        CONVTYPE_MAX,
+	CONVTYPE_GPU_VEC4,
+	CONVTYPE_GPU_COMB,
+	CONVTYPE_MAX,
 #else
-        CONVTYPE_MAX = CONVTYPE_CPU_MAX,
+	CONVTYPE_MAX = CONVTYPE_CPU_MAX,
 #endif
 	
 };
@@ -50,7 +50,9 @@ class Conv : public Function {
 
 
 	float *temp;
-        cl_mem buf_temp;
+#ifdef __OPENCL__
+	cl_mem buf_temp;
+#endif
 	float *filter;
 	uint32_t filter_length;
 
@@ -70,8 +72,8 @@ public:
 	bool convCPU_OMP(Conv *, GPU *);
 #ifdef __OPENCL__
 	bool convGPU_STD(Conv *, GPU *);
-        bool convGPU_VEC4(Conv *, GPU *);
-        bool convGPU_COMB(Conv *, GPU *);
+	bool convGPU_VEC4(Conv *, GPU *);
+	bool convGPU_COMB(Conv *, GPU *);
 
 	bool convGPU(Conv *calculated, int type, GPU *);
 #endif

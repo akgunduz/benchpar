@@ -9,10 +9,13 @@ FuncList::FuncList() {
 
 }
 
-FuncList::~FuncList() { 
+FuncList::~FuncList() {
+#ifdef __OPENCL__
         for (int i = 0; i < kernelCount; i++) {
+
                 clReleaseKernel(kernels[i]);
         }
+#endif
 }
 
 FuncList* FuncList::createArray(int size, GPU* gpu) {
@@ -27,7 +30,7 @@ FuncList* FuncList::createArray(int size, GPU* gpu) {
 
 void FuncList::set(const char *id, fFuncs func, int kernelCount, int argCount, const char *kernelid[], int argument[]) {
         
-        cl_int errCode;
+
         
         this->id = id;
         
@@ -42,16 +45,20 @@ void FuncList::set(const char *id, fFuncs func, int kernelCount, int argCount, c
         this->kernelCount = kernelCount;
         this->argCount = argCount;
 
+#ifdef __OPENCL__
+		cl_int errCode;
+
         for (int i = 0; i < kernelCount; i++) {
                 
             if (kernelid != NULL) {
-                strcpy(kernelID[i], kernelid[i]);
+
+				cl_int errCode;
                 kernels[i] = clCreateKernel(gpu->clProgram, kernelid[i], &errCode);
                 gpu->checkErr("clCreateKernel", errCode);
-            }
 
+            }
         }
-        
+#endif
         for (int i = 0; i < argCount; i++) {
             
             if (argument != NULL) {
