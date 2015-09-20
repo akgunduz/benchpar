@@ -148,8 +148,8 @@ void App::printOut(const char* format, ...) {
 	va_end(arglist);
 }
 
-bool App::endCheck(const char *str, const char *suffix)
-{
+bool App::endCheck(const char *str, const char *suffix) {
+
 	if (!str || !suffix)
 		return 0;
 
@@ -163,20 +163,20 @@ bool App::endCheck(const char *str, const char *suffix)
 	return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
 
-void App::setPath(const char *ref)
-{
-	const char *pos = strrchr(ref, '/');
+void App::setPath(const char *ref) {
 
-	strcpy(path, "");
-
-	//   strcpy(path, getcwd(NULL, 0));
-	//   strcat(path, "/");
-	strncat(path, ref, pos - ref + 1);
+#ifdef __IDE__
+    strcpy(path, getcwd(NULL, 0));
+    strcat(path, "/");
+#else
+    const char *pos = strrchr(ref, '/');
+	strncpy(path, ref, pos - ref + 1);
+#endif
 	printf("Working path : %s\n", path);
 }
 
-const char* App::getPath()
-{
+const char* App::getPath() {
+
 	return path;
 }
 
