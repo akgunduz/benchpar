@@ -22,7 +22,7 @@ double Timer::getTime() {
 	return refTime.tv_sec * 1000 + (double)refTime.tv_usec / 1000;
 #else
 	struct timespec refTime;
-	int res = clock_gettime(CLOCK_BOOTTIME, &refTime);
+	int res = clock_gettime(CLOCK_REALTIME, &refTime);
 
 	if (res != 0) {
 		printf("Can not get time!!!\n");

@@ -83,7 +83,7 @@ PI_CFLAGS = $(CFLAGS) -O2 -D__ARM__ -march=armv6zk -mtune=arm1176jzf-s -mfloat-a
 	-I$(TOOLCHAIN_PATH)/libs/pi/$(GCC_VERSION)/include
 
 PI_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/$(TOOLCHAIN_ARM_PREFIX)/lib \
-	-L$(TOOLCHAIN_PATH)/libs/pi/$(GCC_VERSION)/lib $(LDFLAGS) -lusb-1.0
+	-L$(TOOLCHAIN_PATH)/libs/pi/$(GCC_VERSION)/lib $(LDFLAGS) -lusb-1.0 -lrt
 
 PI_FILES_DIR = $(addprefix $(PI_OBJECTS_PATH)/, $(sort $(dir $(ARM_FILES))))
 
