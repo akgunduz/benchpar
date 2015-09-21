@@ -74,6 +74,28 @@ ARM_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(ARM_OBJECTS_PATH)/%.o, $(ARM_SO
 ARM_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(ARM_OBJECTS_PATH)/%.d, $(ARM_SOURCES))
 
 
+C7_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
+
+C7_OBJECTS_PATH = Objects/c7
+
+C7_CFLAGS = $(CFLAGS) -O3 -D__ARM__ -march=armv7-a -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4 \
+	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
+	-I$(TOOLCHAIN_PATH)/libs/c7/$(GCC_VERSION)/include
+
+C7_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/lib \
+	-L$(TOOLCHAIN_PATH)/libs/c7/$(GCC_VERSION)/lib $(LDFLAGS) -lusb-1.0
+
+C7_FILES_DIR = $(addprefix $(C7_OBJECTS_PATH)/, $(sort $(dir $(ARM_FILES))))
+
+C7_EXECUTABLE = $(EXECUTABLE)_c7
+
+C7_SOURCES = $(addprefix $(SOURCE_PATH)/, $(ARM_FILES))
+
+C7_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(C7_OBJECTS_PATH)/%.o, $(C7_SOURCES))
+
+C7_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(C7_OBJECTS_PATH)/%.d, $(C7_SOURCES))
+
+
 C8_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
 
 C8_OBJECTS_PATH = Objects/c8
@@ -235,6 +257,21 @@ $(ARM_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
 
 arm: $(ARM_OBJECTS_PATH) $(EXEC_PATH) $(ARM_EXECUTABLE) $(ARM_DEPENDENCIES)
+
+
+$(C7_OBJECTS_PATH):
+	@mkdir -p $(C7_FILES_DIR)
+
+$(C7_EXECUTABLE): $(C7_OBJECTS)
+	$(C7_CC) -o $(EXEC_PATH)/$@ $^ $(C7_LDFLAGS) 
+
+$(C7_OBJECTS_PATH)/%.d: $(SOURCE_PATH)/%.cpp
+	$(C7_CC) $(C7_CFLAGS) -MM -MT $(C7_OBJECTS_PATH)/$*.o $< >> $@
+
+$(C7_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
+	$(C7_CC) $(C7_CFLAGS) -c -o $@ $<
+
+c7: $(C7_OBJECTS_PATH) $(EXEC_PATH) $(C7_EXECUTABLE) $(C7_DEPENDENCIES)
 
 
 $(C8_OBJECTS_PATH):
