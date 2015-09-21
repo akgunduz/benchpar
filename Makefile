@@ -74,6 +74,28 @@ ARM_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(ARM_OBJECTS_PATH)/%.o, $(ARM_SO
 ARM_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(ARM_OBJECTS_PATH)/%.d, $(ARM_SOURCES))
 
 
+PI_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
+
+PI_OBJECTS_PATH = Objects/pi
+
+PI_CFLAGS = $(CFLAGS) -O2 -D__ARM__ -march=armv6zk -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -marm \
+	-I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/$(TOOLCHAIN_ARM_PREFIX)/include \
+	-I$(TOOLCHAIN_PATH)/libs/pi/$(GCC_VERSION)/include
+
+PI_LDFLAGS = -L$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/$(TOOLCHAIN_ARM_PREFIX)/lib \
+	-L$(TOOLCHAIN_PATH)/libs/pi/$(GCC_VERSION)/lib $(LDFLAGS) -lusb-1.0
+
+PI_FILES_DIR = $(addprefix $(PI_OBJECTS_PATH)/, $(sort $(dir $(ARM_FILES))))
+
+PI_EXECUTABLE = $(EXECUTABLE)_pi
+
+PI_SOURCES = $(addprefix $(SOURCE_PATH)/, $(ARM_FILES))
+
+PI_OBJECTS = $(patsubst $(SOURCE_PATH)/%.cpp, $(PI_OBJECTS_PATH)/%.o, $(PI_SOURCES))
+
+PI_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(PI_OBJECTS_PATH)/%.d, $(PI_SOURCES))
+
+
 C7_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_PREFIX)-g++
 
 C7_OBJECTS_PATH = Objects/c7
@@ -257,6 +279,21 @@ $(ARM_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
 	$(ARM_CC) $(ARM_CFLAGS) -c -o $@ $<
 
 arm: $(ARM_OBJECTS_PATH) $(EXEC_PATH) $(ARM_EXECUTABLE) $(ARM_DEPENDENCIES)
+
+
+$(PI_OBJECTS_PATH):
+	@mkdir -p $(PI_FILES_DIR)
+
+$(PI_EXECUTABLE): $(PI_OBJECTS)
+	$(PI_CC) -o $(EXEC_PATH)/$@ $^ $(PI_LDFLAGS) 
+
+$(PI_OBJECTS_PATH)/%.d: $(SOURCE_PATH)/%.cpp
+	$(PI_CC) $(PI_CFLAGS) -MM -MT $(PI_OBJECTS_PATH)/$*.o $< >> $@
+
+$(PI_OBJECTS_PATH)/%.o: $(SOURCE_PATH)/%.cpp
+	$(PI_CC) $(PI_CFLAGS) -c -o $@ $<
+
+pi: $(PI_OBJECTS_PATH) $(EXEC_PATH) $(PI_EXECUTABLE) $(PI_DEPENDENCIES)
 
 
 $(C7_OBJECTS_PATH):
