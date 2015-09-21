@@ -16,7 +16,7 @@ ifeq ($(UNAME_S),Linux)
     TOOLCHAIN_PATH = /home/akgunduz/Toolchains
     TOOLCHAIN_ARM_PREFIX = arm-linux-gnueabihf
 else
-	TOOLCHAIN_PATH = /Volumes/Toolchains
+	TOOLCHAIN_PATH = /Users/akgunduz/Toolchains
 	TOOLCHAIN_ARM_PREFIX = arm-linux-gnueabihf
 endif
 

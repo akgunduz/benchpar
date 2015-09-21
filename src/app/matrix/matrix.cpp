@@ -124,7 +124,7 @@ void Matrix::initFuncs() {
 	funcList = FuncList::createArray(MULTYPE_MAX, gpu);
 	funcList[MULTYPE_CPU_STD].set("MULTYPE_CPU_STD", (fFuncs)&Matrix::multiplyCPU_STD, 0, 0);
 	funcList[MULTYPE_CPU_TILED].set("MULTYPE_CPU_TILED", (fFuncs)&Matrix::multiplyCPU_TILED, 0, 0);
-	funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0, 0);
+	//funcList[MULTYPE_CPU_TILED_BASIC].set("MULTYPE_CPU_TILED_BASIC", (fFuncs)&Matrix::multiplyCPU_TILED_BASIC, 0, 0);
 	funcList[MULTYPE_CPU_TILED_OMP].set("MULTYPE_CPU_TILED_OMP", (fFuncs)&Matrix::multiplyCPU_TILED_OMP, 0, 0);
 #ifdef __OPENCL__
 	funcList[MULTYPE_GPU_STD].set("MULTYPE_GPU_STD", (fFuncs)&Matrix::multiplyGPU_STD, 1, 4, &kernelIDs[0], &args[0]);
