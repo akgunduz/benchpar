@@ -1,0 +1,21 @@
+#!/bin/bash
+Client/benchtool_cmd -a m -m 2 -o msr -r 10 1
+Client/benchtool_cmd -a m -m 4 -o msr -r 10 1
+Client/benchtool_cmd -a m -m 2 -o msr -r 5 2
+Client/benchtool_cmd -a m -m 4 -o msr -r 5 2
+Client/benchtool_cmd -a m -m 2 -o msr -r 3 3
+Client/benchtool_cmd -a m -m 4 -o msr -r 3 3
+Client/benchtool_cmd -a c -m 1 -o msr -r 100 1
+Client/benchtool_cmd -a c -m 3 -o msr -r 100 1
+Client/benchtool_cmd -a c -m 1 -o msr -r 100 2
+Client/benchtool_cmd -a c -m 3 -o msr -r 100 2
+Client/benchtool_cmd -a c -m 1 -o msr -r 100 3
+Client/benchtool_cmd -a c -m 3 -o msr -r 100 3
+Client/benchtool_cmd -a c -m 1 -o msr -r 100 4
+Client/benchtool_cmd -a c -m 3 -o msr -r 100 4
+Client/benchtool_cmd -a s -m 0 -o msr -r 10000 1
+Client/benchtool_cmd -a s -m 1 -o msr -r 10000 1
+Client/benchtool_cmd -a s -m 0 -o msr -r 10000 2
+Client/benchtool_cmd -a s -m 1 -o msr -r 10000 2
+Client/benchtool_cmd -a s -m 0 -o msr -r 10000 3
+Client/benchtool_cmd -a s -m 1 -o msr -r 10000 3
