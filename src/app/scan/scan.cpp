@@ -23,17 +23,18 @@ Scan::Scan(size_t size, GPU *gpu, bool prepare)   :
 	}
 }
 
-Scan::Scan(std::string path, GPU *gpu)  :
+Scan::Scan(const char *path, GPU *gpu)  :
 		Function(gpu) {
 
 	initFuncs();
+        this->size = 0;
 
-	FILE *fd = fopen(path.c_str(), "r");
+	FILE *fd = fopen(path, "r");
 	if (!fd) {
 		throw std::runtime_error("File could not opened!");
 	}
 
-	int res = fscanf(fd, "%d", (int *)&size);
+	int res = fscanf(fd, "%ul", &size);
 	if (res == EOF) {
 		fclose(fd);
 		throw std::runtime_error("File Read Error happened!");

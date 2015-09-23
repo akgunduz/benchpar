@@ -47,7 +47,7 @@ class Scan : public Function {
 public:
 
 	Scan(size_t size, GPU *, bool prepare = false);
-	Scan(std::string path, GPU *);
+	Scan(const char *path, GPU *);
 	~Scan();
 
 	virtual void initFuncs();
