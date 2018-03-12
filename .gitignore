@@ -35,3 +35,4 @@ BenchTool.1
 /build/
 /dist/
 nbproject/
+cmake-build*
