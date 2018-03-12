@@ -16,27 +16,15 @@ void printHelp() {
 	printf("------------------- Bench Tool -------------------       \n");
 
 	printf("Parameters:                                              \n");
-	printf("App  :  -a m/s/c                         default:m       \n");
-	printf("Print:  -p off/on                        default:off     \n");
-	printf("Repeat: -r (1-2000000)                   default:1       \n");
-	printf("Power:  -o off/msr/perf/ina/spc/spr      default:off     \n");
-
-	printf("\n------------------- Matrix (m) -------------------     \n");
-
-	printf("There are 3 main running modes:                        \n\n");
-	printf("1. Matrix Create Mode:                                   \n");
-	printf("Usage: -c printID row column                             \n");
-	printf("Sample: -c 1 64 1024                                     \n");
-	printf("Creates a MatrixInput_1 file with a 64x1024 matrix inside\n");
-	printf("\n2. Platform Query Mode:                                \n");
-	printf("Usage: -q                                                \n");
-	printf("Queries the platform and lists on the console            \n");
-	printf("\n3. Matrix Calculation Mode:(default)                   \n");
-	printf("Usage: fileInput1 fileInput2 parameters...               \n");
-
-	printf("Parameters:                                              \n");
-	printf("Sanity: -s (0-6)                         default:disabled\n");
-	printf("Method: -m (0-6)/a/c/g                   default:0       \n");
+	printf("App  :     -a m(atrix)/s(can)/c(onv)     default:m       \n");
+	printf("Print:     -p off/on                     default:off     \n");
+	printf("Timestamp: -t off/on                     default:off     \n");
+	printf("Repeat:    -r (1-2000000)                default:1       \n");
+	printf("Power:     -o off/msr/perf/ina/spc/spr   default:off     \n");
+	printf("Sanity:    -s (0-6)                      default:disabled\n");
+	printf("Query:     -q                            run & exit      \n");
+	printf("Help:      -h                            run & exit      \n");
+	printf("Run mode:  -m (0-6)/a/c/g                default:0     \n\n");
 	printf("Methods:                                                 \n");
 	printf("0 : MULTYPE_CPU_STD                                      \n");
 	printf("1 : MULTYPE_CPU_TILED                                    \n");
@@ -49,9 +37,22 @@ void printHelp() {
 	printf("c : Run Only CPU Modes Sequentially                      \n");
 	printf("g : Run Only GPU Modes Sequentially                      \n");
 
+	printf("\n------------------- Matrix (m) Parameters---------     \n");
+	printf("Create:    -c printID row column                         \n");
+	printf("Default:   fileInput1 fileInput2                         \n");
+
+	printf("\n------------------- Scan (s) Parameters-----------     \n");
+	printf("Create:    -c printID size                               \n");
+	printf("Default:   fileInput1 fileInput2 .... fileInputN         \n");
+
+	printf("\n------------------- Conv (s) Parameters-----------     \n");
+	printf("Create:    -c printID size                               \n");
+	printf("Create:    -f filterInput                                \n");
+	printf("Default:   fileInput1 fileInput2 .... fileInputN         \n");
+
 }
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *const *argv) {
 
 	enum APP_MODES appMode = MATRIX_MODE;
 	enum POWER_MODES powerMode = POWER_OFF;
@@ -147,12 +148,16 @@ int main(int argc, const char *argv[]) {
 
 			if (!strcmp(argv[++i], "off")) {
 				print_enabled = false;
+			} else if (!strcmp(argv[i], "on")) {
+				print_enabled = true;
 			}
 
 		} else if (!strcmp (argv[i], "-t")) {
 
 			if (!strcmp(argv[++i], "on")) {
 				time_enabled = true;
+			} else if (!strcmp(argv[i], "off")) {
+				time_enabled = false;
 			}
 
 		} else if (!strcmp (argv[i], "-q")) {
