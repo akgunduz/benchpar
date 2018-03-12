@@ -185,8 +185,7 @@ void Matrix::create(uint32_t row, uint32_t col) {
 
 		for (int j = 0; j < col; j++) {
 
-			*(mem + i * col + j) = 1.0f; //(float)(rand()  / (RAND_MAX + 1.));
-
+			*(mem + i * col + j) = (float)(rand()  / (RAND_MAX + 1.));
 		}
 	}
 }

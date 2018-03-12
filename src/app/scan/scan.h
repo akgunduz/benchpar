@@ -26,7 +26,9 @@
 enum SCANTYPE {
 	SCANTYPE_CPU_STD,
 #ifndef __ARM__
+#ifdef __AVX__
 	SCANTYPE_CPU_AVX,
+#endif
 	SCANTYPE_CPU_SSE,
 	SCANTYPE_CPU_OMP_SSE,
 	SCANTYPE_CPU_OMP_SSEp2_SSEp1,
@@ -59,7 +61,9 @@ public:
 	bool scanCPU_STD(Scan *, GPU *);
 
 #ifndef __ARM__
+#ifdef __AVX__
 	bool scanCPU_AVX(Scan *, GPU *);
+#endif
 	bool scanCPU_SSE(Scan *, GPU *);
 	bool scanCPU_OMP_SSE(Scan *, GPU *);
 	bool scanCPU_OMP_SSEp2_SSEp1(Scan *, GPU *);

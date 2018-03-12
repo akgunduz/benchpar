@@ -84,7 +84,9 @@ void Scan::initFuncs() {
 	funcList = FuncList::createArray(SCANTYPE_MAX, gpu);
 	funcList[SCANTYPE_CPU_STD].set("SCANTYPE_CPU_STD", (fFuncs)&Scan::scanCPU_STD, 0, 0);
 #ifndef __ARM__
+#ifdef __AVX__
 	funcList[SCANTYPE_CPU_AVX].set("SCANTYPE_CPU_AVX", (fFuncs)&Scan::scanCPU_AVX, 0, 0);
+#endif
 	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", (fFuncs)&Scan::scanCPU_SSE, 0, 0);
 	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", (fFuncs)&Scan::scanCPU_OMP_SSE, 0, 0);
 	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1, 0, 0);

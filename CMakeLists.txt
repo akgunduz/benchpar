@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.11)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(APPLE)
-        set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-apple.cmake")
+        set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-apple-x86.cmake")
     elseif(UNIX)
         if (DEFINED ARM)
             set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-linux-arm.cmake")
-        else()
-            set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-linux-x86.cmake")
         endif()
     elseif(WIN32)
         set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-windows-x86.cmake")
@@ -19,7 +17,22 @@ endif()
 
 project(BenchPar)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mavx -fopenmp -D__OPENCL__")
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+
+add_compile_options(-fopenmp)
+#add_definitions(-D__OPENCL__)
+
+#if(CMAKE_SYSTEM_PROCESSOR MATCHES "i686.*|i386.*|x86.*|amd64.*|AMD64.*")
+#    add_compile_options(-mavx -march=native)
+#endif()
+
+if (DEFINED __AVX__)
+    add_compile_options(-mavx)
+endif()
 
 set(COMMON_FILES
     src/app/conv/conv.cpp
@@ -58,6 +71,17 @@ include_directories(src/app/matrix)
 include_directories(src/app/scan)
 include_directories(src/power)
 
-add_executable(benchpar ${COMMON_FILES})
+if(APPLE)
+    add_executable(benchpar ${APPLE_FILES})
+    target_link_libraries(benchtool_osx ${CMAKE_THREAD_LIBS_INIT})
+elseif(UNIX)
+    if (DEFINED ARM)
+        add_executable(benchpar ${COMMON_FILES})
+        target_link_libraries(benchpar hidapi-libusb)
+    else()
+        add_executable(benchpar ${COMMON_FILES})
+        target_link_libraries(benchpar OpenCL hidapi-libusb)
+    endif()
+elseif(WIN32)
 
-target_link_libraries(benchpar OpenCL hidapi-libusb)
+endif()

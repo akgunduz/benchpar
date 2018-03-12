@@ -23,8 +23,8 @@ bool Scan::scanCPU_STD(Scan *calculated, GPU *gpu) {
 
 	return true;
 }
-
 #ifndef __ARM__
+#ifdef __AVX__
 inline __m256 scan_AVX(__m256 x) {
 	__m256 t0, t1;
 	//shift1_AVX + add
@@ -45,7 +45,6 @@ bool Scan::scanCPU_AVX(Scan *calculated, GPU *gpu) {
 	__m256 offset = _mm256_setzero_ps();
 
 	for (int i = 0; i < size; i += 8) {
-
 		__m256 x = _mm256_loadu_ps(&mem[i]);
 		__m256 out = scan_AVX(x);
 		out = _mm256_add_ps(out, offset);
@@ -57,6 +56,7 @@ bool Scan::scanCPU_AVX(Scan *calculated, GPU *gpu) {
 
 	return true;
 }
+#endif
 
 inline __m128 scan_SSE(__m128 x) {
 

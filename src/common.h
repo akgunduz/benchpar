@@ -25,6 +25,7 @@
 #include <stdarg.h>
 
 #ifndef __ARM__
+#include <immintrin.h>
 #endif
 
 #ifdef __APPLE__
