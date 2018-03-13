@@ -16,7 +16,7 @@ void printHelp() {
 	printf("------------------- Bench Tool -------------------       \n");
 
 	printf("Parameters:                                              \n");
-	printf("App  :     -a m(atrix)/s(can)/c(onv)     default:m       \n");
+	printf("Algorithm: -a m(atrix)/s(can)/c(onv)     default:m       \n");
 	printf("Print:     -p off/on                     default:off     \n");
 	printf("Timestamp: -t off/on                     default:off     \n");
 	printf("Repeat:    -r (1-2000000)                default:1       \n");
@@ -25,6 +25,15 @@ void printHelp() {
 	printf("Query:     -q                            run & exit      \n");
 	printf("Help:      -h                            run & exit      \n");
 	printf("Run mode:  -m (0-6)/a/c/g                default:0     \n\n");
+	printf("Common Methods:                                          \n");
+
+	printf("a : Run All Modes Sequentially                           \n");
+	printf("c : Run Only CPU Modes Sequentially                      \n");
+	printf("g : Run Only GPU Modes Sequentially                      \n");
+
+	printf("\n------------------- Matrix (m) Parameters---------     \n");
+	printf("Create:    -c printID row column                         \n");
+	printf("Default:   fileInput1 fileInput2                         \n");
 	printf("Methods:                                                 \n");
 	printf("0 : MULTYPE_CPU_STD                                      \n");
 	printf("1 : MULTYPE_CPU_TILED                                    \n");
@@ -33,22 +42,27 @@ void printHelp() {
 	printf("4 : MULTYPE_GPU_STD                                      \n");
 	printf("5 : MULTYPE_GPU_VEC4                                     \n");
 	printf("6 : MULTYPE_GPU_VEC8                                     \n");
-	printf("a : Run All Modes Sequentially                           \n");
-	printf("c : Run Only CPU Modes Sequentially                      \n");
-	printf("g : Run Only GPU Modes Sequentially                      \n");
-
-	printf("\n------------------- Matrix (m) Parameters---------     \n");
-	printf("Create:    -c printID row column                         \n");
-	printf("Default:   fileInput1 fileInput2                         \n");
 
 	printf("\n------------------- Scan (s) Parameters-----------     \n");
 	printf("Create:    -c printID size                               \n");
 	printf("Default:   fileInput1 fileInput2 .... fileInputN         \n");
+	printf("Methods:                                                 \n");
+	printf("0 : SCANTYPE_CPU_STD                                     \n");
+	printf("1 : SCANTYPE_CPU_AVX                                     \n");
+	printf("2 : SCANTYPE_CPU_SSE                                     \n");
+	printf("3 : SCANTYPE_CPU_OMP_SSE                                 \n");
+	printf("4 : SCANTYPE_GPU_STD                                     \n");
 
 	printf("\n------------------- Conv (s) Parameters-----------     \n");
-	printf("Create:    -c printID size                               \n");
+	printf("Create:    -c printID row column                         \n");
 	printf("Create:    -f filterInput                                \n");
 	printf("Default:   fileInput1 fileInput2 .... fileInputN         \n");
+	printf("Methods:                                                 \n");
+	printf("0 : CONVTYPE_CPU_STD                                     \n");
+	printf("1 : CONVTYPE_CPU_OMP                                     \n");
+	printf("2 : CONVTYPE_GPU_STD                                     \n");
+	printf("3 : CONVTYPE_GPU_VEC4                                    \n");
+	printf("4 : CONVTYPE_GPU_COMB                                    \n");
 
 }
 

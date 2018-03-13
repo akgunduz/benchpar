@@ -110,8 +110,7 @@ bool Matrix::multiplyGPU_VEC4(Matrix *calculated, GPU *gpu) {
 
 bool Matrix::multiplyGPU_VEC8(Matrix *calculated, GPU *gpu) {
 
-	//return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
-	return true;
+	return multiplyGPU(calculated, MULTYPE_GPU_VEC8, gpu);
 }
 
 #ifndef __ARM__

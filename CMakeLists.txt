@@ -21,14 +21,9 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-
-add_compile_options(-fopenmp)
+add_definitions(-fopenmp)
 #add_definitions(-D__OPENCL__)
-
-#if(CMAKE_SYSTEM_PROCESSOR MATCHES "i686.*|i386.*|x86.*|amd64.*|AMD64.*")
-#    add_compile_options(-mavx -march=native)
-#endif()
+#add_definitions(-D__AVX__)
 
 if (DEFINED __AVX__)
     add_compile_options(-mavx)
@@ -85,3 +80,5 @@ elseif(UNIX)
 elseif(WIN32)
 
 endif()
+
+set_target_properties(benchpar PROPERTIES LINK_FLAGS -fopenmp)

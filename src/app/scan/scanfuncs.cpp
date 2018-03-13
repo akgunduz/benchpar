@@ -122,22 +122,6 @@ bool Scan::scanCPU_OMP_SSE(Scan *calculated, GPU *gpu) {
 	return true;
 }
 
-bool Scan::scanCPU_OMP_SSEp2_SSEp1(Scan *calculated, GPU *gpu) {
-
-	__m128 offset = _mm_setzero_ps();
-
-	for (int i = 0; i < size; i += 4) {
-
-		__m128 x = _mm_load_ps(&mem[i]);
-		__m128 out = scan_SSE(x);
-		out = _mm_add_ps(out, offset);
-		_mm_store_ps(&calculated->mem[i], out);
-		offset = _mm_shuffle_ps(out, out, _MM_SHUFFLE(3, 3, 3, 3));
-	}
-
-	return true;
-}
-
 #endif
 
 #ifdef __OPENCL__

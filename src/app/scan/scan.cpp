@@ -89,7 +89,6 @@ void Scan::initFuncs() {
 #endif
 	funcList[SCANTYPE_CPU_SSE].set("SCANTYPE_CPU_SSE", (fFuncs)&Scan::scanCPU_SSE, 0, 0);
 	funcList[SCANTYPE_CPU_OMP_SSE].set("SCANTYPE_CPU_OMP_SSE", (fFuncs)&Scan::scanCPU_OMP_SSE, 0, 0);
-	funcList[SCANTYPE_CPU_OMP_SSEp2_SSEp1].set("SCANTYPE_CPU_OMP_SSEp2_SSEp1", (fFuncs)&Scan::scanCPU_OMP_SSEp2_SSEp1, 0, 0);
 #endif
 #ifdef __OPENCL__
 	funcList[SCANTYPE_GPU_STD].set("SCANTYPE_GPU_STD", (fFuncs)&Scan::scanGPU_STD, 3, 0, &kernelIDs[0]);
