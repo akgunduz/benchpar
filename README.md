@@ -1,6 +1,6 @@
 # BenchPar - A benchmark utility with parallelization capabilities
 
-BenchPar is a commandline utility that make benchmarks on three different algorithms; matrix, scan and convolution, using both cpu and gpu parallelization capabilities of the host system. Beside it can also becnhmark power consumption if necessary modules exists in the system.
+BenchPar is a commandline utility that make benchmarks on three different algorithms; matrix, scan and convolution, using both cpu and gpu parallelization capabilities of the host system. Beside it can also benchmark power consumption if necessary modules exists in the system.
 
 
 ### Requirements
